@@ -662,5 +662,5 @@
   });
   paintBtn();
 
-  window.HUD = { wire: wire, on: function () { return on; }, repaintBtn: paintBtn };
+  window.HUD = { wire: wire, repaintBtn: paintBtn };
 })();

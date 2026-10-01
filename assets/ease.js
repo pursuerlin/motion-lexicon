@@ -66,35 +66,6 @@
   EASE.snappy = bezierFn(0.85, 0, 0.15, 1);
   EASE.bezier = bezierFn;
 
-  /* 显式积分求解弹簧：返回 {values, duration}（归一化时间轴上的位移序列） */
-  function springSeries(stiffness, damping, mass, steps) {
-    steps = steps || 220;
-    const dt = 0.006;
-    let x = 1, v = 0, t = 0;
-    const pts = [[0, 1]];
-    let maxT = 0;
-    for (let i = 0; i < 40000; i++) {
-      const a = (-stiffness * x - damping * v) / mass;
-      v += a * dt;
-      x += v * dt;
-      t += dt;
-      maxT = t;
-      pts.push([t, x]);
-      if (Math.abs(x) < 0.0012 && Math.abs(v) < 0.0012) break;
-    }
-    const dur = maxT;
-    const out = new Array(steps + 1);
-    for (let i = 0; i <= steps; i++) {
-      const tt = (i / steps) * dur;
-      let lo = 0, hi = pts.length - 1;
-      while (lo < hi - 1) { const mid = (lo + hi) >> 1; if (pts[mid][0] <= tt) lo = mid; else hi = mid; }
-      const [t0, x0] = pts[lo], [t1, x1] = pts[Math.min(hi, pts.length - 1)];
-      const k = t1 === t0 ? 0 : (tt - t0) / (t1 - t0);
-      out[i] = 1 - (x0 + (x1 - x0) * k);
-    }
-    return { values: out, duration: dur * 1000 };
-  }
-
   /* 实验室与卡片共用的一份缓动清单 */
   const LIST = [
     { key: 'linear', label: 'linear', css: 'linear', fn: EASE.linear, note: '匀速。只适合无始无终的持续运动。' },
@@ -115,5 +86,4 @@
 
   window.EASE = EASE;
   window.EASE_LIST = LIST;
-  window.springSeries = springSeries;
 })();

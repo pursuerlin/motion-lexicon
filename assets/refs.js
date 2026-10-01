@@ -146,7 +146,6 @@
 
   window.REFS = {
     panelHTML: panelHTML,
-    wire: wire,
-    has: function (id) { return !!(REFS[id] && REFS[id].length); }
+    wire: wire
   };
 })();

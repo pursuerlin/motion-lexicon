@@ -331,7 +331,6 @@
     if (dir) document.documentElement.dataset.dir = dir > 0 ? 'next' : 'prev';
     else document.documentElement.removeAttribute('data-dir');
   }
-  function visIn(node) { return node ? ($('.pg-visual .stage', node) || $('.pg-visual', node)) : null; }
   function cardVis(card) { return card ? $('.stage', card) : null; }
 
   let lastCard = null, pageBusy = false, pageToken = 0, paintDialect = null, favOnly = false;

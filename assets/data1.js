@@ -318,7 +318,7 @@ window.TERMS = [
     demo: {
       kind: 'frames',
       frames: [[0, 'opacity:0; transform:scale(.6) rotate(-12deg)'], [100, 'opacity:1; transform:none']],
-      e: 'cubic-bezier(0.16,1,0.3,1)', d: '1600ms', slow: true
+      e: 'cubic-bezier(0.16,1,0.3,1)', d: '1600ms'
     }
   },
   {

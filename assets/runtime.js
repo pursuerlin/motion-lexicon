@@ -29,7 +29,7 @@
   /* ================= 分类与术语 ================= */
   window.CATS.push({
     id: 'runtime', name: '三维与运行时', en: '3D & Runtime', tagline: '当 CSS 补间不够用时：着色器、Canvas、骨骼、状态机与渲染循环。',
-    nameEn: '3D & Runtime', taglineEn: 'When CSS tweens are not enough: shaders, canvas, bones, state machines and the render loop.'
+    taglineEn: 'When CSS tweens are not enough: shaders, canvas, bones, state machines and the render loop.'
   });
 
   window.TERMS.push(

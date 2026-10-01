@@ -29,7 +29,6 @@
   window.CATS.push({
     id: 'compound', name: '组合范式', en: 'Compound Patterns',
     tagline: '单个术语只是零件。当指针、滚动与点击共同驱动一整屏时，需要一个词把编排说清楚。',
-    nameEn: 'Compound Patterns',
     taglineEn: 'One term is a part. When pointer, scroll and tap drive a whole screen together, you need a word for the choreography.'
   });
 
