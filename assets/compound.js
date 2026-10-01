@@ -24,7 +24,10 @@
   const IMG = function (n) { return 'assets/img/' + n; };
   const P16 = ['p01.jpg', 'p02.jpg', 'p03.jpg', 'p04.jpg', 'p05.jpg', 'p06.jpg', 'p07.jpg',
     'p08.jpg', 'p09.jpg', 'p10.jpg', 'p11.jpg', 'p12.jpg', 'p13.jpg', 'p14.jpg', 'p15.jpg', 'p16.jpg'];
-  const im = function (n, alt) { return '<img src="' + IMG(n) + '" alt="' + (alt || '') + '" loading="lazy" draggable="false">'; };
+  const im = function (n, alt) {
+    const a = alt || '';
+    return '<img src="' + IMG(n) + '" alt="' + a + '"' + (a ? ' data-l10n="' + a + '" data-l10n-attr="alt"' : '') + ' loading="lazy" draggable="false">';
+  };
 
   window.CATS.push({
     id: 'compound', name: '组合范式', en: 'Compound Patterns',
@@ -518,7 +521,7 @@
       return '<div class="cp cp-sp"><i class="sp-under">' +
         '<b class="sp-title">遮罩下藏着 12 张照片 · 移光标去照</b>' +
         '<div class="sp-grid">' + rep(12, function (i) {
-          return '<s><img src="assets/img/' + L[i][0] + '" alt="' + L[i][1] + '" loading="lazy" draggable="false"><em>' + L[i][1] + '</em></s>';
+          return '<s><img src="assets/img/' + L[i][0] + '" alt="' + L[i][1] + '" data-l10n="' + L[i][1] + '" data-l10n-attr="alt" loading="lazy" draggable="false"><em data-l10n="' + L[i][1] + '">' + L[i][1] + '</em></s>';
         }) + '</div></i><u class="sp-mask"></u><span class="cp-cap">radial mask</span></div>';
     },
     trail: function () {
@@ -530,7 +533,7 @@
       const cap = ['逆光', '站台', '霓虹', '夜车', '回眸', '灯河'];
       return '<div class="cp cp-fan"><i class="fn-deck">' +
         rep(6, function (i) {
-          return '<b class="fn-c" style="--i:' + (i - 2.5) + '">' + im(P16[i], cap[i]) + '<s>' + cap[i] + '</s></b>';
+          return '<b class="fn-c" style="--i:' + (i - 2.5) + '">' + im(P16[i], cap[i]) + '<s data-l10n="' + cap[i] + '">' + cap[i] + '</s></b>';
         }) +
         '</i><span class="cp-cap">hover → fan</span></div>';
     },
@@ -1906,7 +1909,7 @@
   M.htmlFor = function (s) {
     if (s.kind === 'compound') {
       const d = DRV[s.mode] || ['', ''];
-      return '<b class="cp-chip d-' + d[0] + '" aria-hidden="true">' + d[1] + '</b>' + ((HTML[s.mode] || HTML.gaze)());
+      return '<b class="cp-chip d-' + d[0] + '" aria-hidden="true" data-l10n="' + d[1] + '">' + d[1] + '</b>' + ((HTML[s.mode] || HTML.gaze)());
     }
     return prevFor ? prevFor(s) : '';
   };

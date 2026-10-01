@@ -6,6 +6,7 @@
   const $ = s => document.querySelector(s);
   const $$ = s => Array.prototype.slice.call(document.querySelectorAll(s));
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const q1 = (s) => String(s).replace(/"/g, '&quot;');
   const EASE = window.EASE, LIST = window.EASE_LIST;
 
   const state = { pts: [0.16, 1, 0.3, 1], fn: EASE.easeOutExpo, dur: 1200, dist: 640, prop: 'x', label: 'expo-out', css: 'cubic-bezier(0.16, 1, 0.3, 1)', key: 'easeOutExpo', draggable: true };
@@ -229,7 +230,7 @@
     /* 初始选中按 key 匹配：硬编码下标在清单插一项后就会静默错位 */
     $('#lab-list').innerHTML = LIST.map(function (it) {
       return '<button type="button" class="ease-p' + (it.key === state.key ? ' on' : '') + '" data-k="' + it.key + '"><b>' + it.label + '</b>' +
-        '<span>' + it.note + '</span><canvas class="ecurve" width="44" height="30"></canvas></button>';
+        '<span data-l10n="' + q1(it.note) + '">' + it.note + '</span><canvas class="ecurve" width="44" height="30"></canvas></button>';
     }).join('');
     size(); draw(); renderCode(); syncSliders(); fitTrack(true);
 

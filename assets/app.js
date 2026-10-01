@@ -68,7 +68,7 @@
     switch (s.kind) {
       case 'track':
         return '<div class="lane"><i class="rail"></i><i class="mk ref" data-t="ref"></i>' +
-          '<i class="mk live" data-t="live"></i><span class="lane-lbl">灰色=匀速参照</span></div>';
+          '<i class="mk live" data-t="live"></i><span class="lane-lbl" data-l10n="灰色=匀速参照">灰色=匀速参照</span></div>';
       case 'curve':
         return '<div class="curvebox"><canvas class="cv" width="240" height="170"></canvas>' +
           '<div class="cprobe"><i></i></div></div>';
@@ -148,9 +148,9 @@
   function ctlHTML(s) {
     if (!s.ctl || !s.ctl.length) return '';
     return '<div class="pctl">' + s.ctl.map(function (c) {
-      return '<label class="pk-i"><span>' + esc(c.l) + '</span>' +
+      return '<label class="pk-i"><span data-l10n="' + esc(c.l) + '">' + esc(c.l) + '</span>' +
         '<input type="range" data-p="' + c.p + '" data-u="' + (c.u || '') + '" min="' + c.min + '" max="' + c.max +
-        '" step="' + (c.step == null ? 1 : c.step) + '" value="' + c.v + '" aria-label="' + esc(c.l) + '">' +
+        '" step="' + (c.step == null ? 1 : c.step) + '" value="' + c.v + '" aria-label="' + esc(c.l) + '" data-l10n="' + esc(c.l) + '" data-l10n-attr="aria-label">' +
         '<output>' + c.v + (c.u || '') + '</output></label>';
     }).join('') + '</div>';
   }
@@ -191,13 +191,13 @@
     /* 组合范式由输入驱动，慢放与循环对它没有任何作用，就别摆一对死控件 */
     const hasCtl = !!(s.ctl && s.ctl.length);
     const ctl = hasCtl ? '<div class="dt-ctl">' +
-      '<span class="ctl-lbl">慢放</span>' +
+      '<span class="ctl-lbl" data-l10n="慢放">慢放</span>' +
       '<span class="seg" data-seg>' +
       '<button type="button" class="seg-b on" data-sp="1">1×</button>' +
       '<button type="button" class="seg-b" data-sp="0.5">½×</button>' +
       '<button type="button" class="seg-b" data-sp="0.25">¼×</button>' +
       '</span>' +
-      (s.kind === 'frames' || s.kind === 'two' || !s.kind ? '<label class="ctl-chk"><input type="checkbox" data-loop><span>循环播放</span></label>' : '') +
+      (s.kind === 'frames' || s.kind === 'two' || !s.kind ? '<label class="ctl-chk"><input type="checkbox" data-loop><span data-l10n="循环播放">循环播放</span></label>' : '') +
       '</div>' : '';
     const kb = s.kind === 'compound' ? ' tabindex="0" aria-label="' + esc(t.en + ' ' + t.zh + '：' + hint) + '"' : '';
     const bar = ctlHTML(s);
@@ -210,26 +210,26 @@
       }
     }
     const compoundReadout = withTools && s.kind === 'compound' && s.mode === 'frames'
-      ? '<aside class="fr-readout" aria-label="抽帧实时读数"><div class="fr-readout-head"><b><i></i> LIVE READOUT</b><span>SCROLL</span></div>' +
+      ? '<aside class="fr-readout" aria-label="抽帧实时读数" data-l10n="抽帧实时读数" data-l10n-attr="aria-label"><div class="fr-readout-head"><b><i></i> LIVE READOUT</b><span>SCROLL</span></div>' +
         '<div class="fr-readout-main"><small>FRAME</small><strong data-fr-out="frame">01</strong><em data-fr-out="total">/24</em></div>' +
         '<div class="fr-readout-grid"><div><small>PROGRESS</small><b data-fr-out="progress">0%</b></div><div><small>SAMPLES</small><b data-fr-out="samples">24</b></div></div>' +
         '<div class="fr-readout-track"><i data-fr-out="track"></i></div>' +
-        '<div class="fr-contact-head"><span>FRAME CONTACT SHEET</span><b>24</b></div><div class="fr-contact" aria-label="24 张实际帧缩略图">' + contactFrames + '</div>' +
-        '<p>左侧是实际预览，右侧接触表标出当前采样帧。</p></aside>'
+        '<div class="fr-contact-head"><span>FRAME CONTACT SHEET</span><b>24</b></div><div class="fr-contact" aria-label="24 张实际帧缩略图" data-l10n="24 张实际帧缩略图" data-l10n-attr="aria-label">' + contactFrames + '</div>' +
+        '<p data-l10n="左侧是实际预览，右侧接触表标出当前采样帧。">左侧是实际预览，右侧接触表标出当前采样帧。</p></aside>'
       : withTools && s.kind === 'compound' && s.mode === 'gaze'
-      ? '<aside class="gz-readout" aria-label="视线跟随实时读数"><div class="gz-readout-head"><b><i></i> LIVE READOUT</b><span data-gz-out="mode">AUTONOMOUS</span></div>' +
+      ? '<aside class="gz-readout" aria-label="视线跟随实时读数" data-l10n="视线跟随实时读数" data-l10n-attr="aria-label"><div class="gz-readout-head"><b><i></i> LIVE READOUT</b><span data-gz-out="mode">AUTONOMOUS</span></div>' +
         '<div class="gz-readout-state" aria-live="polite"><i></i><strong data-gz-out="state">IDLE LOOP</strong><small>gaze target</small></div>' +
         '<div class="gz-readout-focus"><div><small>FOCUS VECTOR</small><strong><span data-gz-out="x">+00</span><em> × </em><span data-gz-out="y">+00</span></strong></div><div class="gz-readout-lag"><small>LAG</small><b data-gz-out="lag">0%</b></div></div>' +
         '<div class="gz-map" aria-hidden="true"><span class="gz-map-axis x"></span><span class="gz-map-axis y"></span><i class="gz-map-center"></i><i class="gz-map-dot"></i><b>−X</b><b>+X</b><em>−Y</em><em>+Y</em></div>' +
         '<div class="gz-readout-grid"><div><small>SMOOTH</small><b data-gz-out="smooth">0.16</b></div><div><small>RANGE</small><b data-gz-out="range">7.5px</b></div></div>' +
-        '<p>指针决定目标方向；松开后，视线回到低频游走。</p></aside>'
+        '<p data-l10n="指针决定目标方向；松开后，视线回到低频游走。">指针决定目标方向；松开后，视线回到低频游走。</p></aside>'
       : '';
     /* 卡片：舞台下面直接跟参数条。弹窗：参数条排在慢放/循环之下，别挤在演示和工具条中间 */
     const modeAttr = s.kind === 'compound' && s.mode ? ' data-mode="' + esc(s.mode) + '"' : '';
     return '<div class="stage kind-' + (s.kind || 'frames') + '"' + stageAttrs(s) + modeAttr + kb + '>' +
       stageHTML(t) + '</div>' +
       compoundReadout +
-      (withTools ? '<div class="stage-tools">' + (hint ? '<span class="hint">' + esc(hint) + '</span>' : '<span></span>') +
+      (withTools ? '<div class="stage-tools">' + (hint ? '<span class="hint" data-l10n="' + esc(hint) + '">' + esc(hint) + '</span>' : '<span></span>') +
         (canReplay ? '<button class="tool replay" type="button">↻ 重播</button>' : '') + '</div>' + ctl + bar
         : bar);
   }
@@ -252,7 +252,7 @@
     const cat = window.CATS.filter(c => c.id === t.cat)[0] || {};
     return '<article class="' + cardCls(t) + ' term--detail t-' + t.id + ' cat-' + t.cat + '" data-id="' + t.id + '" data-cat="' + t.cat +
       '" data-play="' + playOf(t) + '">' +
-      '<p class="pg-kicker">' + esc(cat.name || '') + ' · ' + esc(t.en) + '</p>' +
+      '<p class="pg-kicker"><span data-l10n="' + esc(cat.name || '') + '">' + esc(cat.name || '') + '</span> · ' + esc(t.en) + '</p>' +
       '<h2 class="pg-title" id="page-title">' + esc(t.zh) + '<em>' + esc(t.en) + '</em></h2>' +
       /* 这块就是卡片里那个舞台形变而来的地方，所以 VT 名字挂在它身上 */
       '<div class="pg-visual">' + stageBlock(t, true) + '</div>' +
@@ -908,7 +908,7 @@
     const en = window.I18N && window.I18N.lang === 'en';
     $('#recipe-chips').innerHTML = recipe.map(id => {
       const t = window.TERMS.find(x => x.id === id);
-      return '<span class="rchip">' + esc(t ? (t.en + (en ? '' : ' / ' + t.zh)) : id) + '<button data-rm="' + esc(id) + '" aria-label="remove">×</button></span>';
+      return '<span class="rchip">' + esc(t ? (t.en + (en ? '' : ' / ' + t.zh)) : id) + '<button data-rm="' + esc(id) + '" aria-label="移除" data-l10n="移除" data-l10n-attr="aria-label">×</button></span>';
     }).join('');
     const text = recipe.map(id => {
       const t = window.TERMS.find(x => x.id === id);

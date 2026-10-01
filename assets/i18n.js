@@ -92,8 +92,216 @@
     compound: ['Compound Patterns', 'One term is a part. When pointer, scroll and tap drive a whole screen, you need a word for the choreography.']
   };
 
+  /* ---------- 短标签：中文原文就是 key ----------
+     这些串活在 params.js / compound.js 的数据和舞台模板里，给每条都开一个 i18n key
+     会把两处数据都改一遍；改成「原文即 key」，中文侧零维护（切回 zh 就直接显示 key），
+     要加第三种语言也只是再补一张表。缺词条时回落中文，不会出空标签。 */
+  const LABEL = {
+    /* 卡片控制条 */
+    '时长': 'Duration', '错峰': 'Stagger', '主排速度': 'Primary speed', '次排速度': 'Secondary speed',
+    '位移': 'Move', '倾斜': 'Tilt', '偏转': 'Deflect', '光圈': 'Aperture', '力场半径': 'Field radius',
+    '半径': 'Radius', '发射率': 'Emission rate', '圈数': 'Loops', '圈速': 'Orbit speed',
+    '处理时长': 'Work time', '大小': 'Size', '实例数': 'Instances', '尺寸': 'Size', '层距': 'Layer gap',
+    '展开': 'Spread', '展开宽': 'Unfold width', '展开高': 'Unfold height', '峰值': 'Peak', '帧数': 'Frames',
+    '帧率': 'Frame rate', '幅度': 'Amplitude', '开度': 'Opening', '弹性': 'Elasticity', '拉伸': 'Stretch', '刚度 k': 'Stiffness k',
+    '推镜': 'Dolly in', '播放倍速': 'Playback rate', '收敛': 'Convergence', '收缩': 'Shrink',
+    '旋转': 'Rotate', '模拟帧率': 'Sim rate', '生长时长': 'Grow time', '目标': 'Target', '自转': 'Spin',
+    '节点': 'Nodes', '行程': 'Travel', '行间隔': 'Line gap', '衰减': 'Decay', '视距': 'View distance',
+    '角': 'Angle', '角度': 'Angle', '质量 m': 'Mass m', '跟随': 'Follow', '重力': 'Gravity',
+    '阻塞': 'Block', '阻尼 c': 'Damping c', '雾增益': 'Fog gain',
+    /* 驱动方式徽标 */
+    '指针': 'Pointer', '滚动': 'Scroll', '悬停': 'Hover', '点击': 'Tap', '拖拽': 'Drag',
+    /* 图注 */
+    '夜奔': 'Night run', '站台': 'Platform', '霓虹': 'Neon', '雪线': 'Snowline', '逆光': 'Backlit',
+    '展厅': 'Gallery', '夜车': 'Night train', '塔顶': 'Pagoda', '灯河': 'River of lights',
+    '纹理': 'Texture', '掠影': 'Glimpse', '回廊': 'Cloister', '回眸': 'Glance back',
+    /* 界面外壳 */
+    '灰色=匀速参照': 'grey = linear reference', '实演 · 当前曲线': 'Live · current curve',
+    '位移 X': 'Move X', '位移 Y': 'Move Y', '位移+旋转': 'Move + Rotate', '缩放': 'Scale',
+    '慢放': 'Slow-mo', '循环播放': 'Loop', '个术语': 'terms', '移除': 'Remove', '配方文本': 'Recipe text',
+    '匀速。只适合无始无终的持续运动。': 'Constant speed. Only for motion with no start or end.',
+    '加速离场，物体“被甩走”。': 'Accelerating exit — the object gets thrown away.',
+    '默认首选：带速度进场，平稳停住。': 'The safe default: arrives with speed, settles smoothly.',
+    '长距离位移、来回切换。': 'Long travels and back-and-forth switches.',
+    '戏剧化减速，前 20% 走完 80%。': 'Dramatic deceleration: 80% done in the first 20%.',
+    '末端过冲一次，做 pop / 弹入。': 'One overshoot at the end, for pop and spring-ins.',
+    '起手反向预备（anticipation）。': 'It moves back first: anticipation.',
+    '橡皮筋震荡，需要 JS 驱动。': 'Rubber-band oscillation; needs JS to drive it.',
+    '落地衰减弹跳，需要 JS 驱动。': 'Decaying bounces on landing; needs JS to drive it.',
+    '末端极缓，常用于大面积转场。': 'Barely moving at the end; good for large transitions.',
+    'Material 3 的强调曲线。': 'The emphasized curve of Material 3.',
+    'Material 标准曲线。': 'The standard curve of Material.',
+    '两端猛、中间极快，适合切页。': 'Sharp at both ends, very fast between them: page switches.',
+    '离散台阶，逐帧/像素风。': 'Discrete steps for sprite and pixel motion.',
+    'Easings.net（简中）': 'Easings.net (zh-CN)',
+    '互联网上正在跑的同类实现 · 和本页演示对照着看': 'The same pattern running on real sites, side by side with the demo here',
+    '反向滚动，最容易暴露卡顿的一类': 'Reversed scrolling, the easiest kind to expose jank',
+    '另一版 ↗': 'Another build',
+    '同一套排布，看它怎么做前后层次': 'Same layout; watch how it layers depth',
+    '同一批卡片滚上来时逐层压住前一张': 'Each card pins over the previous one as you scroll',
+    '图片蒙版揭示，落地页高频': 'Image mask reveal, a landing-page staple',
+    '在框里快速滚动': 'Scroll fast inside the box',
+    '在框里滚一下试试': 'Give it a scroll in the box',
+    '在框里滚动，进度直接映射': 'Scroll the box; progress maps straight through',
+    '在框里移动鼠标': 'Move the pointer inside the box',
+    '在立方体上拖动': 'Drag on the cube',
+    '头部收缩同时浮出投影': 'Header shrinks and lifts a shadow',
+    '封面流：中间放大两侧展开': 'Coverflow: centre grows, sides fan out',
+    '封面滚到顶后缩成固定页眉': 'The hero collapses into a fixed header',
+    '左侧钉住、右侧滚动的经典双栏': 'Classic two-column: left pins, right scrolls',
+    '左右拖动': 'Drag left or right',
+    '左右拖动圆筒': 'Drag the drum left or right',
+    '带标记点的分段滚动吸附': 'Sectional snap with tick marks',
+    '悬停试试': 'Hover it',
+    '把光标移近按钮': 'Bring the cursor near the button',
+    '把卡片拽出边界再松手': 'Pull the card past the edge, then let go',
+    '抓住方块拖，松手看惯性': 'Grab the block; release to feel the inertia',
+    '抓住最上面那张甩出去': 'Grab the top card and throw it',
+    '拖动分割线': 'Drag the divider',
+    '拖动列表项换序': 'Drag rows to reorder them',
+    '拖动旋转 · 点击对焦': 'Drag to rotate, tap to focus',
+    '拖动滑杆逐帧看': 'Drag the scrubber frame by frame',
+    '按住不放': 'Press and hold',
+    '按住不放，看进度填满': 'Hold until the bar fills',
+    '播完再移除': 'Removed only after it finishes playing',
+    '新窗口打开 ↗': 'Open in a new tab',
+    '横向轮播版': 'The horizontal carousel version',
+    '每次进入自动重播': 'Replays on every entry',
+    '注意：结束就弹回（未设 both）': 'Note: it snaps back at the end (no fill: both)',
+    '滚到底自动补': 'More loads at the bottom',
+    '滚动推进剧情': 'Scroll to advance the story',
+    '滚动看数字被映射': 'Scroll and watch the value map',
+    '滚动看顶部进度': 'Scroll to drive the top bar',
+    '滚动进度条，本站把它做成了环形': 'Scroll progress bar, which this site renders as a ring',
+    '滚动阴影提示还有内容': 'A scroll shadow hints there is more below',
+    '滚动驱动 3D 模型旋转，商品页常用': 'Scroll drives a 3D model spin, common on product pages',
+    '滚动：这条不阻塞': 'Scroll: this one never blocks',
+    '滚动：顶部会钉住': 'Scroll: the top pins',
+    '点 Input 触发状态迁移': 'Press Input to move the state machine',
+    '点“前进/返回”': 'Use forward / back',
+    '点“换序”看 FLIP 补位': 'Hit shuffle to watch FLIP fill the gap',
+    '点一下': 'Tap',
+    '点一下圆钮': 'Tap the dial',
+    '点一下扔一个球': 'Tap to drop a ball',
+    '点一下撒纸屑': 'Tap for confetti',
+    '点一下重新解码': 'Tap to re-decode',
+    '点不同标签': 'Pick another tab',
+    '点两侧的卡换焦点': 'Tap a side card to move focus',
+    '点击卡片放大，再点收回': 'Tap a card to expand, tap again to close',
+    '点击展开/收起': 'Tap to expand or collapse',
+    '点击标题': 'Tap the heading',
+    '点击翻面': 'Tap to flip',
+    '点卡片': 'Tap a card',
+    '点按钮增删列表项': 'Use the buttons to add and remove rows',
+    '点按钮抽一个数': 'Tap to draw a number',
+    '点按钮试试': 'Press the button',
+    '点标签跳转': 'Pick a tab to jump',
+    '点筛选标签': 'Pick a filter',
+    '点舞台上任意位置': 'Tap anywhere on the stage',
+    '点页签切换': 'Switch a tab',
+    '看 WAAPI 版 ↗': 'See the WAAPI build',
+    '真实落地参考': 'Shipping examples',
+    '真嵌一个 3D 滚动案例，看它怎么保深度': 'A real embedded 3D scroll case; see how depth survives',
+    '移动指针，手会跟过来': 'Move the pointer and the hand follows',
+    '纵向滚动推横向位移，本站同款': 'Vertical scroll drives horizontal travel, like this site',
+    '视差落地实现': 'Parallax in production',
+    '轮播里的多层视差': 'Layered parallax inside a carousel',
+    '载入实时演示': 'Load the live demo',
+    '靠近中间的按钮': 'Come near the middle button',
+    '鼠标移到卡片上': 'Put the cursor on the card',
+    /* 舞台提示：数据里的 demo.hint，以及演示内部由程序拼出来的短标签 */
+    '1 屏内容': '1 screen of content',
+    '2 屏内容': '2 screens of content',
+    '3 屏内容': '3 screens of content',
+    '4 屏内容': '4 screens of content',
+    '5 屏内容': '5 screens of content',
+    '6 屏内容': '6 screens of content',
+    '7 屏内容': '7 screens of content',
+    'Tab 我': 'Tab to me',
+    'transform · 顺滑': 'transform · smooth',
+    '一切从这里开始': 'Everything starts here',
+    '三条长度=三档 token': '3 lengths = 3 duration tokens',
+    '上传中…': 'Uploading…',
+    '下拉刷新': 'Pull down to refresh',
+    '入场动画只播一次': 'Entrance plays only once',
+    '全部参与渲染': 'Fully rendered',
+    '到达最高点': 'Hits the highest point',
+    '前进再返回，注意方向对称': 'Forward then back — keep it symmetric',
+    '动手拖一下': 'Give it a drag',
+    '可拖动播放头': 'Drag the playhead',
+    '可用方向键 / 回车操作': 'Arrow keys / Enter work',
+    '同一段行程：A 只动 transform，B 每帧写样式后立刻读几何': 'Same trip: A transform, B forced reads',
+    '向下拖列表，越过阈值松手': 'Pull down past threshold, release',
+    '向左滑走一项，看补位': 'Swipe one left, watch the gap close',
+    '向左滑走这张卡': 'Swipe this card left',
+    '在几行之间移动鼠标': 'Move the cursor between rows',
+    '在卡上移动鼠标': 'Move the cursor over the card',
+    '在卡片里移动鼠标': 'Move the cursor inside the card',
+    '在按钮上点击任意位置': 'Click anywhere on the button',
+    '在框里滚动': 'Scroll inside the frame',
+    '增长开始显现': 'Growth starts to show',
+    '已保存到云端': 'Saved to the cloud',
+    '已发布': 'Published',
+    '强制同步布局 · 卡顿': 'Forced layout · janky',
+    '抓我': 'Grab me',
+    '拖我甩走': 'Drag me, fling me away',
+    '按住以确认删除': 'Hold to confirm delete',
+    '按住我': 'Hold me',
+    '数字是现场量出来的': 'Numbers measured live',
+    '普通区块': 'Plain block',
+    '沉淀成结论': 'Settles into a takeaway',
+    '点一下试试': 'Give it a tap',
+    '点我试试': 'Tap me to try',
+    '热度退去': 'The hype fades',
+    '焦点环': 'Focus ring',
+    '第一章 · 起点': 'Chapter 1 · Start',
+    '第三块内容': 'Third content block',
+    '第三章 · 峰值': 'Chapter 3 · Peak',
+    '第二块内容': 'Second content block',
+    '第二章 · 转折': 'Chapter 2 · Turning point',
+    '第五块内容': 'Fifth content block',
+    '第四块内容': 'Fourth content block',
+    '第四章 · 结论': 'Chapter 4 · Takeaway',
+    '等待审阅': 'Awaiting review',
+    '脉冲': 'Pulse',
+    '自动循环': 'Loops automatically',
+    '自动循环播放': 'Autoplays on a loop',
+    '越界试试': 'Drag past the edge',
+    '趋势掉头': 'Trend reverses',
+    '跳过布局与绘制': 'Skips layout and paint',
+    '转码完成': 'Transcode done',
+    '轻推提示': 'Nudge to get attention',
+    '钉在顶部当锚': 'Pinned to top as an anchor',
+    '错误密码': 'Wrong password',
+    '抽帧实时读数': 'Frame readout', '24 张实际帧缩略图': '24 real frame thumbnails',
+    '左侧是实际预览，右侧接触表标出当前采样帧。': 'Live preview on the left; the contact sheet marks the frame being sampled.',
+    '视线跟随实时读数': 'Gaze readout',
+    '指针决定目标方向；松开后，视线回到低频游走。': 'The pointer sets the target; release it and the gaze drifts on its own.',
+    '收藏这个术语': 'Bookmark this term', '上一条 / 下一条': 'Previous / Next',
+    '搜索动效术语': 'Search motion terms', '缓动曲线预览': 'Easing curve preview',
+    '没有匹配的术语。换个说法试试，比如「弹」「糊」「跟手」「掉帧」。':
+      'No matches. Try another word — bounce, blur, follow, jank.',
+    '同一条动效，切换成 CSS / WAAPI / GSAP / Framer / Swift / Compose / Tailwind 的写法':
+      'The same effect written in CSS / WAAPI / GSAP / Framer / Swift / Compose / Tailwind',
+    '约 80 词、按用途分 12 类': '~80 terms in 12 purpose groups',
+    '140+ 行业词条': '140+ industry terms',
+    '按制作流程分类': 'sorted by production pipeline',
+    '镜头 / 光效 / 色彩': 'camera / light / color',
+    '缓动函数速查': 'easing cheat sheet',
+    '按领域整理的动效原则': 'animation principles by domain',
+    '图片来源：人像摄影素材由本站收录；风景照片来自 Wikimedia Commons（CC 授权），完整署名见 assets/img/ATTRIBUTION.md':
+      'Photos: portraits collected by this site; landscapes from Wikimedia Commons (CC). Full credits in assets/img/ATTRIBUTION.md'
+  };
+  /* 分类名已有权威表，别再抄一份 */
+  Object.keys(CAT_EN).forEach(function (id) {
+    const c = window.CATS.filter(function (x) { return x.id === id; })[0];
+    if (c) LABEL[c.name] = CAT_EN[id][0];
+  });
+
   /* [英文释义, 含糊说法, 专业说法] */
   window.EN = {
+    'cylinder-reel': ['Roll a strip of photos onto a cylinder: each card is rotateY(i×36°) then pushed out along its own facing by the radius R (R = card width / 2tan(π/N)), so spinning the drum is the carousel. One speed answers two places — drag faster and the headline letter-spacing blows open, so the page breathes in sync. Release and inertia decays while the tracking springs back.', 'roll a row of photos into a tube and spin it by dragging', 'cards laid on a cylinder at rotateY(i·36°) translateZ(R); the drag sets rotY and the same velocity drives the title letter-spacing'],
+    'ring-gallery': ['A gallery with the camera outside the ring: photos sit rotateY(i×45°) translateZ(R) around a circle, so only the card facing the camera keeps full size and brightness while the rest fall off with angle. Tap a side card and its angle is brought to 0° along the shortest path — no tween written anywhere, one focus variable changes.', 'photos in a circle and only the one facing me lights up', '8 photos on a ring at rotateY(i·45°) translateZ(R); drag rotates the ring, tap normalises the angle along the shortest path and raises that card'],
     'easing': ['A function mapping animation progress onto the timeline. Linear motion reads as machine-made because nothing in the real world reaches top speed and stops instantly.', 'make it feel more natural', 'this motion uses an ease-out curve: fast start, slow settle'],
     'linear': ['Progress grows in direct proportion to time. Right for motion with no beginning or end — spinners, marquees, progress fills; wrong for anything that starts and stops.', 'just move it at a steady speed', 'linear timing, continuous motion only'],
     'ease-in': ['Slow start, fast finish. The high exit velocity reads as “leaving”, so it belongs on exits, collapses and throw-away gestures.', 'when it goes away', 'ease-in so it accelerates out of frame'],
@@ -344,9 +552,22 @@
 
   function refreshStatic() {
     $$('[data-i18n]').forEach(function (el) { el.textContent = t(el.dataset.i18n); });
+    applyLabels($$('[data-l10n]'));
     const q = $('#q'); if (q) q.placeholder = t('search');
     document.title = t('docTitle');
     document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
+  }
+
+  /* data-l10n 存中文原文，data-l10n-attr 指定要改写哪个属性（默认改写文本） */
+  function applyLabels(nodes) {
+    for (let i = 0; i < nodes.length; i++) {
+      const el = nodes[i], src = el.dataset.l10n;
+      if (src == null) continue;
+      const v = (lang === 'en' && LABEL[src]) ? LABEL[src] : src;
+      const attr = el.dataset.l10nAttr;
+      if (attr) { if (el.getAttribute(attr) !== v) el.setAttribute(attr, v); }
+      else if (el.textContent !== v) el.textContent = v;
+    }
   }
 
   function refreshTerms(root) {
@@ -360,6 +581,7 @@
     nodes.forEach(function (el) {
       const id = el.dataset.id, term = byId[id];
       if (!term) return;
+      applyLabels($$('[data-l10n]', el));
       const en = window.EN[id];
       const def = lang === 'en' && en ? en[0] : term.def;
       const vag = lang === 'en' && en ? en[1] : term.vague;

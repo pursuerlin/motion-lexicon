@@ -9,8 +9,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,460;0,9..144,600;1,9..144,420;1,9..144,560&family=Noto+Serif+SC:wght@560;700&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/styles.css?v=120">
-<link rel="stylesheet" href="assets/hud.css?v=114">
+<link rel="stylesheet" href="assets/styles.css?v=122">
+<link rel="stylesheet" href="assets/hud.css?v=122">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>〜</text></svg>">
 <!-- 首帧就定主题：等 app.js 启动才纠正的话，浅色用户每次都闪一下暗色 -->
 <script>
@@ -34,14 +34,15 @@
   </a>
   <div class="search">
     <span class="mag" aria-hidden="true">⌕</span>
-    <input id="q" type="search" placeholder="搜术语、中文说法或代码：easing / 错峰 / 视差 / will-change …" aria-label="搜索动效术语" autocomplete="off">
+    <input id="q" type="search" placeholder="搜术语、中文说法或代码：easing / 错峰 / 视差 / will-change …" aria-label="搜索动效术语" data-l10n="搜索动效术语" data-l10n-attr="aria-label" autocomplete="off">
     <button id="clear" class="mini" type="button" data-i18n="clear">清空</button>
   </div>
   <div class="top-tools">
     <span id="hitcount" class="hit" aria-live="polite"></span>
     <div class="menu" id="dialect-menu">
       <button id="dialect-btn" class="menu-btn" type="button" aria-haspopup="listbox" aria-expanded="false"
-        title="同一条动效，切换成 CSS / WAAPI / GSAP / Framer / Swift / Compose / Tailwind 的写法">
+        title="同一条动效，切换成 CSS / WAAPI / GSAP / Framer / Swift / Compose / Tailwind 的写法"
+        data-l10n="同一条动效，切换成 CSS / WAAPI / GSAP / Framer / Swift / Compose / Tailwind 的写法" data-l10n-attr="title">
         <span class="menu-cap" data-i18n="dialect">代码写法</span><b id="dialect-cur">CSS</b>
         <svg class="caret" width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
@@ -91,40 +92,40 @@
       <div class="lab-col preview">
         <h4><span data-i18n="labWatch">看它运动</span> <span class="hint-sm" data-i18n="labRef">灰色 = 匀速参照</span></h4>
         <div class="pv">
-          <span class="pv-lbl">实演 · 当前曲线</span>
+          <span class="pv-lbl" data-l10n="实演 · 当前曲线">实演 · 当前曲线</span>
           <i id="pv-ref" class="pv-dot ref"></i>
           <i id="pv-live" class="pv-dot live"></i>
           <span class="pv-rail"></span>
         </div>
         <div class="lab-row">
-          <label><span data-i18n="labDur">时长</span> <output id="lab-dur-v">1200ms</output></label>
+          <label for="lab-dur"><span data-i18n="labDur">时长</span> <output id="lab-dur-v">1200ms</output></label>
           <input id="lab-dur" type="range" min="80" max="1200" step="20" value="1200">
         </div>
         <div class="lab-row">
-          <label><span data-i18n="labDist">距离</span> <output id="lab-dist-v">96px</output></label>
+          <label for="lab-dist"><span data-i18n="labDist">距离</span> <output id="lab-dist-v">96px</output></label>
           <input id="lab-dist" type="range" min="24" max="180" step="4" value="96">
         </div>
         <div class="lab-row">
           <label data-i18n="labProp">动什么</label>
           <div id="lab-props" class="pt-row">
-            <button type="button" class="pt on" data-p="x">位移 X</button>
-            <button type="button" class="pt" data-p="y">位移 Y</button>
-            <button type="button" class="pt" data-p="scale">缩放</button>
-            <button type="button" class="pt" data-p="rotate">旋转</button>
-            <button type="button" class="pt" data-p="combo">位移+旋转</button>
+            <button type="button" class="pt on" data-p="x" data-l10n="位移 X">位移 X</button>
+            <button type="button" class="pt" data-p="y" data-l10n="位移 Y">位移 Y</button>
+            <button type="button" class="pt" data-p="scale" data-l10n="缩放">缩放</button>
+            <button type="button" class="pt" data-p="rotate" data-l10n="旋转">旋转</button>
+            <button type="button" class="pt" data-p="combo" data-l10n="位移+旋转">位移+旋转</button>
           </div>
         </div>
         <div class="bezier">
           <div class="bz-hd"><b id="lab-ease-name">expo-out</b><code id="lab-ease-css">cubic-bezier()</code><span id="lab-handles" class="hint-sm"></span></div>
-          <div class="bz-row" data-i="0"><label>x1</label><input id="pt-0" type="range" min="0" max="1" step="0.01" value="0.16"><output id="ptv-0">0.16</output></div>
-          <div class="bz-row" data-i="1"><label>y1</label><input id="pt-1" type="range" min="-1" max="2" step="0.02" value="1"><output id="ptv-1">1.00</output></div>
-          <div class="bz-row" data-i="2"><label>x2</label><input id="pt-2" type="range" min="0" max="1" step="0.01" value="0.3"><output id="ptv-2">0.30</output></div>
-          <div class="bz-row" data-i="3"><label>y2</label><input id="pt-3" type="range" min="-1" max="2" step="0.02" value="1"><output id="ptv-3">1.00</output></div>
+          <div class="bz-row" data-i="0"><label for="pt-0">x1</label><input id="pt-0" type="range" min="0" max="1" step="0.01" value="0.16"><output id="ptv-0">0.16</output></div>
+          <div class="bz-row" data-i="1"><label for="pt-1">y1</label><input id="pt-1" type="range" min="-1" max="2" step="0.02" value="1"><output id="ptv-1">1.00</output></div>
+          <div class="bz-row" data-i="2"><label for="pt-2">x2</label><input id="pt-2" type="range" min="0" max="1" step="0.01" value="0.3"><output id="ptv-2">0.30</output></div>
+          <div class="bz-row" data-i="3"><label for="pt-3">y2</label><input id="pt-3" type="range" min="-1" max="2" step="0.02" value="1"><output id="ptv-3">1.00</output></div>
         </div>
       </div>
 
       <div class="lab-col curve-out">
-        <canvas id="lab-curve" role="img" aria-label="缓动曲线预览"></canvas>
+        <canvas id="lab-curve" role="img" aria-label="缓动曲线预览" data-l10n="缓动曲线预览" data-l10n-attr="aria-label"></canvas>
         <div class="code-out">
           <div id="lab-tabs" class="ltabs"></div>
           <pre><code id="lab-code"></code></pre>
@@ -149,7 +150,7 @@
       </div>
     </aside>
     <div class="content">
-      <p id="empty" class="empty" hidden>没有匹配的术语。换个说法试试，比如「弹」「糊」「跟手」「掉帧」。</p>
+      <p id="empty" class="empty" hidden data-l10n="没有匹配的术语。换个说法试试，比如「弹」「糊」「跟手」「掉帧」。">没有匹配的术语。换个说法试试，比如「弹」「糊」「跟手」「掉帧」。</p>
       <div id="sections"></div>
     </div>
   </div>
@@ -158,13 +159,13 @@
     <div>
       <h4 data-i18n="refs">参考与延伸阅读</h4>
       <ul class="refs">
-        <li><a href="https://www.aidesign.guide/dictionary/animation-vocabulary" target="_blank" rel="noopener">Animation Vocabulary · The AI Design Guide</a><span>约 80 词、按用途分 12 类</span></li>
-        <li><a href="https://schoolofmotion.com/blog/motion-design-dictionary" target="_blank" rel="noopener">The Essential Motion Design Dictionary · School of Motion</a><span>140+ 行业词条</span></li>
-        <li><a href="https://www.mythstudio.co.uk/glossary" target="_blank" rel="noopener">Animation Glossary · Myth Studio</a><span>按制作流程分类</span></li>
-        <li><a href="https://videobolt.net/motion-graphics-glossary" target="_blank" rel="noopener">Motion Graphics Glossary · Videobolt</a><span>镜头 / 光效 / 色彩</span></li>
-        <li><a href="https://easings.net/zh-cn" target="_blank" rel="noopener">Easings.net（简中）</a><span>缓动函数速查</span></li>
-        <li><a href="https://github.com/dylantarre/animation-principles" target="_blank" rel="noopener">dylantarre/animation-principles</a><span>按领域整理的动效原则</span></li>
-        <li><span>图片来源：人像摄影素材由本站收录；风景照片来自 Wikimedia Commons（CC 授权），完整署名见 assets/img/ATTRIBUTION.md</span></li>
+        <li><a href="https://www.aidesign.guide/dictionary/animation-vocabulary" target="_blank" rel="noopener">Animation Vocabulary · The AI Design Guide</a><span data-l10n="约 80 词、按用途分 12 类">约 80 词、按用途分 12 类</span></li>
+        <li><a href="https://schoolofmotion.com/blog/motion-design-dictionary" target="_blank" rel="noopener">The Essential Motion Design Dictionary · School of Motion</a><span data-l10n="140+ 行业词条">140+ 行业词条</span></li>
+        <li><a href="https://www.mythstudio.co.uk/glossary" target="_blank" rel="noopener">Animation Glossary · Myth Studio</a><span data-l10n="按制作流程分类">按制作流程分类</span></li>
+        <li><a href="https://videobolt.net/motion-graphics-glossary" target="_blank" rel="noopener">Motion Graphics Glossary · Videobolt</a><span data-l10n="镜头 / 光效 / 色彩">镜头 / 光效 / 色彩</span></li>
+        <li><a href="https://easings.net/zh-cn" target="_blank" rel="noopener" data-l10n="Easings.net（简中）">Easings.net（简中）</a><span data-l10n="缓动函数速查">缓动函数速查</span></li>
+        <li><a href="https://github.com/dylantarre/animation-principles" target="_blank" rel="noopener">dylantarre/animation-principles</a><span data-l10n="按领域整理的动效原则">按领域整理的动效原则</span></li>
+        <li><span data-l10n="图片来源：人像摄影素材由本站收录；风景照片来自 Wikimedia Commons（CC 授权），完整署名见 assets/img/ATTRIBUTION.md">图片来源：人像摄影素材由本站收录；风景照片来自 Wikimedia Commons（CC 授权），完整署名见 assets/img/ATTRIBUTION.md</span></li>
       </ul>
     </div>
     <div class="foot-self">
@@ -185,7 +186,7 @@
       <span class="crumb-sep" aria-hidden="true">›</span>
       <b id="page-crumb" class="crumb-here"></b>
       <div class="crumb-acts">
-        <button id="page-fav" class="icon-btn" type="button" aria-pressed="false" aria-label="收藏这个术语">
+        <button id="page-fav" class="icon-btn" type="button" aria-pressed="false" aria-label="收藏这个术语" data-l10n="收藏这个术语" data-l10n-attr="aria-label">
           <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.6l2.3 4.7 5.2.8-3.8 3.7.9 5.2-4.6-2.4-4.6 2.4.9-5.2L3.4 8.1l5.2-.8z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
         </button>
         <button id="page-copy" class="line-btn" type="button">
@@ -196,7 +197,7 @@
     </div>
     <article id="page-body" class="page-body"></article>
   </div>
-  <nav class="edge-nav" aria-label="上一条 / 下一条">
+  <nav class="edge-nav" aria-label="上一条 / 下一条" data-l10n="上一条 / 下一条" data-l10n-attr="aria-label">
     <button id="page-prev" class="edge-pill left" type="button"><i aria-hidden="true">←</i><span></span></button>
     <button id="page-next" class="edge-pill right" type="button"><span></span><i aria-hidden="true">→</i></button>
   </nav>
@@ -211,24 +212,24 @@
       <button id="recipe-close" class="mini" type="button" data-i18n="recCollapse">收起</button>
     </header>
     <div id="recipe-chips" class="rchip-row"></div>
-    <textarea id="recipe-out" rows="6" readonly spellcheck="false"></textarea>
+    <textarea id="recipe-out" rows="6" readonly spellcheck="false" aria-label="配方文本" data-l10n="配方文本" data-l10n-attr="aria-label"></textarea>
     <button id="recipe-copy" class="solid" type="button" data-i18n="recCopy">复制这段描述</button>
   </div>
 </div>
 
 <!-- 全部 defer：下载更早并行、不阻塞解析，defer 保证按文档顺序执行，全局变量依赖不受影响 -->
-<script defer src="assets/ease.js?v=112"></script>
-<script defer src="assets/data1.js?v=112"></script>
-<script defer src="assets/data2.js?v=112"></script>
-<script defer src="assets/app.js?v=117"></script>
-<script defer src="assets/motion.js?v=112"></script>
-<script defer src="assets/runtime.js?v=112"></script>
-<script defer src="assets/compound.js?v=120"></script>
-<script defer src="assets/refs.js?v=112"></script>
-<script defer src="assets/hud.js?v=112"></script>
-<script defer src="assets/params.js?v=112"></script>
-<script defer src="assets/dialects.js?v=112"></script>
-<script defer src="assets/i18n.js?v=112"></script>
-<script defer src="assets/lab.js?v=112"></script>
+<script defer src="assets/ease.js?v=122"></script>
+<script defer src="assets/data1.js?v=122"></script>
+<script defer src="assets/data2.js?v=122"></script>
+<script defer src="assets/app.js?v=122"></script>
+<script defer src="assets/motion.js?v=122"></script>
+<script defer src="assets/runtime.js?v=122"></script>
+<script defer src="assets/compound.js?v=122"></script>
+<script defer src="assets/refs.js?v=122"></script>
+<script defer src="assets/hud.js?v=122"></script>
+<script defer src="assets/params.js?v=122"></script>
+<script defer src="assets/dialects.js?v=122"></script>
+<script defer src="assets/i18n.js?v=122"></script>
+<script defer src="assets/lab.js?v=122"></script>
 </body>
 </html>

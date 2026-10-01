@@ -15,6 +15,7 @@
   'use strict';
 
   const SDA = 'https://scroll-driven-animations.style/demos/';
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
   /* embed: 可实时嵌进来看的；link: 只给外链（对方拒绝被嵌，或页面太重） */
   const EMB = function (title, slug, note) {
@@ -92,18 +93,18 @@
   function panelHTML(id) {
     const list = REFS[id];
     if (!list || !list.length) return '';
-    return '<section class="refs" aria-label="真实落地参考">' +
-      '<h3 class="refs-hd">真实落地参考<span>互联网上正在跑的同类实现 · 和本页演示对照着看</span></h3>' +
+    return '<section class="refs" aria-label="真实落地参考" data-l10n="真实落地参考" data-l10n-attr="aria-label">' +
+      '<h3 class="refs-hd"><span data-l10n="真实落地参考">真实落地参考</span><span data-l10n="互联网上正在跑的同类实现 · 和本页演示对照着看">互联网上正在跑的同类实现 · 和本页演示对照着看</span></h3>' +
       '<div class="ref-list">' + list.map(function (r, i) {
         return '<article class="ref' + (r.embed ? ' ref--embed' : ' ref--link') + '">' +
           '<header class="ref-top"><b>' + r.title + '</b>' +
           '<span class="ref-host">' + (r.host || hostOf(r.url)) + '</span></header>' +
-          '<p class="ref-note">' + r.note + '</p>' +
+          '<p class="ref-note" data-l10n="' + esc(r.note) + '">' + r.note + '</p>' +
           '<div class="ref-acts">' +
-          (r.embed ? '<button type="button" class="ref-load" data-i="' + i + '">载入实时演示</button>' : '') +
-          '<a class="ref-open" href="' + r.url + '" target="_blank" rel="noopener noreferrer">新窗口打开 ↗</a>' +
+          (r.embed ? '<button type="button" class="ref-load" data-i="' + i + '" data-l10n="载入实时演示">载入实时演示</button>' : '') +
+          '<a class="ref-open" href="' + r.url + '" target="_blank" rel="noopener noreferrer" data-l10n="新窗口打开 ↗">新窗口打开 ↗</a>' +
           (r.alt ? '<a class="ref-open" href="' + r.alt + '" target="_blank" rel="noopener noreferrer">' +
-            (r.embed ? '看 WAAPI 版 ↗' : '另一版 ↗') + '</a>' : '') +
+            (r.embed ? '<span data-l10n="看 WAAPI 版 ↗">看 WAAPI 版 ↗</span>' : '<span data-l10n="另一版 ↗">另一版 ↗</span>') + '</a>' : '') +
           '</div><div class="ref-slot"></div></article>';
       }).join('') + '</div></section>';
   }
