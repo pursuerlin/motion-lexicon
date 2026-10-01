@@ -335,7 +335,7 @@
   }
   function cardVis(card) { return card ? $('.stage', card) : null; }
 
-  let lastCard = null, pageBusy = false, pageToken = 0, paintDialect = null, favOnly = false;
+  let lastCard = null, pageBusy = false, pageToken = 0, paintDialect = null, paintTheme = null, favOnly = false;
   let favs = readList('motion-fav');
   const pg = () => $('#page');
 
@@ -954,13 +954,12 @@
   function setTheme(v) {
     document.documentElement.dataset.theme = v;
     try { localStorage.setItem('motion-theme', v); } catch (e) {}
-    const i = THEMES.findIndex(t => t.k === v), next = THEMES[(i + 1) % THEMES.length] || THEMES[0];
     const en = window.I18N && window.I18N.lang === 'en';
-    const btn = $('#theme');
-    /* 按钮显示「下一套」的名字：点下去就知道会变成什么 */
-    btn.textContent = en ? next.en : next.zh;
-    btn.title = en ? 'Theme: ' + (THEMES[i] || THEMES[0]).en + ' → next' : '主题：' + ((THEMES[i] || THEMES[0]).zh) + '，点击切换下一套';
-    btn.setAttribute('aria-label', btn.title);
+    const t = THEMES.filter(x => x.k === v)[0] || THEMES[0];
+    /* 下拉里显示的是「当前这套」，不再是「点下去会变成哪套」 */
+    const cur = $('#theme-cur');
+    if (cur) cur.textContent = en ? t.en : t.zh;
+    if (paintTheme) paintTheme();
     redrawCurves();
   }
   function setMotion(on) {
@@ -1006,6 +1005,7 @@
     const deep = /^#term\/(.+)$/.exec(location.hash || '');
     if (deep && TERMS_BY_ID[deep[1]]) openDetail(deep[1], null, 0);
     initDialectMenu();
+    initThemeMenu();
     initScrollUI();
     $('#lang') && $('#lang').addEventListener('click', function () {
       window.I18N.set(window.I18N.lang === 'en' ? 'zh' : 'en');
@@ -1039,6 +1039,50 @@
       });
       document.addEventListener('click', function (e) { if (!e.target.closest('#dialect-menu')) open(false); });
       document.addEventListener('keydown', function (e) { if (e.key === 'Escape') open(false); });
+    }
+
+    /* 主题下拉：每套配色带一个色样（底/字/强调三格）。
+       色样靠元素自身的 data-theme 让同一批调色板定义直接生效，
+       所以这里不存在第二份颜色表，改调色板样片会跟着变。 */
+    function initThemeMenu() {
+      const menu = $('#theme-menu'), btn = $('#theme-btn'), list = $('#theme-list');
+      if (!menu || !list) return;
+      const items = () => [].slice.call(list.querySelectorAll('.menu-item'));
+      const open = function (on) {
+        menu.classList.toggle('open', on);
+        btn.setAttribute('aria-expanded', String(on));
+        if (on) { const c = list.querySelector('.menu-item.on') || items()[0]; if (c) c.focus(); }
+      };
+      paintTheme = function () {
+        const cur = document.documentElement.dataset.theme;
+        const en = window.I18N && window.I18N.lang === 'en';
+        list.innerHTML = '<p class="menu-hd">' + esc(L('themeHd')) + '</p>' + THEMES.map(t =>
+          '<button type="button" role="menuitemradio" aria-checked="' + (t.k === cur) + '" class="menu-item' +
+          (t.k === cur ? ' on' : '') + '" data-t="' + t.k + '">' +
+          '<span class="tsw" data-theme="' + t.k + '" aria-hidden="true"><i></i><i></i><i></i></span>' +
+          '<span class="tname">' + esc(en ? t.en : t.zh) + '</span>' +
+          '<svg class="tick" width="15" height="15" viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 10.6 8.2 14 15.5 6.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></button>').join('');
+      };
+      paintTheme();
+      btn.addEventListener('click', function (e) { e.stopPropagation(); open(!menu.classList.contains('open')); });
+      list.addEventListener('click', function (e) {
+        const it = e.target.closest('.menu-item'); if (!it) return;
+        setTheme(it.dataset.t); open(false); btn.focus();
+      });
+      list.addEventListener('keydown', function (e) {
+        const it = items(), i = it.indexOf(document.activeElement);
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault(); if (it.length) it[(i + (e.key === 'ArrowDown' ? 1 : it.length - 1) + it.length) % it.length].focus();
+        } else if (e.key === 'Home') { e.preventDefault(); if (it[0]) it[0].focus(); }
+        else if (e.key === 'End') { e.preventDefault(); if (it.length) it[it.length - 1].focus(); }
+        else if (e.key === 'Escape') { e.preventDefault(); open(false); btn.focus(); }
+        else if (e.key === 'Tab') open(false);
+      });
+      btn.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); open(true); }
+      });
+      document.addEventListener('click', function (e) { if (!e.target.closest('#theme-menu')) menu.classList.remove('open'); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') menu.classList.remove('open'); });
     }
 
     /* 滚动进度条 + 侧栏跟随当前分类 */
@@ -1086,11 +1130,6 @@
       document.body.dataset.filter = on ? '' : a.dataset.cat;
       $$('#nav a').forEach(x => x.classList.toggle('on', !on && x === a));
       applyFilter();
-    });
-    $('#theme').addEventListener('click', function () {
-      const cur = document.documentElement.dataset.theme;
-      const i = THEMES.findIndex(t => t.k === cur);
-      setTheme(THEMES[(i + 1) % THEMES.length].k);
     });
     $('#motion').addEventListener('click', () => setMotion(document.documentElement.classList.contains('no-motion')));
     document.addEventListener('click', e => {

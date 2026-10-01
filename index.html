@@ -6,9 +6,9 @@
 <title>动效词汇表 · 把“那个感觉”说成专业术语</title>
 <meta name="description" content="239 个 Web 动画与动效术语，16 个分类，每个都带可重播或可交互的实演效果、含糊说法到专业说法的对照，以及可直接复制的代码。让需求描述和 AI 提示词一次说清。">
 <meta name="color-scheme" content="dark light">
-<link rel="stylesheet" href="assets/fonts/fonts.css?v=127">
-<link rel="stylesheet" href="assets/styles.css?v=127">
-<link rel="stylesheet" href="assets/hud.css?v=127">
+<link rel="stylesheet" href="assets/fonts/fonts.css?v=133">
+<link rel="stylesheet" href="assets/styles.css?v=133">
+<link rel="stylesheet" href="assets/hud.css?v=133">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>〜</text></svg>">
 <!-- 首帧就定主题：等 app.js 启动才纠正的话，浅色用户每次都闪一下暗色 -->
 <script>
@@ -49,7 +49,15 @@
     <button id="lang" class="ghost" type="button">EN</button>
     <button id="motion" class="ghost" type="button" aria-pressed="true">动效 开</button>
     <button id="hud" class="ghost" type="button" aria-pressed="true">遥测 开</button>
-    <button id="theme" class="ghost" type="button">亮色</button>
+    <div class="menu" id="theme-menu">
+      <button id="theme-btn" class="menu-btn" type="button" aria-haspopup="menu" aria-expanded="false"
+        title="切换配色：五套调色板，默认跟随系统的深浅色偏好"
+        data-l10n="切换配色：五套调色板，默认跟随系统的深浅色偏好" data-l10n-attr="title">
+        <span class="menu-cap" data-i18n="themeCap">主题</span><b id="theme-cur">暗房</b>
+        <svg class="caret" width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="menu-list" id="theme-list" role="menu" tabindex="-1"></div>
+    </div>
     <button class="ghost recipe-open" type="button"><span data-i18n="recipe">配方</span> <b id="recipe-count">0</b></button>
   </div>
   <div class="scroll-progress" id="scroll-progress" aria-hidden="true"><i></i></div>
@@ -216,18 +224,18 @@
 </div>
 
 <!-- 全部 defer：下载更早并行、不阻塞解析，defer 保证按文档顺序执行，全局变量依赖不受影响 -->
-<script defer src="assets/ease.js?v=127"></script>
-<script defer src="assets/data1.js?v=127"></script>
-<script defer src="assets/data2.js?v=127"></script>
-<script defer src="assets/app.js?v=127"></script>
-<script defer src="assets/motion.js?v=127"></script>
-<script defer src="assets/runtime.js?v=127"></script>
-<script defer src="assets/compound.js?v=127"></script>
-<script defer src="assets/refs.js?v=127"></script>
-<script defer src="assets/hud.js?v=127"></script>
-<script defer src="assets/params.js?v=127"></script>
-<script defer src="assets/dialects.js?v=127"></script>
-<script defer src="assets/i18n.js?v=127"></script>
-<script defer src="assets/lab.js?v=127"></script>
+<script defer src="assets/ease.js?v=133"></script>
+<script defer src="assets/data1.js?v=133"></script>
+<script defer src="assets/data2.js?v=133"></script>
+<script defer src="assets/app.js?v=133"></script>
+<script defer src="assets/motion.js?v=133"></script>
+<script defer src="assets/runtime.js?v=133"></script>
+<script defer src="assets/compound.js?v=133"></script>
+<script defer src="assets/refs.js?v=133"></script>
+<script defer src="assets/hud.js?v=133"></script>
+<script defer src="assets/params.js?v=133"></script>
+<script defer src="assets/dialects.js?v=133"></script>
+<script defer src="assets/i18n.js?v=133"></script>
+<script defer src="assets/lab.js?v=133"></script>
 </body>
 </html>

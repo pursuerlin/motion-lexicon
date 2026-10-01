@@ -643,7 +643,10 @@ window.TERMS.push(
     say: 'X 线性 + Y 缓动 = 抛物线轨迹',
     def: '自由运动的物体走弧线而不是直线（重力使然）。实现技巧：横向 linear、纵向 ease-in-out，两个通道合成即是抛物线。',
     code: '/* X: linear, Y: ease-in —— 合成抛物线 */',
-    demo: { kind: 'frames', html: '<div class="obj ball arc"></div>', frames: [[0, 'transform:translate(-52px,10px)'], [50, 'transform:translate(0,-26px)'], [100, 'transform:translate(52px,10px)']], e: 'ease-in-out', d: '1300ms', loop: true, alt: true }
+    /* 这条教的本来就是「横向 linear + 纵向抛物线」。原来只有三个点且整条
+       transform 套 ease-in-out：X 不是匀速，端点还各爬 ~270ms。
+       现在按 y = 10 - 144·t(1-t) 采样 9 个点、时间走 linear，才是它说的那个东西。 */
+    demo: { kind: 'frames', html: '<div class="obj ball arc"></div>', frames: [[0, 'transform:translate(-52px,10px)'], [12.5, 'transform:translate(-39px,-5.75px)'], [25, 'transform:translate(-26px,-17px)'], [37.5, 'transform:translate(-13px,-23.75px)'], [50, 'transform:translate(0,-26px)'], [62.5, 'transform:translate(13px,-23.75px)'], [75, 'transform:translate(26px,-17px)'], [87.5, 'transform:translate(39px,-5.75px)'], [100, 'transform:translate(52px,10px)']], e: 'linear', d: '1300ms', loop: true, alt: true }
   },
   {
     id: 'slow-in-out', en: 'Slow in & slow out', zh: '慢入慢出', cat: 'principles',

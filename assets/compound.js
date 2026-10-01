@@ -424,13 +424,14 @@
   const HTML = {
     gaze: function () {
       return '<div class="cp cp-gaze">' +
-        '<div class="gz-field" aria-hidden="true"><i class="gz-cross"></i><i class="gz-target"></i><span class="gz-axis gz-axis-x"></span><span class="gz-axis gz-axis-y"></span></div>' +
+        '<div class="gz-field" aria-hidden="true">' +
+          '<span class="gz-axis gz-axis-x"></span><span class="gz-axis gz-axis-y"></span>' +
+          '<i class="gz-cross"></i><span class="gz-ray"><u></u></span><i class="gz-target"></i>' +
+        '</div>' +
         '<i class="gz-body" aria-hidden="true">' +
-          '<b class="gz-brow gz-brow-l"></b><b class="gz-brow gz-brow-r"></b>' +
           '<b class="gz-eye"><s class="gz-pupil"></s></b><b class="gz-eye"><s class="gz-pupil"></s></b>' +
-          '<i class="gz-nose"></i><i class="gz-mouth"></i>' +
         '</i>' +
-        '<span class="cp-cap">move pointer · eyes settle</span>' +
+        '<span class="cp-cap">gaze ray vs target</span>' +
       '</div>';
     },
     pinned: function () {
@@ -816,6 +817,8 @@
       if (field) {
         field.style.setProperty('--gx', ((p.live ? p.x : cx) * 50 + 50).toFixed(2) + '%');
         field.style.setProperty('--gy', ((p.live ? p.y : cy) * 50 + 50).toFixed(2) + '%');
+        /* 射线只报角度：起点在场地中心，末端离目标环还差多少，就是这一帧的滞后 */
+        field.style.setProperty('--ray', (Math.atan2(cy, cx) * 180 / Math.PI).toFixed(2) + 'deg');
         field.classList.toggle('is-live', !!p.live);
       }
       if (target) {

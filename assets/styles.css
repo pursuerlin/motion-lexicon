@@ -4,7 +4,7 @@
    信号黄绿做“正在播放”的指示，等宽字体标注参数。
    ========================================================================== */
 
-:root {
+:root, [data-theme=paper] {
   /* 纸感工作台（light 为默认）：暖纸底、墨色正文、朱砂强调——编辑部质感 */
   --bg: #FAF7F1;
   --bg-2: #F3EDE2;
@@ -163,7 +163,7 @@ button { font: inherit; cursor: pointer; }
 .menu.open .menu-btn { background: var(--panel-2); border-color: var(--accent); }
 .menu-cap { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 .menu-btn b { font-weight: 500; min-width: 34px; text-align: left; font-family: var(--mono); font-size: 12.5px; }
-.menu-btn .caret { display: block; color: var(--muted); transition: transform .24s cubic-bezier(.2, 0, 0, 1); }
+.menu-btn .caret { display: block; flex: 0 0 auto; color: var(--muted); transition: transform .24s cubic-bezier(.2, 0, 0, 1); }
 .menu.open .menu-btn .caret { transform: rotate(180deg); }
 .menu-list {
   position: absolute; top: calc(100% + 18px); right: 0; min-width: 226px; z-index: 90;
@@ -187,6 +187,16 @@ button { font: inherit; cursor: pointer; }
 .menu-item .tick { display: block; width: 0; overflow: visible; opacity: 0; color: var(--accent); transition: opacity .18s; }
 .menu-item.on { color: var(--ink); font-weight: 500; }
 .menu-item.on .tick { opacity: 1; }
+/* 主题样片：底色 + 字色 + 强调色三格。样片元素自带 data-theme，
+   于是配色直接从上面那五套定义里取，不存在第二份颜色表。 */
+.tsw { display: inline-flex; gap: 2px; flex: 0 0 auto; width: 34px; height: 18px;
+  padding: 2px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); }
+.tsw i { display: block; border-radius: 2px }
+.tsw i:nth-child(1) { flex: 2; background: var(--ink) }
+.tsw i:nth-child(2) { flex: 1; background: var(--accent) }
+.tsw i:nth-child(3) { flex: 1; background: var(--muted) }
+.menu-item .tname { flex: 1 1 auto }
+#theme-list { min-width: 208px }
 
 /* ---------------- 阅读进度（顺便就是 scroll-progress 的实例） ---------------- */
 .scroll-progress { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; overflow: hidden; }
@@ -322,6 +332,10 @@ kbd { border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; font-si
   transition: background var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease), border-color var(--dur-2);
 }
 .term:hover { background: var(--panel-2); box-shadow: var(--shadow); }
+/* 239 张卡片一次性挂着，120Hz 屏滚动时帧时从 8.4ms 涨到 16.7ms。
+   离屏卡片跳过渲染后 p90 从 16.7 降到 8.9ms，且 239 个舞台的布局签名与不开时逐字节相同。
+   高度本来就是固定的 274px，所以 intrinsic-size 不会引起滚动条跳动。 */
+.term:not(.term--detail) { content-visibility: auto; contain-intrinsic-size: auto 274px; }
 .term:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .term[hidden] { display: none; }
 /* 卡片入场：rise-in + 错峰（仅在 JS 就绪后启用，避免无脚本时内容不可见） */
@@ -1234,10 +1248,86 @@ html.has-page { overflow: hidden; }
 .term--detail .stage.kind-compound .srow-x em { font-size: 9px; }
 .term--detail .stage.kind-compound .cp .sflow { padding: 16px; gap: 14px; }
 .term--detail .stage.kind-compound .cp-cap { font-size: 12px; bottom: 8px; left: 14px; }
-.term--detail .stage.kind-compound .gz-body { width: 230px; height: 190px; gap: 22px; padding-bottom: 26px; }
-.term--detail .stage.kind-compound .gz-eye { width: 54px; height: 54px; }
-.term--detail .stage.kind-compound .gz-pupil { width: 22px; height: 22px; }
-.term--detail .stage.kind-compound .gz-mouth { width: 58px; height: 28px; bottom: 26px; margin-left: -29px; }
+/* ---------- 光标驱动视线跟随 · 仪表脸 + 视线射线 ----------
+   配色只从当前调色板推导（--panel / --panel-2 / --ink / --accent / --line / --bg-2），
+   所以五套主题都成立。原先这里是三代样式叠加，最上面一层写死了 #f2f0fb 紫底 + !important，
+   把主题色全压掉了。
+   读法：圆环 = 指针要去的地方，射线 = 视线此刻真正的指向，两者错开多少就是滞后。 */
+.stage.kind-compound:has(.cp-gaze) {
+  background:
+    radial-gradient(120% 92% at 50% -12%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 62%),
+    linear-gradient(155deg, color-mix(in srgb, var(--panel) 90%, var(--ink)), var(--bg-2));
+}
+.cp-gaze { position: relative; display: grid; place-items: center; overflow: hidden; isolation: isolate; cursor: crosshair; touch-action: none; }
+.gz-field {
+  position: absolute; inset: 7% 8%; z-index: 0; overflow: hidden; border-radius: 18px;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(90deg, transparent 49.7%, color-mix(in srgb, var(--ink) 7%, transparent) 50%, transparent 50.3%),
+    linear-gradient(transparent 49.7%, color-mix(in srgb, var(--ink) 7%, transparent) 50%, transparent 50.3%);
+}
+.gz-field::before, .gz-field::after {
+  content: ""; position: absolute; border: 1px dashed color-mix(in srgb, var(--ink) 11%, transparent); border-radius: 50%;
+}
+.gz-field::before { inset: 16%; }
+.gz-field::after { inset: 31%; }
+.gz-axis { position: absolute; background: color-mix(in srgb, var(--ink) 9%, transparent); }
+.gz-axis-x { left: 8%; right: 8%; top: 50%; height: 1px; }
+.gz-axis-y { top: 8%; bottom: 8%; left: 50%; width: 1px; }
+.gz-cross { position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; margin: -2.5px; border-radius: 50%; background: color-mix(in srgb, var(--ink) 30%, transparent); }
+/* 射线：角度由 JS 每帧写进 --ray，起点在场地中心，末端的小点是视线落点 */
+.gz-ray {
+  position: absolute; left: 50%; top: 50%; width: 47%; height: 1.5px; margin-top: -.75px;
+  transform-origin: 0 50%; transform: rotate(var(--ray, 0deg));
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 66%, transparent), color-mix(in srgb, var(--accent) 10%, transparent));
+}
+.gz-ray u { position: absolute; right: -3px; top: -2.5px; width: 6.5px; height: 6.5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent); }
+.gz-target {
+  position: absolute; left: var(--gx, 50%); top: var(--gy, 50%); width: 22px; height: 22px; margin: -11px;
+  border: 1px solid color-mix(in srgb, var(--accent) 52%, transparent); border-radius: 50%;
+  opacity: .38; transform: scale(.82);
+  transition: opacity .26s var(--ease-out), transform .26s var(--ease-out), border-color .26s var(--ease-out);
+}
+.gz-target::before, .gz-target::after { content: ""; position: absolute; background: color-mix(in srgb, var(--accent) 40%, transparent); }
+.gz-target::before { left: 50%; top: -6px; width: 1px; height: 34px; }
+.gz-target::after { top: 50%; left: -6px; width: 34px; height: 1px; }
+.gz-field.is-live .gz-target { opacity: 1; transform: scale(1); border-color: var(--accent); }
+/* 脸：只用面板色加一点点强调色，深浅底都不脏 */
+.gz-body {
+  position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 15px;
+  width: 152px; height: 104px; padding: 0 18px;
+  border: 1px solid color-mix(in srgb, var(--ink) 13%, transparent); border-radius: 24px;
+  background: linear-gradient(168deg, color-mix(in srgb, var(--panel) 96%, var(--accent)), color-mix(in srgb, var(--panel-2) 90%, var(--ink)));
+  box-shadow: 0 20px 32px -24px color-mix(in srgb, var(--ink) 62%, transparent),
+              inset 0 1px 0 color-mix(in srgb, #fff 34%, transparent);
+  will-change: transform;
+}
+.gz-eye {
+  position: relative; display: grid; place-items: center; overflow: hidden;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--ink) 17%, transparent);
+  background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--panel) 34%, #fff) 0 40%, color-mix(in srgb, var(--panel-2) 80%, var(--ink)) 100%);
+  box-shadow: inset 0 -3px 7px color-mix(in srgb, var(--ink) 13%, transparent);
+  transform-origin: center;
+}
+.gz-pupil {
+  display: block; width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--accent) 60%, var(--ink));
+  background: radial-gradient(circle at 33% 30%, color-mix(in srgb, #fff 76%, transparent) 0 14%, var(--accent) 15% 44%, color-mix(in srgb, var(--ink) 86%, var(--accent)) 46%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 11%, transparent);
+}
+.gz-eye.blink { transform: scaleY(.08); }
+.gz-body + .cp-cap { margin-top: 0; }
+.term--detail .stage.kind-compound .gz-body { width: 236px; height: 152px; gap: 26px; padding: 0 28px; }
+.term--detail .stage.kind-compound .gz-eye { width: 58px; height: 58px; }
+.term--detail .stage.kind-compound .gz-pupil { width: 24px; height: 24px; }
+.term--detail .stage.kind-compound .gz-ray { width: 44%; }
+@media (max-width: 640px) {
+  .term--detail .stage.kind-compound .gz-body { width: min(66vw, 214px); height: min(42vw, 136px); gap: 18px; padding-inline: 20px; }
+  .term--detail .stage.kind-compound .gz-eye { width: min(15vw, 50px); height: min(15vw, 50px); }
+  .term--detail .stage.kind-compound .gz-pupil { width: min(6vw, 21px); height: min(6vw, 21px); }
+}
+
 .term--detail .pi-head { height: calc(var(--hh, 46%) + 96px); gap: 12px; padding: 8px 8px 16px; }
 .term--detail .pi-hero { min-height: 52px; border-radius: var(--r-lg); }
 .term--detail .pi-hero s { font-size: 13px; }
@@ -1284,25 +1374,6 @@ html.has-page { overflow: hidden; }
 .term--detail .sp-grid s em { font-size: 13px; }
 
 /* 1. 光标驱动视线跟随 */
-.cp-gaze { display: grid; place-items: center; }
-.gz-body {
-  position: relative; display: flex; align-items: center; justify-content: center; gap: 13px;
-  width: 138px; height: 112px; padding-bottom: 16px;
-  border-radius: 40% 40% 46% 46% / 44% 44% 56% 56%;
-  background: linear-gradient(150deg, var(--obj-a), var(--obj-b));
-  box-shadow: 0 10px 22px -14px rgba(20, 16, 36, .55);
-}
-.gz-eye {
-  position: relative; display: grid; place-items: center; overflow: hidden;
-  width: 32px; height: 32px; border-radius: 50%; background: var(--bg);
-  transition: transform .1s cubic-bezier(.2, 0, 0, 1);
-}
-.gz-pupil { display: block; width: 13px; height: 13px; border-radius: 50%; background: var(--ink); }
-.gz-eye.blink { transform: scaleY(.08); }
-.gz-mouth {
-  position: absolute; left: 50%; bottom: 15px; width: 34px; height: 17px; margin-left: -17px;
-  border: 2px solid rgba(29, 27, 32, .3); border-top: 0; border-radius: 0 0 14px 14px;
-}
 
 /* 2. 滚动驱动主视觉重组 */
 /* 头部整体钉住并收缩，正文从它下面走；收缩量由 --hh 驱动，才不会露出缝 */
@@ -1506,232 +1577,23 @@ html.has-page { overflow: hidden; }
 }
 
 /* gaze restore wins over the superseded v2 rules */
-.stage.kind-compound:has(.cp-gaze) {
-  --gaze-ink: #373354;
-  background: #f2f0fb !important;
+/* ---------- 光标驱动视线跟随 · 仪表脸 + 视线射线 ----------
+   配色只从当前调色板推导（--panel / --panel-2 / --ink / --accent / --line / --bg-2），
+   所以五套主题都成立。原先这里是三代样式叠加，最上面一层写死了 #f2f0fb 紫底 + !important，
+   把主题色全压掉了。
+   读法：圆环 = 指针要去的地方，射线 = 视线此刻真正的指向，两者错开多少就是滞后。 */
+/* 射线：角度由 JS 每帧写进 --ray，起点在场地中心，末端的小点是视线落点 */
+/* 脸：只用面板色加一点点强调色，深浅底都不脏 */
+@media (max-width: 640px) {
+  .term--detail .stage.kind-compound .gz-body { width: min(66vw, 214px); height: min(42vw, 136px); gap: 18px; padding-inline: 20px; }
+  .term--detail .stage.kind-compound .gz-eye { width: min(15vw, 50px); height: min(15vw, 50px); }
+  .term--detail .stage.kind-compound .gz-pupil { width: min(6vw, 21px); height: min(6vw, 21px); }
 }
-.cp-gaze {
-  background: radial-gradient(ellipse at 50% 52%, rgba(255,255,255,.96) 0 18%, rgba(231,228,250,.44) 54%, transparent 78%) !important;
-  cursor: default !important;
-}
-.gz-field {
-  inset: 0 !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: radial-gradient(ellipse at 50% 55%, rgba(255,255,255,.68), transparent 58%) !important;
-  opacity: 1 !important;
-}
-.gz-field::before, .gz-field::after, .gz-cross, .gz-axis { display: none !important; }
-.gz-target {
-  width: 14px !important;
-  height: 14px !important;
-  margin: -7px !important;
-  border: 1px solid rgba(112,100,184,.24) !important;
-  opacity: 0 !important;
-  transform: scale(.7) !important;
-}
-.gz-target::before, .gz-target::after { display: none !important; }
-.gz-field.is-live .gz-target { opacity: .34 !important; transform: scale(1.2) !important; }
-.gz-body {
-  display: flex !important;
-  width: 212px !important;
-  height: 156px !important;
-  padding: 8px 22px 18px !important;
-  border: 0 !important;
-  border-radius: 46% 54% 48% 52% / 44% 42% 58% 56% !important;
-  background: radial-gradient(90% 80% at 28% 18%, rgba(255,255,255,.8), transparent 42%), linear-gradient(148deg, #d9d7f4 0%, #b6b4e4 54%, #918fca 100%) !important;
-  box-shadow: 0 25px 38px -24px rgba(77,67,133,.42), inset 0 1px 0 rgba(255,255,255,.75), inset 0 -17px 24px rgba(86,77,146,.12) !important;
-  filter: none !important;
-  overflow: visible !important;
-}
-.gz-body::before {
-  content: "";
-  position: absolute;
-  left: 13%; top: 8%; width: 53%; height: 30%;
-  border-radius: 50%;
-  background: rgba(255,255,255,.24);
-  filter: blur(10px);
-  pointer-events: none;
-}
-.gz-body::after {
-  content: "" !important;
-  position: absolute;
-  left: 18%; right: 18%; bottom: -8px; height: 13px;
-  border-radius: 50%;
-  background: rgba(79,70,126,.16) !important;
-  filter: blur(10px) !important;
-  z-index: -1 !important;
-}
-.gz-brow { display: none !important; }
-.gz-eye {
-  position: relative !important;
-  top: auto !important;
-  left: auto !important;
-  width: 45px !important;
-  height: 31px !important;
-  border: 0 !important;
-  border-radius: 50% 50% 46% 54% / 62% 62% 38% 38% !important;
-  background: #fcfbf7 !important;
-  box-shadow: 0 4px 9px rgba(77,67,133,.12), inset 0 -4px 7px rgba(122,113,176,.12) !important;
-  transform-origin: 50% 20% !important;
-}
-.gz-eye::before {
-  content: "" !important;
-  position: absolute !important;
-  z-index: 2 !important;
-  inset: -6% -5% auto !important;
-  height: 47% !important;
-  border-radius: 50% !important;
-  background: #b7b4e5 !important;
-  box-shadow: 0 2px 4px rgba(76,66,129,.12) !important;
-  display: block !important;
-}
-.gz-eye::after { display: none !important; }
-.gz-pupil {
-  position: relative !important;
-  z-index: 1 !important;
-  width: 16px !important;
-  height: 16px !important;
-  border: 0 !important;
-  border-radius: 50% !important;
-  background: #292541 !important;
-  box-shadow: inset 2px 2px 0 rgba(255,255,255,.12) !important;
-}
-.gz-pupil::after { width: 4px !important; height: 4px !important; margin: 3px 0 0 3px !important; background: rgba(255,255,255,.9) !important; }
-.gz-nose { display: none !important; }
-.gz-mouth {
-  left: 50% !important;
-  bottom: 21px !important;
-  width: 22px !important;
-  height: 8px !important;
-  margin-left: -11px !important;
-  border-bottom: 1.5px solid rgba(55,51,84,.42) !important;
-  border-radius: 0 0 12px 12px !important;
-}
-.gz-body + .cp-cap {
-  margin-top: 2px !important;
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  color: #807ba4 !important;
-}
-.term--detail .stage.kind-compound .gz-body {
-  width: 320px !important;
-  height: 232px !important;
-  padding: 13px 34px 28px !important;
-}
-.term--detail .stage.kind-compound .gz-eye { width: 62px !important; height: 43px !important; }
-.term--detail .stage.kind-compound .gz-pupil { width: 22px !important; height: 22px !important; }
-.term--detail .stage.kind-compound .gz-mouth { bottom: 32px !important; width: 30px !important; margin-left: -15px !important; }
-.cp-gaze { cursor: crosshair; }
-.gz-field { inset: 9% 10%; border: 1px solid color-mix(in srgb, var(--accent-2) 22%, transparent); border-radius: 24px; background: linear-gradient(90deg, transparent 49.7%, color-mix(in srgb, var(--accent-2) 18%, transparent) 50%, transparent 50.3%), linear-gradient(transparent 49.7%, color-mix(in srgb, var(--accent-2) 18%, transparent) 50%, transparent 50.3%), radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent-2) 13%, transparent), transparent 62%); opacity: .78; }
-.gz-field::before, .gz-field::after, .gz-cross, .gz-axis { display: block; }
-.gz-body { display: flex; width: 168px; height: 136px; aspect-ratio: auto; padding: 7px 18px 22px; border: 1px solid color-mix(in srgb, var(--gaze-ink) 16%, transparent); border-radius: 48% 52% 44% 56% / 43% 44% 56% 57%; background: radial-gradient(105% 100% at 30% 18%, color-mix(in srgb, var(--panel) 68%, white), transparent 42%), linear-gradient(145deg, color-mix(in srgb, var(--accent-3) 78%, #fff), color-mix(in srgb, var(--accent-2) 58%, var(--accent-3)) 74%, color-mix(in srgb, var(--accent-2) 72%, #1d3043)); filter: none; overflow: visible; }
-.gz-eye { position: relative; top: auto; left: auto; width: 40px; height: 34px; border: 1px solid color-mix(in srgb, var(--gaze-ink) 18%, transparent); background: radial-gradient(circle at 50% 48%, #fff 0 46%, color-mix(in srgb, var(--panel) 74%, #fff) 47% 78%, color-mix(in srgb, var(--accent-2) 20%, #fff) 100%); }
-.gz-eye:nth-of-type(1), .gz-eye:nth-of-type(2) { left: auto; }
-.gz-pupil { width: 15px; height: 15px; border: 2px solid color-mix(in srgb, var(--accent-2) 55%, var(--gaze-ink)); background: radial-gradient(circle at 32% 30%, #fff 0 15%, var(--accent-2) 16% 46%, var(--gaze-ink) 48% 100%); }
-.gz-eye::before, .gz-eye::after { display: none; }
-.gz-nose, .gz-mouth, .gz-brow { display: block; }
-.gz-body + .cp-cap { margin-top: 0; }
-.term--detail .stage.kind-compound .gz-body { width: 270px; height: 214px; aspect-ratio: auto; padding: 10px 30px 34px; }
-.term--detail .stage.kind-compound .gz-eye { top: auto; width: 64px; height: 52px; }
-.term--detail .stage.kind-compound .gz-pupil { width: 23px; height: 23px; }
-
-/* restore the original compact cartoon treatment for gaze */
-.stage.kind-compound:has(.cp-gaze) { background: radial-gradient(110% 90% at 50% 0%, color-mix(in srgb, var(--accent-2) 12%, transparent), transparent 65%), linear-gradient(145deg, color-mix(in srgb, var(--panel) 92%, var(--accent-2)), var(--bg-2)); }
-.cp-gaze { display: grid; place-items: center; overflow: hidden; isolation: isolate; cursor: crosshair; touch-action: none; }
-.gz-field { position: absolute; inset: 9% 10%; z-index: 0; overflow: hidden; border: 1px solid color-mix(in srgb, var(--accent-2) 22%, transparent); border-radius: 24px; background: linear-gradient(90deg, transparent 49.7%, color-mix(in srgb, var(--accent-2) 18%, transparent) 50%, transparent 50.3%), linear-gradient(transparent 49.7%, color-mix(in srgb, var(--accent-2) 18%, transparent) 50%, transparent 50.3%), radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent-2) 13%, transparent), transparent 62%); opacity: .78; }
-.gz-field::before, .gz-field::after { content: ""; position: absolute; pointer-events: none; border: 1px dashed color-mix(in srgb, var(--accent-2) 20%, transparent); border-radius: 50%; }
-.gz-field::before { inset: 21%; } .gz-field::after { inset: 37%; }
-.gz-cross { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px; border: 1px solid var(--accent-2); border-radius: 50%; opacity: .7; }
-.gz-axis { position: absolute; background: color-mix(in srgb, var(--accent-2) 22%, transparent); } .gz-axis-x { left: 10%; right: 10%; top: 50%; height: 1px; } .gz-axis-y { top: 10%; bottom: 10%; left: 50%; width: 1px; }
-.gz-target { position: absolute; left: var(--gx, 50%); top: var(--gy, 50%); width: 24px; height: 24px; margin: -12px; border: 1px solid var(--accent); border-radius: 50%; opacity: .72; transform: scale(.9); transition: opacity .24s var(--ease-out), transform .24s var(--ease-out); }
-.gz-target::before, .gz-target::after { content: ""; position: absolute; background: var(--accent); } .gz-target::before { left: 50%; top: -5px; width: 1px; height: 32px; } .gz-target::after { top: 50%; left: -5px; width: 32px; height: 1px; }
-.gz-field.is-live .gz-target { opacity: 1; transform: scale(1.12); }
-.gz-body { position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 13px; width: 168px; height: 136px; padding: 7px 18px 22px; border: 1px solid color-mix(in srgb, var(--gaze-ink) 16%, transparent); border-radius: 48% 52% 44% 56% / 43% 44% 56% 57%; background: radial-gradient(105% 100% at 30% 18%, color-mix(in srgb, var(--panel) 68%, white), transparent 42%), linear-gradient(145deg, color-mix(in srgb, var(--accent-3) 78%, #fff), color-mix(in srgb, var(--accent-2) 58%, var(--accent-3)) 74%, color-mix(in srgb, var(--accent-2) 72%, #1d3043)); box-shadow: 0 22px 32px -20px color-mix(in srgb, var(--accent-2) 55%, #111), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -14px 25px rgba(34,20,58,.18); will-change: transform; }
-.gz-body::after { content: ""; position: absolute; left: 14%; right: 14%; bottom: 8px; height: 8px; border-radius: 50%; background: color-mix(in srgb, var(--ink) 17%, transparent); filter: blur(7px); z-index: -1; }
-.gz-brow { position: absolute; top: 29px; width: 30px; height: 8px; border-top: 2px solid color-mix(in srgb, var(--gaze-ink) 68%, transparent); border-radius: 50%; opacity: .62; } .gz-brow-l { left: 29px; transform: rotate(-7deg); } .gz-brow-r { right: 29px; transform: rotate(7deg); }
-.gz-eye { position: relative; display: grid; place-items: center; overflow: hidden; width: 40px; height: 34px; border: 1px solid color-mix(in srgb, var(--gaze-ink) 18%, transparent); border-radius: 53% 47% 49% 51% / 58% 58% 42% 42%; background: radial-gradient(circle at 50% 48%, #fff 0 46%, color-mix(in srgb, var(--panel) 74%, #fff) 47% 78%, color-mix(in srgb, var(--accent-2) 20%, #fff) 100%); box-shadow: inset 0 -4px 8px rgba(30, 25, 45, .14), 0 2px 4px rgba(20, 16, 36, .08); transform-origin: center; }
-.gz-pupil { display: block; width: 15px; height: 15px; border: 2px solid color-mix(in srgb, var(--accent-2) 55%, var(--gaze-ink)); border-radius: 50%; background: radial-gradient(circle at 32% 30%, #fff 0 15%, var(--accent-2) 16% 46%, var(--gaze-ink) 48% 100%); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-2) 15%, transparent); }
-.gz-pupil::after { content: ""; display: block; width: 4px; height: 4px; margin: 2px; border-radius: 50%; background: rgba(255,255,255,.86); }
-.gz-eye.blink { transform: scaleY(.08); }
-.gz-nose { position: absolute; left: 50%; bottom: 38px; width: 12px; height: 18px; margin-left: -6px; border-right: 1.5px solid color-mix(in srgb, var(--gaze-ink) 32%, transparent); border-bottom: 1.5px solid color-mix(in srgb, var(--gaze-ink) 32%, transparent); border-radius: 0 0 8px 0; transform: rotate(17deg); }
-.gz-mouth { position: absolute; left: 50%; bottom: 17px; width: 35px; height: 13px; margin-left: -17px; border-bottom: 2px solid color-mix(in srgb, var(--gaze-ink) 48%, transparent); border-radius: 0 0 18px 18px; }
-.term--detail .stage.kind-compound .gz-body { width: 270px; height: 214px; gap: 23px; padding: 10px 30px 34px; }
-.term--detail .stage.kind-compound .gz-eye { width: 64px; height: 52px; } .term--detail .stage.kind-compound .gz-pupil { width: 23px; height: 23px; }
-@media (max-width: 640px) { .term--detail .stage.kind-compound .gz-body { width: min(68vw, 246px); height: min(54vw, 188px); gap: 18px; padding-inline: 22px; } .term--detail .stage.kind-compound .gz-eye { width: min(16vw, 56px); height: min(13vw, 46px); } .term--detail .stage.kind-compound .gz-pupil { width: min(6vw, 22px); height: min(6vw, 22px); } }
 .toy { position: absolute; display: grid; place-items: center; width: 72px; height: 72px; border-radius: 24px; color: #fff; font-size: 34px; box-shadow: 0 18px 24px -18px rgba(56,48,104,.6); }
 .toy-a { background: #7771be; transform: translate(-28px, 10px) rotate(calc(var(--tilt, 0deg) - 8deg)); } .toy-b { background: #e2a47d; transform: translate(36px, -18px) rotate(calc(var(--tilt, 0deg) + 7deg)); } .toy-c { background: #6d9db0; transform: translate(62px, 32px) rotate(calc(var(--tilt, 0deg) + 12deg)); } .toy-d { background: #c67fa7; transform: translate(-70px, -28px) rotate(calc(var(--tilt, 0deg) - 14deg)); }
 @media (max-width: 760px) { }
 
 /* ---------- demo 精修：光标驱动视线跟随 ---------- */
-.stage.kind-compound:has(.cp-gaze) {
-  --gaze-ink: color-mix(in srgb, var(--ink) 86%, #3b2c55);
-  --gaze-soft: color-mix(in srgb, var(--accent-2) 26%, transparent);
-  background:
-    radial-gradient(110% 90% at 50% 0%, color-mix(in srgb, var(--accent-2) 12%, transparent), transparent 65%),
-    linear-gradient(145deg, color-mix(in srgb, var(--panel) 92%, var(--accent-2)), var(--bg-2));
-}
-.cp-gaze {
-  display: grid; place-items: center; overflow: hidden; isolation: isolate;
-  cursor: crosshair; touch-action: none;
-}
-.gz-field {
-  position: absolute; inset: 9% 10%; z-index: 0; overflow: hidden; border: 1px solid color-mix(in srgb, var(--accent-2) 22%, transparent);
-  border-radius: 24px; background:
-    linear-gradient(90deg, transparent 49.7%, color-mix(in srgb, var(--accent-2) 18%, transparent) 50%, transparent 50.3%),
-    linear-gradient(transparent 49.7%, color-mix(in srgb, var(--accent-2) 18%, transparent) 50%, transparent 50.3%),
-    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent-2) 13%, transparent), transparent 62%);
-  opacity: .78;
-}
-.gz-field::before, .gz-field::after { content: ""; position: absolute; pointer-events: none; border: 1px dashed color-mix(in srgb, var(--accent-2) 20%, transparent); border-radius: 50%; }
-.gz-field::before { inset: 21%; }
-.gz-field::after { inset: 37%; }
-.gz-cross { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px; border: 1px solid var(--accent-2); border-radius: 50%; opacity: .7; }
-.gz-axis { position: absolute; background: color-mix(in srgb, var(--accent-2) 22%, transparent); }
-.gz-axis-x { left: 10%; right: 10%; top: 50%; height: 1px; }
-.gz-axis-y { top: 10%; bottom: 10%; left: 50%; width: 1px; }
-.gz-target {
-  position: absolute; left: var(--gx, 50%); top: var(--gy, 50%); width: 24px; height: 24px; margin: -12px;
-  border: 1px solid var(--accent); border-radius: 50%; opacity: .72; transform: scale(.9); transition: opacity .24s var(--ease-out), transform .24s var(--ease-out);
-}
-.gz-target::before, .gz-target::after { content: ""; position: absolute; background: var(--accent); }
-.gz-target::before { left: 50%; top: -5px; width: 1px; height: 32px; }
-.gz-target::after { top: 50%; left: -5px; width: 32px; height: 1px; }
-.gz-field.is-live .gz-target { opacity: 1; transform: scale(1.12); }
-.gz-body {
-  position: relative; z-index: 2; display: flex; align-items: center; justify-content: center; gap: 13px;
-  width: 168px; height: 136px; padding: 7px 18px 22px; border: 1px solid color-mix(in srgb, var(--gaze-ink) 16%, transparent);
-  border-radius: 48% 52% 44% 56% / 43% 44% 56% 57%;
-  background: radial-gradient(105% 100% at 30% 18%, color-mix(in srgb, var(--panel) 68%, white), transparent 42%),
-    linear-gradient(145deg, color-mix(in srgb, var(--accent-3) 78%, #fff), color-mix(in srgb, var(--accent-2) 58%, var(--accent-3)) 74%, color-mix(in srgb, var(--accent-2) 72%, #1d3043));
-  box-shadow: 0 22px 32px -20px color-mix(in srgb, var(--accent-2) 55%, #111), inset 0 1px 0 rgba(255,255,255,.65), inset 0 -14px 25px rgba(34,20,58,.18);
-  will-change: transform;
-}
-.gz-body::after { content: ""; position: absolute; left: 14%; right: 14%; bottom: 8px; height: 8px; border-radius: 50%; background: color-mix(in srgb, var(--ink) 17%, transparent); filter: blur(7px); z-index: -1; }
-.gz-brow { position: absolute; top: 29px; width: 30px; height: 8px; border-top: 2px solid color-mix(in srgb, var(--gaze-ink) 68%, transparent); border-radius: 50%; opacity: .62; }
-.gz-brow-l { left: 29px; transform: rotate(-7deg); }
-.gz-brow-r { right: 29px; transform: rotate(7deg); }
-.gz-eye {
-  position: relative; display: grid; place-items: center; overflow: hidden; width: 40px; height: 34px;
-  border: 1px solid color-mix(in srgb, var(--gaze-ink) 18%, transparent); border-radius: 53% 47% 49% 51% / 58% 58% 42% 42%;
-  background: radial-gradient(circle at 50% 48%, #fff 0 46%, color-mix(in srgb, var(--panel) 74%, #fff) 47% 78%, color-mix(in srgb, var(--accent-2) 20%, #fff) 100%);
-  box-shadow: inset 0 -4px 8px rgba(30, 25, 45, .14), 0 2px 4px rgba(20, 16, 36, .08); transform-origin: center;
-}
-.gz-pupil { display: block; width: 15px; height: 15px; border: 2px solid color-mix(in srgb, var(--accent-2) 55%, var(--gaze-ink)); border-radius: 50%; background: radial-gradient(circle at 32% 30%, #fff 0 15%, var(--accent-2) 16% 46%, var(--gaze-ink) 48% 100%); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-2) 15%, transparent); }
-.gz-pupil::after { content: ""; display: block; width: 4px; height: 4px; margin: 2px; border-radius: 50%; background: rgba(255,255,255,.86); }
-.gz-eye.blink { transform: scaleY(.08); }
-.gz-nose { position: absolute; left: 50%; bottom: 38px; width: 12px; height: 18px; margin-left: -6px; border-right: 1.5px solid color-mix(in srgb, var(--gaze-ink) 32%, transparent); border-bottom: 1.5px solid color-mix(in srgb, var(--gaze-ink) 32%, transparent); border-radius: 0 0 8px 0; transform: rotate(17deg); }
-.gz-mouth { position: absolute; left: 50%; bottom: 17px; width: 35px; height: 13px; margin-left: -17px; border-bottom: 2px solid color-mix(in srgb, var(--gaze-ink) 48%, transparent); border-radius: 0 0 18px 18px; }
-.term--detail .stage.kind-compound .gz-body { width: 270px; height: 214px; gap: 23px; padding: 10px 30px 34px; border-radius: 48% 52% 44% 56% / 43% 44% 56% 57%; }
-.term--detail .stage.kind-compound .gz-field { inset: 8% 9%; border-radius: 34px; }
-.term--detail .stage.kind-compound .gz-eye { width: 64px; height: 52px; }
-.term--detail .stage.kind-compound .gz-pupil { width: 23px; height: 23px; }
-.term--detail .stage.kind-compound .gz-brow { top: 46px; width: 47px; }
-.term--detail .stage.kind-compound .gz-brow-l { left: 48px; }
-.term--detail .stage.kind-compound .gz-brow-r { right: 48px; }
-.term--detail .stage.kind-compound .gz-nose { bottom: 58px; height: 28px; width: 18px; margin-left: -9px; }
-.term--detail .stage.kind-compound .gz-mouth { bottom: 27px; width: 54px; height: 22px; margin-left: -27px; }
 
 @media (max-width: 640px) {
   .term--detail .stage.kind-compound .gz-body { width: min(68vw, 246px); height: min(54vw, 188px); gap: 18px; padding-inline: 22px; }
@@ -1740,68 +1602,17 @@ html.has-page { overflow: hidden; }
 }
 
 /* 视频参考的材质层：毛绒主体来自用户提供的参考帧，眼睛仍由运行时驱动。 */
-.gz-body {
-  display: block; width: min(78%, 430px); height: auto; aspect-ratio: 820 / 570; padding: 0; overflow: hidden;
-  border: 0; border-radius: 46% 54% 38% 42% / 43% 45% 55% 53%; background: #9ba7e6;
-  box-shadow: 0 28px 42px -25px rgba(54, 50, 116, .55), inset 0 1px 0 rgba(255,255,255,.55);
-}
-.gz-body::after { content: none; }
-.gz-eye {
-  position: absolute; z-index: 2; top: 59%; display: grid; place-items: center; width: 18%; height: 20%; overflow: hidden;
-  border: 0; border-radius: 50% 50% 47% 53% / 54% 56% 44% 46%; background: #faf8f1;
-  box-shadow: 0 3px 8px rgba(47, 45, 94, .16), inset 0 -4px 8px rgba(105, 92, 152, .1); transform-origin: 50% 20%;
-}
-.gz-eye:nth-of-type(1) { left: 29%; }
-.gz-eye:nth-of-type(2) { left: 53%; }
-.gz-eye::before {
-  content: ""; position: absolute; z-index: 2; left: -4%; right: -4%; top: -13%; height: 46%; border-radius: 50% 50% 40% 40%;
-  background: #9aa7e0; box-shadow: 0 2px 5px rgba(72, 66, 127, .15);
-}
-.gz-pupil { position: relative; z-index: 1; width: 51%; height: 66%; border: 0; border-radius: 50%; background: #101018; box-shadow: inset 3px 2px 0 rgba(255,255,255,.12); transform: translate(0, 0); }
-.gz-pupil::after { content: ""; display: block; width: 18%; height: 18%; margin: 17% 0 0 18%; border-radius: 50%; background: rgba(255,255,255,.85); }
-.gz-eye.blink { transform: scaleY(.08); }
-.term--detail .stage.kind-compound .gz-body { width: min(78%, 600px); height: auto; aspect-ratio: 820 / 570; padding: 0; }
-.term--detail .stage.kind-compound .gz-eye { top: 59%; width: 18%; height: 20%; }
-.term--detail .stage.kind-compound .gz-pupil { width: 51%; height: 66%; }
 
 @media (max-width: 640px) {
   .gz-body, .term--detail .stage.kind-compound .gz-body { width: min(88%, 430px); }
 }
 
 /* ---------- gaze v2: original sculpted character, no source-frame texture ---------- */
-.stage.kind-compound:has(.cp-gaze) {
-  background: radial-gradient(90% 100% at 50% 0%, rgba(197, 197, 255, .24), transparent 62%), #eeedfb;
-}
-.cp-gaze { cursor: default; background: linear-gradient(140deg, #f5f2ff 0%, #e7e6f8 100%); }
-.cp-gaze::before { content: ""; position: absolute; width: 56%; height: 22%; bottom: 10%; border-radius: 50%; background: rgba(78, 73, 125, .13); filter: blur(24px); }
-.gz-field { inset: 0; border: 0; border-radius: 0; background: radial-gradient(circle at 50% 46%, rgba(255,255,255,.58), transparent 48%); opacity: 1; }
-.gz-field::before, .gz-field::after, .gz-cross, .gz-axis { display: none; }
-.gz-target { width: 12px; height: 12px; margin: -6px; border: 1px solid rgba(102, 92, 171, .46); border-radius: 50%; opacity: 0; transition: opacity .25s ease, transform .25s ease; }
-.gz-target::before, .gz-target::after { display: none; }
-.gz-field.is-live .gz-target { opacity: .42; transform: scale(1.4); }
-.gz-body {
-  width: min(76%, 430px); height: auto; aspect-ratio: 420 / 300; padding: 0; border: 0; border-radius: 0; background: transparent; overflow: visible;
-  filter: drop-shadow(0 28px 22px rgba(61, 55, 113, .18)); transform-origin: 50% 72%;
-}
-.gz-eye { position: absolute; top: 42%; width: 18%; height: 16%; overflow: hidden; border: 0; border-radius: 48% 52% 48% 52% / 66% 66% 34% 34%; background: #fbf9f2; box-shadow: 0 4px 9px rgba(53, 49, 94, .13), inset 0 -3px 5px rgba(117, 108, 166, .1); transform-origin: 50% 18%; }
-.gz-eye:nth-of-type(1) { left: 29%; }
-.gz-eye:nth-of-type(2) { left: 53%; }
-.gz-eye::before { content: ""; position: absolute; inset: -5% -4% auto; height: 46%; border-radius: 50%; background: #a7a7e3; box-shadow: 0 2px 4px rgba(74, 66, 128, .15); z-index: 2; }
-.gz-eye::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 18%; background: rgba(121, 113, 168, .08); border-radius: 50%; }
-.gz-pupil { position: relative; z-index: 1; width: 48%; height: 68%; border: 0; border-radius: 50%; background: #141322; box-shadow: inset 2px 2px 0 rgba(255,255,255,.1); }
-.gz-pupil::after { width: 18%; height: 18%; margin: 16% 0 0 18%; background: rgba(255,255,255,.86); }
-.gz-body > .gz-eye { transition: transform .18s cubic-bezier(.2, .8, .2, 1); }
-.gz-body + .cp-cap { position: relative; z-index: 3; margin-top: 17%; color: #77739a; border-color: rgba(117, 108, 166, .18); background: rgba(255,255,255,.52); }
-.term--detail .stage.kind-compound .gz-body { width: min(78%, 620px); aspect-ratio: 420 / 300; height: auto; padding: 0; }
-.term--detail .stage.kind-compound .gz-eye { top: 42%; width: 18%; height: 16%; }
-.term--detail .stage.kind-compound .gz-pupil { width: 48%; height: 68%; }
 @media (prefers-reduced-motion: reduce) { .gz-body { transition: none !important; } .gz-body + .cp-cap { animation: none; } }
 .toy { position: absolute; display: grid; place-items: center; width: 72px; height: 72px; border-radius: 24px; color: #fff; font-size: 34px; box-shadow: 0 18px 24px -18px rgba(56,48,104,.6); transform: rotate(var(--tilt, 0deg)); }
 .toy-a { background: #7771be; transform: translate(-28px, 10px) rotate(calc(var(--tilt, 0deg) - 8deg)); } .toy-b { background: #e2a47d; transform: translate(36px, -18px) rotate(calc(var(--tilt, 0deg) + 7deg)); } .toy-c { background: #6d9db0; transform: translate(62px, 32px) rotate(calc(var(--tilt, 0deg) + 12deg)); } .toy-d { background: #c67fa7; transform: translate(-70px, -28px) rotate(calc(var(--tilt, 0deg) - 14deg)); }
 @media (max-width: 760px) { }
 
-@media (max-width: 720px) {
-}
 
 /* ---- 11. 光标聚光揭示 ---- */
 .cp-sp { overflow: hidden; border-radius: var(--r-md); background: var(--bg-2); }
@@ -2332,23 +2143,6 @@ html[data-dir=prev]::view-transition-new(ml-body) { animation: ml-in-l .36s var(
 }
 
 /* final restore for gaze after all legacy detail rules */
-.stage.kind-compound:has(.cp-gaze) { --gaze-ink: color-mix(in srgb, var(--ink) 86%, #3b2c55); }
-.cp-gaze { cursor: crosshair; }
-.gz-field { inset: 9% 10%; border: 1px solid color-mix(in srgb, var(--accent-2) 22%, transparent); border-radius: 24px; background: linear-gradient(90deg, transparent 49.7%, color-mix(in srgb, var(--accent-2) 18%, transparent) 50%, transparent 50.3%), linear-gradient(transparent 49.7%, color-mix(in srgb, var(--accent-2) 18%, transparent) 50%, transparent 50.3%), radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent-2) 13%, transparent), transparent 62%); opacity: .78; }
-.gz-field::before, .gz-field::after, .gz-cross, .gz-axis { display: block; }
-.gz-body { display: flex; width: 168px; height: 136px; aspect-ratio: auto; padding: 7px 18px 22px; border: 1px solid color-mix(in srgb, var(--gaze-ink) 16%, transparent); border-radius: 48% 52% 44% 56% / 43% 44% 56% 57%; background: radial-gradient(105% 100% at 30% 18%, color-mix(in srgb, var(--panel) 68%, white), transparent 42%), linear-gradient(145deg, color-mix(in srgb, var(--accent-3) 78%, #fff), color-mix(in srgb, var(--accent-2) 58%, var(--accent-3)) 74%, color-mix(in srgb, var(--accent-2) 72%, #1d3043)); filter: none; overflow: visible; }
-.gz-eye { position: relative; top: auto; left: auto; width: 40px; height: 34px; border: 1px solid color-mix(in srgb, var(--gaze-ink) 18%, transparent); background: radial-gradient(circle at 50% 48%, #fff 0 46%, color-mix(in srgb, var(--panel) 74%, #fff) 47% 78%, color-mix(in srgb, var(--accent-2) 20%, #fff) 100%); }
-.gz-eye:nth-of-type(1), .gz-eye:nth-of-type(2) { left: auto; }
-.gz-eye::before, .gz-eye::after { display: none; }
-.gz-pupil { width: 15px; height: 15px; border: 2px solid color-mix(in srgb, var(--accent-2) 55%, var(--gaze-ink)); background: radial-gradient(circle at 32% 30%, #fff 0 15%, var(--accent-2) 16% 46%, var(--gaze-ink) 48% 100%); }
-.gz-target { width: 24px; height: 24px; margin: -12px; border: 1px solid var(--accent); opacity: .72; transform: scale(.9); }
-.gz-target::before, .gz-target::after { display: block; content: ""; position: absolute; background: var(--accent); }
-.gz-target::before { left: 50%; top: -5px; width: 1px; height: 32px; }
-.gz-target::after { top: 50%; left: -5px; width: 32px; height: 1px; }
-.gz-body + .cp-cap { margin-top: 0; }
-.term--detail .stage.kind-compound .gz-body { width: 270px; height: 214px; aspect-ratio: auto; padding: 10px 30px 34px; }
-.term--detail .stage.kind-compound .gz-eye { top: auto; width: 64px; height: 52px; }
-.term--detail .stage.kind-compound .gz-pupil { width: 23px; height: 23px; }
 
 /* ==========================================================================
    精修层 · 纸感质感 / 编辑部排版 / demo 精修
@@ -2402,20 +2196,6 @@ h1, h2 { font-weight: 560; }
 .solid:active, .mini:active, .ghost:active { transform: scale(.96); }
 
 /* ---------- demo 精修：视线跟随 ---------- */
-.gz-body {
-  background: radial-gradient(120% 120% at 30% 20%, var(--obj-b), var(--obj-a) 62%, color-mix(in srgb, var(--obj-a) 62%, #000));
-  box-shadow: 0 20px 36px -18px rgba(70, 34, 6, .55), inset 0 -9px 18px rgba(30, 12, 0, .18), inset 0 10px 20px rgba(255, 255, 255, .3);
-}
-.gz-eye {
-  background: radial-gradient(100% 100% at 50% 30%, #FFFFFF, #F0E7D8 76%, #D9CDB8);
-  box-shadow: inset 0 -3px 7px rgba(40, 24, 4, .18), 0 1px 0 rgba(255, 255, 255, .5);
-}
-.gz-pupil { position: relative; background: radial-gradient(100% 100% at 36% 30%, #7A5230, #1E150C 70%); }
-.gz-pupil::after {
-  content: ""; position: absolute; left: 20%; top: 16%; width: 36%; height: 36%;
-  border-radius: 50%; background: rgba(255, 255, 255, .9); filter: blur(.3px);
-}
-.gz-mouth { border-color: rgba(40, 26, 8, .38); }
 
 /* ---------- demo 精修：辉光流转（夜色 + 地面反光） ---------- */
 .cp-lf .lf-scene {
@@ -3132,15 +2912,3 @@ h1, h2 { font-weight: 560; }
 }
 
 /* final restore for gaze after all legacy detail rules */
-.stage.kind-compound:has(.cp-gaze) { --gaze-ink: color-mix(in srgb, var(--ink) 86%, #3b2c55); }
-.cp-gaze { cursor: crosshair; }
-.gz-field { inset: 9% 10%; border: 1px solid color-mix(in srgb, var(--accent-2) 22%, transparent); border-radius: 24px; background: linear-gradient(90deg, transparent 49.7%, color-mix(in srgb, var(--accent-2) 18%, transparent) 50%, transparent 50.3%), linear-gradient(transparent 49.7%, color-mix(in srgb, var(--accent-2) 18%, transparent) 50%, transparent 50.3%), radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent-2) 13%, transparent), transparent 62%); opacity: .78; }
-.gz-field::before, .gz-field::after, .gz-cross, .gz-axis { display: block; }
-.gz-body { display: flex; width: 168px; height: 136px; aspect-ratio: auto; padding: 7px 18px 22px; border: 1px solid color-mix(in srgb, var(--gaze-ink) 16%, transparent); border-radius: 48% 52% 44% 56% / 43% 44% 56% 57%; background: radial-gradient(105% 100% at 30% 18%, color-mix(in srgb, var(--panel) 68%, white), transparent 42%), linear-gradient(145deg, color-mix(in srgb, var(--accent-3) 78%, #fff), color-mix(in srgb, var(--accent-2) 58%, var(--accent-3)) 74%, color-mix(in srgb, var(--accent-2) 72%, #1d3043)); filter: none; overflow: visible; }
-.gz-eye { position: relative; top: auto; left: auto; width: 40px; height: 34px; border: 1px solid color-mix(in srgb, var(--gaze-ink) 18%, transparent); background: radial-gradient(circle at 50% 48%, #fff 0 46%, color-mix(in srgb, var(--panel) 74%, #fff) 47% 78%, color-mix(in srgb, var(--accent-2) 20%, #fff) 100%); }
-.gz-eye:nth-of-type(1), .gz-eye:nth-of-type(2) { left: auto; }
-.gz-eye::before, .gz-eye::after { display: none; }
-.gz-pupil { width: 15px; height: 15px; border: 2px solid color-mix(in srgb, var(--accent-2) 55%, var(--gaze-ink)); background: radial-gradient(circle at 32% 30%, #fff 0 15%, var(--accent-2) 16% 46%, var(--gaze-ink) 48% 100%); }
-.term--detail .stage.kind-compound .gz-body { width: 270px; height: 214px; aspect-ratio: auto; padding: 10px 30px 34px; }
-.term--detail .stage.kind-compound .gz-eye { top: auto; width: 64px; height: 52px; }
-.term--detail .stage.kind-compound .gz-pupil { width: 23px; height: 23px; }

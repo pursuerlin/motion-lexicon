@@ -21,6 +21,7 @@
       terms: '术语', cats: '分类', kinds: '实演类型',
       axis: '同一件事有七种分类轴：缓动曲线 · 时长时序 · 入场出场 · 变换 · 状态转场 · 滚动 · 性能。先定轴，再挑词。',
       labHd: '缓动实验室', labEn: 'Easing Lab',
+      themeCap: '主题', themeHd: '五套调色板，默认跟随系统的深浅色偏好',
       labP: '先感觉，再命名：拖控制点改曲线，看右侧同一条曲线的真实运动，最后把代码原样复制走。',
       labPick: '选一条曲线', labWatch: '看它运动', labRef: '下方灰色 = 匀速参照',
       labDur: '时长', labDist: '距离', labProp: '动什么',
@@ -52,6 +53,7 @@
       terms: 'terms', cats: 'groups', kinds: 'live demo types',
       axis: 'Seven axes describe the same motion: easing · timing · enter/exit · transform · transitions · scroll · performance. Pick the axis, then the word.',
       labHd: 'Easing Lab', labEn: '缓动实验室',
+      themeCap: 'Theme', themeHd: 'Five palettes; the default follows your system light/dark setting',
       labP: 'Feel it first, name it second: drag the control points, watch the real motion, copy the code out.',
       labPick: 'Pick a curve', labWatch: 'Watch it move', labRef: 'grey below = linear reference',
       labDur: 'Duration', labDist: 'Distance', labProp: 'Animate',
@@ -313,6 +315,8 @@
       'No matches. Try another word — bounce, blur, follow, jank.',
     '同一条动效，切换成 CSS / WAAPI / GSAP / Framer / Swift / Compose / Tailwind 的写法':
       'The same effect written in CSS / WAAPI / GSAP / Framer / Swift / Compose / Tailwind',
+    '切换配色：五套调色板，默认跟随系统的深浅色偏好':
+      'Switch palette: five palettes, defaulting to your system light/dark setting',
     '约 80 词、按用途分 12 类': '~80 terms in 12 purpose groups',
     '140+ 行业词条': '140+ industry terms',
     '按制作流程分类': 'sorted by production pipeline',
