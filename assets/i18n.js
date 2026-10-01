@@ -354,7 +354,10 @@
     const scope = root || document;
     const byId = {};
     window.TERMS.forEach(function (x) { byId[x.id] = x; });   /* 之前每个节点都全量 filter，229² 次比较 */
-    $$('.term', scope).forEach(function (el) {
+    const nodes = $$('.term', scope);
+    /* 详情页传进来的节点自己就是 .term，querySelectorAll 不含自身，不补这一句详情页永远不翻译 */
+    if (scope.matches && scope.matches('.term')) nodes.unshift(scope);
+    nodes.forEach(function (el) {
       const id = el.dataset.id, term = byId[id];
       if (!term) return;
       const en = window.EN[id];
@@ -404,6 +407,8 @@
   function syncLangUI() {
     document.documentElement.dataset.lang = lang;
     const b = $('#lang'); if (b) b.textContent = lang === 'en' ? '中文' : 'EN';
+    /* hud.js 排在 i18n.js 前面，它那次 paintBtn() 读不到 lang，在这里补一次 */
+    if (window.HUD && window.HUD.repaintBtn) window.HUD.repaintBtn();
   }
   syncLangUI();
 

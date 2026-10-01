@@ -16,6 +16,9 @@
 <script>
 (function () { try {
   var t = localStorage.getItem('motion-theme');
+  /* 这两个旧值 app.js 的 setTheme 会迁移；首帧脚本不认就会 paper→ember 闪一下 */
+  if (t === 'light') t = 'paper';
+  else if (t === 'dark') t = 'ember';
   if (!t) t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'ember' : 'paper';
   if (['paper','ember','celadon','graphite','iris'].indexOf(t) < 0) t = 'paper';
   document.documentElement.dataset.theme = t;

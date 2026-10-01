@@ -6,7 +6,13 @@
   'use strict';
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
-  const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  /* localStorage 是外部可写的边界：值可能是别的类型，不能让它在 boot() 里炸掉后半程 */
+  const readList = (k) => {
+    let v = [];
+    try { v = JSON.parse(localStorage.getItem(k) || '[]'); } catch (e) { return []; }
+    return Array.isArray(v) ? v.filter(x => typeof x === 'string') : [];
+  };
 
   /* ---------------- 关键帧生成（按内容去重） ---------------- */
   const KF = new Map();
@@ -329,8 +335,7 @@
   function cardVis(card) { return card ? $('.stage', card) : null; }
 
   let lastCard = null, pageBusy = false, pageToken = 0, paintDialect = null, favOnly = false;
-  let favs = [];
-  try { favs = JSON.parse(localStorage.getItem('motion-fav') || '[]'); } catch (e) { favs = []; }
+  let favs = readList('motion-fav');
   const pg = () => $('#page');
 
   function syncFav(id) {
@@ -787,8 +792,8 @@
       cardsMade += items.length;
       return '<section class="cat" id="cat-' + c.id + '" data-cat="' + c.id + '">' +
         '<header class="cat-hd"><div class="cat-no">' + String(window.CATS.indexOf(c) + 1).padStart(2, '0') + '</div>' +
-        '<div><h2>' + c.name + '<span class="cat-en">' + c.en + '</span></h2>' +
-        '<p class="cat-tag">' + c.tagline + '</p>' +
+        '<div><h2>' + esc(c.name) + '<span class="cat-en">' + esc(c.en) + '</span></h2>' +
+        '<p class="cat-tag">' + esc(c.tagline) + '</p>' +
         '<p class="cat-n">' + items.length + ' 个术语</p></div></header>' +
         '<div class="grid">' + cards + '</div></section>';
     }).join('');
@@ -801,7 +806,7 @@
     $('#sections').innerHTML = html;
 
     $('#nav').innerHTML = window.CATS.map(c =>
-      '<a href="#cat-' + c.id + '" data-cat="' + c.id + '"><span>' + c.name + '</span><b>' +
+      '<a href="#cat-' + c.id + '" data-cat="' + c.id + '"><span>' + esc(c.name) + '</span><b>' +
       window.TERMS.filter(t => t.cat === c.id).length + '</b></a>').join('');
     $('#stat-terms').textContent = cardsMade;
     $('#stat-cats').textContent = window.CATS.length;
@@ -894,8 +899,7 @@
 
   /* ---------------- 配方（选词成句） ---------------- */
   const RKEY = 'motion-recipe-v1';
-  let recipe = [];
-  try { recipe = JSON.parse(localStorage.getItem(RKEY) || '[]'); } catch (e) { recipe = []; }
+  let recipe = readList(RKEY);
   function L(k) { return window.I18N ? window.I18N.t(k) : ''; }
   function saveRecipe() { try { localStorage.setItem(RKEY, JSON.stringify(recipe)); } catch (e) {} }
   function renderRecipe() {
@@ -905,7 +909,7 @@
     const en = window.I18N && window.I18N.lang === 'en';
     $('#recipe-chips').innerHTML = recipe.map(id => {
       const t = window.TERMS.find(x => x.id === id);
-      return '<span class="rchip">' + esc(t ? (t.en + (en ? '' : ' / ' + t.zh)) : id) + '<button data-rm="' + id + '" aria-label="remove">×</button></span>';
+      return '<span class="rchip">' + esc(t ? (t.en + (en ? '' : ' / ' + t.zh)) : id) + '<button data-rm="' + esc(id) + '" aria-label="remove">×</button></span>';
     }).join('');
     const text = recipe.map(id => {
       const t = window.TERMS.find(x => x.id === id);

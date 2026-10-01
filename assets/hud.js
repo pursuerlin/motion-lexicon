@@ -616,6 +616,7 @@
     if (!h) return;
     node._hud = h;
     node.classList.add('hud-on');
+    wake();
     var v = node.querySelector('.pg-visual');
     if (v) v.style.setProperty('--hud-accent', ACCENT[term.cat] || 'var(--accent)');
   }
@@ -623,21 +624,30 @@
   /* 只服务当前可见的那个详情节点，隐藏的（切术语留下的）一律不动 */
   /* HUD 只在详情页可见时逐帧刷新。原来即使用户停在首页也会永久占用一条
      requestAnimationFrame 循环，长时间打开页面会白白消耗 CPU/电量。 */
-  (function loop() {
-    var n = document.querySelector('.term--detail.hud-on:not([hidden])');
+  var hudRunning = false;
+  function hudLoop() {
+    var n = on && document.querySelector('.term--detail.hud-on:not([hidden])');
     if (n && n._hud) {
       try { n._hud.paint(); } catch (e) { }
-      requestAnimationFrame(loop);
+      requestAnimationFrame(hudLoop);
     } else {
-      /* 详情页打开/关闭时最多延迟一个短轮询周期，不让空闲状态常驻 rAF。 */
-      setTimeout(loop, 250);
+      /* 没有面板可刷就彻底停摆，下次由 wake() 点火：
+         原来这里是 setTimeout(loop, 250)，遥测关掉、首页闲置也会 4Hz 空转到天亮 */
+      hudRunning = false;
     }
-  })();
+  }
+  function wake() {
+    if (hudRunning || !on) return;
+    hudRunning = true;
+    requestAnimationFrame(hudLoop);
+  }
 
   var btn = document.getElementById('hud');
   function paintBtn() {
     if (!btn) return;
-    var en = window.I18N && window.I18N.lang === 'en';
+    /* 冷启动时 i18n.js 还没把 window.I18N 挂上，退回它先写入的 html[data-lang] */
+    var lang = (window.I18N && window.I18N.lang) || document.documentElement.dataset.lang || 'zh';
+    var en = lang === 'en';
     btn.textContent = en ? (on ? 'HUD on' : 'HUD off') : (on ? '遥测 开' : '遥测 关');
     btn.setAttribute('aria-pressed', String(on));
   }
