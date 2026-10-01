@@ -14,8 +14,9 @@
   --line-soft: #EDE6D8;
   --ink: #211C15;
   --ink-2: #514940;
-  --muted: #8C8271;
+  --muted: #786F61;   /* 原 #8C8271 在纸感底上只有 3.54:1，10.5-13px 的次要文字不达 AA */
   --accent: #D9480F;
+  --accent-strong: #C8420E;   /* 纸感底上 12-13.5px 的强调色文字：4.02 -> 4.63 */
   --accent-ink: #FFF8F3;
   --accent-2: #0B7285;
   --accent-3: #C2255C;
@@ -57,6 +58,7 @@
   --ink-2: #D2CBBB;
   --muted: #9A927F;
   --accent: #FFA057;
+  --accent-strong: var(--accent);
   --accent-ink: #221304;
   --accent-2: #66D9C8;
   --accent-3: #F091B4;
@@ -205,7 +207,7 @@ main { padding: 0 clamp(16px, 4.2vw, 64px) 80px; max-width: 1560px; margin: 0 au
 .lede p { color: var(--ink-2); max-width: 64ch; margin: 18px 0 0; font-size: 15px; }
 .howto { list-style: none; padding: 0; margin: 26px 0 0; display: grid; gap: 8px; }
 .howto li { display: grid; grid-template-columns: 140px 1fr; gap: 12px; align-items: baseline; font-size: 13.5px; }
-.howto b { font-size: 13.5px; font-weight: 500; color: var(--accent); }
+.howto b { font-size: 13.5px; font-weight: 500; color: var(--accent-strong); }
 .howto span { color: var(--muted); }
 .lede-side { display: flex; flex-wrap: wrap; gap: 10px; align-content: start; }
 .stat { flex: 1 1 96px; max-width: 172px; border-radius: 20px; padding: 16px 18px; background: var(--panel); }
@@ -2473,8 +2475,9 @@ h1, h2 { font-weight: 560; }
   --line-soft: #E9E7DB;
   --ink: #1D211E;
   --ink-2: #484E48;
-  --muted: #7F847A;
+  --muted: #6D7168;   /* 同 paper：次要文字要过 4.5:1 */
   --accent: #0E7C6B;
+  --accent-strong: var(--accent);
   --accent-ink: #F2FBF8;
   --accent-2: #C25E00;
   --accent-3: #A83A7E;
@@ -2501,6 +2504,7 @@ h1, h2 { font-weight: 560; }
   --ink-2: #C2CBD7;
   --muted: #8B95A3;
   --accent: #3BC9DB;
+  --accent-strong: var(--accent);
   --accent-ink: #06222A;
   --accent-2: #FFA94D;
   --accent-3: #DA77F2;
@@ -2525,6 +2529,7 @@ h1, h2 { font-weight: 560; }
   --ink-2: #49454F;
   --muted: #6E6A73;
   --accent: #6750A4;
+  --accent-strong: var(--accent);
   --accent-ink: #FFFFFF;
   --accent-2: #00696E;
   --accent-3: #7D5260;
