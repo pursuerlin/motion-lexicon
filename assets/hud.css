@@ -1,0 +1,230 @@
+/* ============================================================
+   hud.css —— 详情页遥测栏。所有改版面的规则都挂在 .term--detail.hud-on
+   下面：顶栏「遥测 关」时，详情页布局和生产原样一致。
+   ============================================================ */
+.term--detail.hud-on .pg-visual {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 264px;
+  grid-template-rows: 1fr auto auto;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.term--detail.hud-on .pg-visual > .stage { grid-column: 1; grid-row: 1; position: relative; }
+.term--detail.hud-on .pg-visual > .stage-tools { grid-column: 1 / -1; grid-row: 2; }
+.term--detail.hud-on .pg-visual > .stage-tools[hidden] { display: none; }
+.term--detail.hud-on .hud { grid-column: 2; grid-row: 1; }
+.term--detail.hud-on .hud-formula { grid-column: 1 / -1; grid-row: 3; }
+
+/* 组合抽帧自己的实时读数：和 LIVE READOUT 同一语法，但不把“实现原理”塞进舞台。 */
+.term--detail .pg-visual:has(.fr-readout) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 264px;
+  grid-template-rows: auto auto auto;
+}
+.term--detail .pg-visual:has(.fr-readout) > .stage { grid-column: 1; grid-row: 1; min-width: 0; }
+.term--detail .pg-visual:has(.fr-readout) > .fr-readout { grid-column: 2; grid-row: 1; }
+.term--detail .pg-visual:has(.fr-readout) > .stage-tools { grid-column: 1 / -1; grid-row: 2; }
+.term--detail .pg-visual:has(.fr-readout) > .dt-ctl,
+.term--detail .pg-visual:has(.fr-readout) > .pctl { grid-column: 1 / -1; }
+.fr-readout {
+  position: relative; display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  min-width: 0; padding: 18px 18px 20px; border-left: 1px solid var(--line-soft);
+  background: linear-gradient(180deg, var(--bg-2), var(--panel) 220%); font-family: var(--mono);
+}
+.fr-readout-head { display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; letter-spacing: .15em; color: var(--muted); }
+.fr-readout-head b { display: flex; align-items: center; gap: 6px; font-weight: 500; color: var(--ink-2); }
+.fr-readout-head i { width: 5px; height: 5px; border-radius: 50%; background: var(--hud-accent); animation: hud-breathe 1.5s var(--ease) infinite; }
+.fr-readout-main { display: flex; align-items: baseline; gap: 4px; }
+.fr-readout-main small, .fr-readout-grid small { font-size: 9px; letter-spacing: .13em; color: var(--muted); }
+.fr-readout-main strong { margin-left: auto; font-size: 54px; line-height: .95; letter-spacing: -.04em; color: var(--hud-accent); font-variant-numeric: tabular-nums; }
+.fr-readout-main em { font-size: 14px; font-style: normal; color: var(--muted); }
+.fr-readout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fr-readout-grid div { display: flex; flex-direction: column; gap: 3px; }
+.fr-readout-grid b { font-size: 16px; color: var(--ink); font-weight: 600; }
+.fr-readout-track { height: 5px; border-radius: 3px; overflow: hidden; background: var(--panel-2); }
+.fr-readout-track i { display: block; width: 100%; height: 100%; border-radius: inherit; transform: scaleX(0); transform-origin: left; background: var(--hud-accent); }
+.fr-contact-head { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--line-soft); font-size: 8px; letter-spacing: .12em; color: var(--muted); }
+.fr-contact-head b { color: var(--hud-accent); font-size: 10px; font-weight: 600; }
+.fr-contact { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.fr-contact > s { position: relative; display: block; min-width: 0; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent); border-radius: 3px; opacity: .48; background: #D9E9E8; transition: opacity .16s, border-color .16s, box-shadow .16s, transform .16s; }
+.fr-contact > s img { display: block; width: 100%; height: 100%; object-fit: cover; transform: translateX(var(--frame-shift)) scale(1.22); transform-origin: 50% 50%; will-change: transform; filter: saturate(.86) contrast(1.02); }
+.fr-contact > s b { position: absolute; left: 3px; bottom: 2px; font: 500 6.5px var(--mono); color: rgba(255,255,255,.92); text-shadow: 0 1px 3px rgba(20,12,36,.5); }
+.fr-contact > s.on { opacity: 1; border-color: var(--hud-accent); box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--hud-accent) 42%, transparent); transform: translateY(-1px); }
+.fr-contact > s[aria-current="true"] b { color: #fff; font-weight: 700; }
+.fr-readout p { margin: 0; padding-top: 10px; border-top: 1px solid var(--line-soft); color: var(--muted); font: 10px/1.55 var(--body); }
+
+/* 光标驱动视线：主舞台只负责“眼睛在看哪里”，状态与算法参数收在同一套 LIVE READOUT。 */
+.term--detail .pg-visual:has(.gz-readout) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 264px;
+  grid-template-rows: auto auto auto;
+}
+.term--detail .pg-visual:has(.gz-readout) > .stage { grid-column: 1; grid-row: 1; min-width: 0; }
+.term--detail .pg-visual:has(.gz-readout) > .gz-readout { grid-column: 2; grid-row: 1; }
+.term--detail .pg-visual:has(.gz-readout) > .stage-tools { grid-column: 1 / -1; grid-row: 2; }
+.term--detail .pg-visual:has(.gz-readout) > .dt-ctl,
+.term--detail .pg-visual:has(.gz-readout) > .pctl { grid-column: 1 / -1; }
+.gz-readout {
+  --gaze-accent: var(--accent-2);
+  display: flex; flex-direction: column; justify-content: center; gap: 14px; min-width: 0; padding: 18px 18px 20px;
+  border-left: 1px solid var(--line-soft); background: linear-gradient(180deg, var(--bg-2), var(--panel) 220%); font-family: var(--mono);
+}
+.gz-readout-head { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 9.5px; letter-spacing: .15em; }
+.gz-readout-head b { display: flex; align-items: center; gap: 6px; color: var(--ink-2); font-weight: 500; }
+.gz-readout-head i, .gz-readout-state i { width: 5px; height: 5px; flex: none; border-radius: 50%; background: var(--gaze-accent); animation: hud-breathe 1.5s var(--ease) infinite; }
+.gz-readout.is-live .gz-readout-head i, .gz-readout.is-live .gz-readout-state i { background: var(--accent); }
+.gz-readout-state { display: flex; align-items: baseline; gap: 8px; padding: 10px 0 2px; border-top: 1px solid var(--line-soft); }
+.gz-readout-state strong { color: var(--gaze-accent); font-size: 18px; letter-spacing: -.02em; }
+.gz-readout-state small, .gz-readout-focus small, .gz-readout-grid small { color: var(--muted); font-size: 9px; letter-spacing: .12em; }
+.gz-readout-state small { margin-left: auto; }
+.gz-readout-focus { display: flex; align-items: end; justify-content: space-between; gap: 10px; }
+.gz-readout-focus > div { display: flex; flex-direction: column; gap: 4px; }
+.gz-readout-focus strong { color: var(--ink); font-size: 34px; line-height: .95; letter-spacing: -.06em; font-variant-numeric: tabular-nums; }
+.gz-readout-focus em { color: var(--muted); font-size: 14px; font-style: normal; letter-spacing: 0; }
+.gz-readout-lag { text-align: right; }
+.gz-readout-lag b { color: var(--ink-2); font-size: 14px; font-weight: 600; }
+.gz-map { position: relative; height: 116px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--gaze-accent) 24%, transparent); border-radius: var(--r-sm); background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--gaze-accent) 12%, transparent), transparent 70%); }
+.gz-map-axis { position: absolute; background: color-mix(in srgb, var(--gaze-accent) 25%, transparent); }
+.gz-map-axis.x { left: 10px; right: 10px; top: 50%; height: 1px; }
+.gz-map-axis.y { top: 10px; bottom: 10px; left: 50%; width: 1px; }
+.gz-map::before, .gz-map::after { content: ""; position: absolute; border: 1px dashed color-mix(in srgb, var(--gaze-accent) 22%, transparent); border-radius: 50%; pointer-events: none; }
+.gz-map::before { inset: 19px; }
+.gz-map::after { inset: 39px; }
+.gz-map-center { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px; border: 1px solid var(--gaze-accent); border-radius: 50%; }
+.gz-map-dot { position: absolute; left: calc(50% + var(--map-x, 0px)); top: calc(50% + var(--map-y, 0px)); width: 12px; height: 12px; margin: -6px; border: 2px solid var(--accent); border-radius: 50%; background: var(--panel); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent); transition: left .12s var(--ease-out), top .12s var(--ease-out); }
+.gz-map b, .gz-map em { position: absolute; color: var(--muted); font: 8px var(--mono); }
+.gz-map b { top: 5px; } .gz-map b:first-of-type { left: 7px; } .gz-map b:nth-of-type(2) { right: 7px; }
+.gz-map em { left: 7px; } .gz-map em:nth-of-type(1) { top: 7px; } .gz-map em:nth-of-type(2) { bottom: 7px; }
+.gz-readout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 10px; border-top: 1px solid var(--line-soft); }
+.gz-readout-grid div { display: flex; flex-direction: column; gap: 3px; }
+.gz-readout-grid b { color: var(--ink); font-size: 15px; font-weight: 600; }
+.gz-readout p { margin: 0; padding-top: 10px; border-top: 1px solid var(--line-soft); color: var(--muted); font: 10px/1.55 var(--body); }
+
+/* 取景框：一条 path 画四角，其余三面靠镜像 */
+.hud-brk { position: absolute; width: 26px; height: 26px; pointer-events: none; color: var(--hud-accent); opacity: .5; }
+.hud-brk svg { display: block; width: 26px; height: 26px; }
+.hud-brk path { fill: none; stroke: currentColor; stroke-width: 2.4; }
+.hud-brk.tl { left: 12px; top: 12px; }
+.hud-brk.tr { right: 12px; top: 12px; transform: scaleX(-1); }
+.hud-brk.bl { left: 12px; bottom: 12px; transform: scaleY(-1); }
+.hud-brk.br { right: 12px; bottom: 12px; transform: scale(-1, -1); }
+
+/* 编号水印 = 这条术语在自己分类里排第几 */
+.hud-num {
+  position: absolute; left: 20px; bottom: 8px; z-index: 0; pointer-events: none;
+  font: 700 104px/0.8 var(--mono); letter-spacing: -.04em;
+  color: color-mix(in srgb, var(--hud-accent) 11%, transparent);
+}
+
+.hud {
+  position: relative;
+  background: linear-gradient(180deg, var(--bg-2), var(--panel) 220%);
+  border-left: 1px solid var(--line-soft);
+  padding: 15px 16px 18px;
+  display: flex; flex-direction: column; justify-content: center; gap: 13px;
+  font-family: var(--mono); min-width: 0;
+}
+.hud-head { display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; letter-spacing: .15em; color: var(--muted); }
+.hud-head b { display: flex; align-items: center; gap: 6px; font-weight: 500; color: var(--ink-2); }
+.hud-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--hud-accent); animation: hud-breathe 1.5s var(--ease) infinite; }
+@keyframes hud-breathe { 0%,100% { opacity: 1 } 50% { opacity: .25 } }
+
+.hud-f { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hud-f s { font-size: 9.5px; letter-spacing: .13em; color: var(--muted); text-decoration: none; text-transform: uppercase; }
+.hud-f var { font-style: normal; font-weight: 700; font-size: 34px; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.hud-f var u { font-size: 14px; font-weight: 500; color: var(--muted); text-decoration: none; margin-left: 1px }
+.hud-f.sm { flex-direction: row; align-items: baseline; justify-content: space-between; gap: 8px; }
+.hud-f.sm var { font-size: 15px; }
+.hud-row { display: flex; gap: 14px; }
+.hud-row .hud-f { flex: 1; }
+.hud-hi var { color: var(--hud-accent); }
+
+.hud-chart { width: 100%; height: 138px; flex: none; display: block; overflow: visible; margin: 0 -6px; touch-action: none; }
+.hud-chart .hud-ax { stroke: var(--line); stroke-width: 1.2; }
+.hud-chart .hud-zone { fill: color-mix(in srgb, var(--hud-accent) 13%, transparent); }
+.hud-chart .hud-cycle { stroke: var(--hud-accent); stroke-width: 1.2; stroke-dasharray: 2 3; opacity: .5; }
+.hud-chart .hud-base { stroke: color-mix(in srgb, var(--hud-accent) 45%, transparent); stroke-width: 1.2; stroke-dasharray: 3 3; }
+.hud-chart .hud-meas { fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-linejoin: round; }
+.hud-chart .hud-ref { fill: none; stroke: var(--line); stroke-width: 1.6; stroke-dasharray: 4 4; }
+.hud-chart .hud-cur { stroke: var(--hud-accent); stroke-width: 1.6; }
+.hud-chart .hud-cdot { fill: var(--hud-accent); stroke: var(--bg); stroke-width: 2; }
+.hud-chart .hud-pk { fill: var(--hud-accent); }
+.hud-chart .hud-pklbl { font: 700 9.5px var(--mono); fill: var(--hud-accent); letter-spacing: .02em; }
+.hud-chart text { font: 500 8.5px var(--mono); fill: var(--muted); letter-spacing: .04em; }
+.hud-cap { display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; font-size: 9px; letter-spacing: .1em; color: var(--muted); margin-top: -6px; }
+
+.hud-verdict {
+  display: flex; align-items: center; gap: 7px; padding: 7px 9px;
+  border: 1px solid color-mix(in srgb, var(--hud-accent) 32%, transparent);
+  background: color-mix(in srgb, var(--hud-accent) 7%, transparent);
+  border-radius: var(--r-sm); font-size: 10.5px; color: var(--ink-2); letter-spacing: .02em;
+}
+.hud-verdict b { color: var(--hud-accent); font-weight: 700; font-variant-numeric: tabular-nums; }
+.hud-end { margin-left: auto; }
+
+
+
+.hud-formula {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 10px 16px; background: var(--panel);
+  border-top: 1px solid var(--line-soft);
+  border-left: 3px solid var(--hud-accent);
+  font: 500 12px/1.5 var(--mono); color: var(--ink-2); letter-spacing: .01em;
+}
+.hud-formula em { font-style: normal; color: var(--muted) }
+.hud-formula i { font-style: normal; color: var(--hud-accent); font-weight: 700 }
+.hud-formula .tool.replay { margin-left: auto; font-size: 11px; padding: 5px 13px; }
+.hud-tag {
+  font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  border: 1px solid var(--line); border-radius: var(--r-pill); padding: 2px 7px;
+}
+
+@media (prefers-reduced-motion: reduce) { .hud-dot { animation: none } }
+.no-motion .hud-dot { animation: none }
+
+/* 窄屏没有 264px 可给：遥测栏退到舞台下方，图变窄 */
+@media (max-width: 1180px) {
+  .term--detail.hud-on .pg-visual { grid-template-columns: minmax(0, 1fr); }
+  .term--detail.hud-on .pg-visual > .stage { grid-column: 1; }
+  .term--detail.hud-on .hud { grid-column: 1; grid-row: 3; border-left: 0; }
+  .term--detail.hud-on .pg-visual > .stage-tools { grid-row: 2; }
+  .term--detail.hud-on .hud-formula { grid-row: 4; }
+  .term--detail .pg-visual:has(.fr-readout) { grid-template-columns: minmax(0, 1fr); }
+  .term--detail .pg-visual:has(.fr-readout) > .stage { grid-column: 1; }
+  .term--detail .pg-visual:has(.fr-readout) > .fr-readout { grid-column: 1; grid-row: 2; border-left: 0; border-top: 1px solid var(--line-soft); }
+  .term--detail .pg-visual:has(.fr-readout) > .stage-tools { grid-row: 3; }
+  .term--detail .pg-visual:has(.fr-readout) > .dt-ctl,
+  .term--detail .pg-visual:has(.fr-readout) > .pctl { grid-column: 1; }
+  .term--detail .pg-visual:has(.gz-readout) { grid-template-columns: minmax(0, 1fr); }
+  .term--detail .pg-visual:has(.gz-readout) > .stage { grid-column: 1; }
+  .term--detail .pg-visual:has(.gz-readout) > .gz-readout { grid-column: 1; grid-row: 2; border-left: 0; border-top: 1px solid var(--line-soft); }
+  .term--detail .pg-visual:has(.gz-readout) > .stage-tools { grid-row: 3; }
+  .term--detail .pg-visual:has(.gz-readout) > .dt-ctl,
+  .term--detail .pg-visual:has(.gz-readout) > .pctl { grid-column: 1; }
+}
+
+/* 手机上让接触表承担“看清 24 帧”的任务：4 列比压成 6 列更容易辨认主体与编号。 */
+@media (max-width: 640px) {
+  .fr-contact { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .fr-contact > s b { font-size: 8px; left: 4px; bottom: 3px; }
+  .fr-readout { padding-inline: 18px; }
+}
+
+/* ── 多条时钟：一条曲线一条时钟，各自归一化成「起点→到位」，原始量纲放图例 ── */
+.hud-chart .hud-goal { stroke: color-mix(in srgb, var(--hud-accent) 45%, transparent); stroke-width: 1.2; stroke-dasharray: 3 3; }
+.hud-chart .hud-c0 { stroke: var(--ink); }
+.hud-chart .hud-c1 { stroke: var(--hud-accent); }
+.hud-chart .hud-c2 { stroke: var(--ink-2); stroke-dasharray: 5 3; }
+.hud-chart .hud-c3 { stroke: var(--hud-accent); stroke-dasharray: 5 3; }
+.hud-legend { display: flex; flex-direction: column; gap: 4px; }
+.hud-clk { display: flex; align-items: center; gap: 7px; font-size: 10px; min-width: 0; }
+.hud-clk s { letter-spacing: .08em; color: var(--muted); text-decoration: none; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hud-clk var { font-style: normal; font-weight: 700; font-size: 13px; color: var(--ink); font-variant-numeric: tabular-nums; margin-left: auto; }
+.hud-clk u { font-size: 9.5px; color: var(--muted); text-decoration: none; min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
+.hud-key { width: 12px; height: 2.5px; border-radius: 2px; flex: none; }
+.hud-key.hud-c0 { background: var(--ink); }
+.hud-key.hud-c1 { background: var(--hud-accent); }
+.hud-key.hud-c2 { background: var(--ink-2); }
+.hud-key.hud-c3 { background: var(--hud-accent); }
