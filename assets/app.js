@@ -324,6 +324,8 @@
     if (HAS_VT && motionOn) { try { t = document.startViewTransition(once); } catch (e) { t = null; } }
     if (!t) { once(); settle(); return; }
     t.finished.then(settle, settle);
+    /* 连点两张卡时后一次转场会抢占前一次，ready 被拒；不接住就是控制台一条未捕获异常 */
+    if (t.ready) t.ready.catch(function () {});
     /* 后台标签页不产帧，VT 回调可能永远不来：兜底只补跑一次，不与 finished 的兑现撞车 */
     setTimeout(function () { if (!ran) { once(); settle(); } }, 140);
   }
@@ -400,6 +402,8 @@
       if (window.REFS) window.REFS.wire(node, id);
       if (window.HUD) window.HUD.wire(node, id);
       p.scrollTop = 0;
+      /* 焦点跟进来：不然键盘/读屏用户点开卡片后焦点仍留在被盖住的那一侧 */
+      try { p.focus({ preventScroll: true }); } catch (e) {}
     };
     const cv = (!open && lastCard) ? cardVis(lastCard) : null;
     if (HAS_VT && motionOn && cv) {

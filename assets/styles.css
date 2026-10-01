@@ -375,6 +375,8 @@ html.has-page { overflow: hidden; }
   animation: page-in .34s var(--ease-out) both;
 }
 @keyframes page-in { from { opacity: 0; } }
+/* #page 是被程序聚焦的整屏视图而非可操作控件，套上全局 :focus-visible 会画出一圈大描边 */
+.page:focus-visible { outline: none; }
 /* 详情页比列表窄一档，专门给两侧的翻页药丸留出真实留白；
    1240 的列表版心放到 1280 窗口里左右只剩 20px，药丸怎么算都会压到内容 */
 .page-inner { max-width: var(--pgw); margin: 0 auto; padding: 0 clamp(16px, 3.4vw, 44px) var(--sp-9); }
