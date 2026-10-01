@@ -142,7 +142,7 @@ def build_latex(cs, force, reuse):
 
 
 def build_noto(cs, reuse):
-    rows, cjk = [], sorted(c for c in cs if ord(c) > 0x2000)
+    rows, cjk = [], ''.join(sorted(c for c in cs if ord(c) > 0x2000))
     for w in NOTO_WEIGHTS:
         covered = set()
         for ci in range(0, len(cjk), CHUNK):
