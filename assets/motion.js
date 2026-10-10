@@ -568,7 +568,7 @@ window.MOTION = (function () {
       cycle(stage, 3200, function (t) {
         const v = Math.round(EASE.easeOut(clamp(t / 0.7, 0, 1)) * 4200);
         String(v).padStart(4, '0').split('').forEach(function (d, i) {
-          if (cols[i]) cols[i].style.transform = 'translateY(' + (-d * 10) + '%)';
+          if (cols[i]) cols[i].style.transform = 'translateY(' + (-d * 100) + '%)';
         });
       });
     }

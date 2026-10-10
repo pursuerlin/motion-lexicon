@@ -22,7 +22,7 @@ window.TERMS.push(
     say: 'hover 时 img scale 1→1.06，容器 overflow hidden',
     def: '容器裁切、内部图像放大，形成窥视感。要点是缩放对象是内层图片而不是容器，否则会挤压周围布局。',
     code: '.thumb { overflow: hidden; } .thumb img { transition: transform 420ms ease-out; } .thumb:hover img { transform: scale(1.06); }',
-    demo: { kind: 'frames', html: '<div class="obj img crop"><i class="fill"></i></div>', play: 'hover', frames: [[0, 'transform:scale(1)'], [100, 'transform:scale(1.12)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '420ms', inner: true, hint: '悬停' }
+    demo: { kind: 'frames', html: '<div class="obj img crop zoom-demo"><i class="fill"></i><b>HOVER TO ZOOM</b></div>', play: 'hover', frames: [[0, 'transform:scale(1)'], [100, 'transform:scale(1.12)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '420ms', inner: true, hint: '悬停或聚焦舞台' }
   },
   {
     id: 'underline-expand', en: 'Underline expand', zh: '下划线展开', cat: 'feedback',
@@ -356,8 +356,8 @@ window.TERMS.push(
     code: 'font-variant-numeric: tabular-nums;',
     demo: {
       kind: 'two',
-      a: { label: '比例数字 · 行在抖', html: '<div class="obj txt num notab">1,234,567</div>', frames: [[0, 'opacity:.35'], [100, 'opacity:1']], e: 'linear', d: '900ms', loop: true, alt: true },
-      b: { label: 'tabular-nums · 稳定', html: '<div class="obj txt num tab">1,234,567</div>', frames: [[0, 'opacity:.35'], [100, 'opacity:1']], e: 'linear', d: '900ms', loop: true, alt: true }
+      a: { label: '比例数字 · 行在抖', html: '<div class="obj txt num-card notab"><b>1,234,567</b><small>proportional width</small></div>', frames: [[0, 'transform:translateX(-8px)'], [50, 'transform:translateX(7px)'], [100, 'transform:none']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '900ms', loop: true, alt: true },
+      b: { label: 'tabular-nums · 稳定', html: '<div class="obj txt num-card tab"><b>1,234,567</b><small>fixed width</small></div>', frames: [[0, 'transform:translateY(2px)'], [50, 'transform:translateY(-2px)'], [100, 'transform:none']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '900ms', loop: true, alt: true }
     }
   },
   {

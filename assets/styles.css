@@ -590,6 +590,14 @@ html.has-page { overflow: hidden; }
 .obj.masked2 { mask-image: linear-gradient(#000 55%, transparent); mask-size: 100% 220%; mask-repeat: no-repeat; }
 .obj.crop { overflow: hidden; }
 .obj.crop .fill, .obj.crop > i { position: absolute; inset: 0; background: linear-gradient(120deg, var(--obj-b), var(--obj-a)); border-radius: inherit; }
+.zoom-demo { isolation: isolate; background: var(--panel-2); color: var(--accent-ink); }
+.zoom-demo .fill { transition: transform 420ms cubic-bezier(.16,1,.3,1); transform-origin: 50% 50%; background:
+  radial-gradient(circle at 22% 26%, rgba(255,255,255,.68) 0 4%, transparent 5%),
+  repeating-linear-gradient(132deg, color-mix(in srgb, var(--accent) 82%, #fff 18%) 0 12px, color-mix(in srgb, var(--obj-b) 78%, #fff 22%) 12px 27px); }
+.zoom-demo .fill::after { content: ""; position: absolute; inset: 12% 14%; border: 1px solid rgba(255,255,255,.52); border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
+.zoom-demo b { position: absolute; left: 10px; bottom: 8px; z-index: 1; font: 600 9px var(--mono); letter-spacing: .1em; color: rgba(255,255,255,.9); text-shadow: 0 1px 6px rgba(0,0,0,.35); }
+.t-hover-zoom .stage:is(:hover, :focus-within) .fill { transform: scale(1.12); }
+.t-hover-zoom .stage:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
 .stagein { display: flex; gap: 8px; align-items: center; justify-content: center; width: 100%; height: 100%; }
 .substage { display: flex; gap: 8px; align-items: center; justify-content: center; }
 .stagein .obj + .obj { opacity: 1; }
@@ -787,6 +795,12 @@ html.has-page { overflow: hidden; }
 .glitch::after { color: rgba(60, 200, 255, .82); clip-path: inset(48% 0 0 0); transform: translateX(calc(var(--glitch-x) * -.62)); }
 .num { font-family: var(--mono); font-size: 22px; font-variant-numeric: tabular-nums; }
 .num.notab { font-variant-numeric: proportional-nums; }
+.num-card { width: auto !important; min-width: 212px; height: 72px !important; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 4px; padding: 0 16px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); box-shadow: 0 12px 26px -18px rgba(0,0,0,.4); }
+.num-card b { font: 600 24px/1 var(--mono); font-variant-numeric: inherit; letter-spacing: .02em; white-space: nowrap; }
+.num-card small { font: 9px/1 var(--mono); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+.num-card.notab b { letter-spacing: .04em; }
+.num-card.tab { border-color: color-mix(in srgb, var(--accent) 34%, var(--line)); background: color-mix(in srgb, var(--accent) 8%, var(--panel-2)); }
+.num-card.tab b { font-variant-numeric: tabular-nums; }
 .caret-demo { display: flex; align-items: center; gap: 2px; }
 .caret { display: inline-block; width: 2px; height: 1.1em; background: var(--accent); }
 .obj.link::after { transform: scaleX(0); }
@@ -1012,6 +1026,7 @@ html.has-page { overflow: hidden; }
 .kinetic b { display: inline-block; }
 .tick { display: flex; gap: 2px; font-family: var(--mono); font-size: 26px; }
 .tick .dg { position: relative; width: 17px; height: 30px; overflow: hidden; display: block; }
+.tick { padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2); box-shadow: 0 12px 26px -18px rgba(0,0,0,.42); }
 .tick u { position: absolute; inset: 0; text-decoration: none; display: grid; place-items: center; }
 .tick u:nth-child(n) { top: calc(var(--n, 0) * 100%); }
 .tick u:nth-child(1) { top: 0; } .tick u:nth-child(2) { top: 100%; } .tick u:nth-child(3) { top: 200%; }
@@ -1990,6 +2005,9 @@ html.has-page { overflow: hidden; }
 .cp-after::after, .cp-before::after { position: absolute; left: 12px; top: 9px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; z-index: 1; }
 .cp-after::after { content: "调色后"; left: auto; right: 12px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
 .cp-before::after { content: "原图"; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+.cp-grade, .cp-raw { position: absolute; z-index: 2; left: 14px; bottom: 44px; padding: 9px 11px; border-left: 2px solid rgba(255,255,255,.72); color: rgba(255,255,255,.92); font: 600 10px/1.25 var(--mono); letter-spacing: .08em; text-shadow: 0 1px 8px rgba(0,0,0,.5); pointer-events: none; }
+.cp-grade { left: auto; right: 14px; border-left: 0; border-right: 2px solid rgba(255,255,255,.72); text-align: right; }
+.cp-grade small, .cp-raw small { display: block; margin-top: 4px; font: 400 8px/1.3 var(--body); letter-spacing: .02em; opacity: .76; }
 .cp-line { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; margin-left: -1px; background: var(--bg); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 12%, transparent); }
 .cp-hd {
   position: absolute; left: 50%; top: 50%; width: 28px; height: 28px; margin: -14px 0 0 -14px;
@@ -2893,6 +2911,7 @@ h1, h2 { font-weight: 560; }
 }
 .term--detail .cp-cp .cp-before::after { left: 14px; content: "BEFORE · 原图"; }
 .term--detail .cp-cp .cp-after::after { right: 14px; content: "AFTER · 调整后"; }
+.term--detail .cp-cp .cp-grade, .term--detail .cp-cp .cp-raw { bottom: 46px; }
 .term--detail .cp-cp .cp-line {
   z-index: 3;
   width: 2px;

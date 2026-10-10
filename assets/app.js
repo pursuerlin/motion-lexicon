@@ -115,6 +115,9 @@
     /* 由 JS 全权驱动的舞台（轨道、曲线、弹簧、运行时场景…）不需要生成关键帧 */
     if (window.MOTION.KINDS[s.kind]) return window.MOTION.extraCSS ? window.MOTION.extraCSS(t) : '';
     if (s.play === 'hover') {
+      /* 图片放大由 CSS transition 驱动，避免关键帧只在卡片首帧运行一次，
+         也让详情页的 hover / keyboard focus 共享同一条路径。 */
+      if (s.inner) return '';
       return animCSS(root + ' .stage:hover' + targetSel(s), s.frames, Object.assign({}, s, { d: s.d || '220ms' }));
     }
     if (s.play === 'press') {
