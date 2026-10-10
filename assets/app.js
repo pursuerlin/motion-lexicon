@@ -39,7 +39,7 @@
     wipe: '.wipebar', scene: '.d25', inner: '.fill', underline: '.link::after',
     shimmer: '.sk i', bar: '.fill', marquee: '.marquee', orbit: '.orbit-box',
     ambient: '.amb i', burst: '.burst i', grain: '.noise', sweep: '.beam',
-    dof: '.dof .card', bokeh: '.bokeh i', cam: '.cam', stack: '.stack',
+    dof: '.dof .card', bokeh: '.bokeh i', cam: '.cam', stack: '.stack .obj',
     dissolve: '.diss.a', caret: '.caret', ball: '.obj',
     pan: '.panstrip', turn: '.turn', follow: '.follow i', secondary: '.sec i',
     staging: '.stage3 i:not(.hot)'
@@ -164,12 +164,14 @@
         stage.style.setProperty('--' + k, stage._prm[k] + (c && c.u ? c.u : ''));
       });
       /* 错峰间隔、时长：都交给 applyTiming 统一施加，重播也不会被冲掉 */
-      if (stage._staggerEls || stage._prm.dur != null) applyTiming(stage);
+      if (stage._staggerEls || stage._prm.dur != null) { applyTiming(stage); wakeIfIdle(stage); }
       if (stage._apply) stage._apply();
       if (s.kind === 'track' || s.kind === 'curve') replay(stage);
       /* 滚动映射类的舞台要立刻重算一次，否则得再滚一下才看得到变化 */
       const box = $('.scrolly', stage);
       if (box) box.dispatchEvent(new Event('scroll'));
+      /* 录制类面板（弹簧那几条）屏上留着的是上一次跑出来的轨迹：参数一改就必须重录 */
+      if (window.HUD) window.HUD.rerecord(term);
     };
     bar.addEventListener('input', function (e) {
       const i = e.target.closest('input[data-p]'); if (!i) return;
@@ -184,6 +186,41 @@
   /* 指针 / 滚动驱动的舞台在 hover 时重播没有意义，反而每帧扫一遍几十上百个节点 */
   function playOf(t) { const d = t.demo || {}; return d.play || (d.kind === 'compound' ? 'none' : 'in'); }
 
+  /* ---------------- 输入驱动徽标：全站一处真源 ----------------
+     卡片只渲染参数条，提示语留在详情页，于是「不动手就不演」的条目在首页上是一块死方块。
+     徽标只由下面这三张表决定：play / behavior / kind(:mode) → 输入类型；
+     入场即播和 cycle/watch 自带时钟的模式一律不进表，免得给会动的卡片多扣一个角标。
+     文案沿用组合范式那套驱动词，样式直接复用 .cp-chip（绝对定位、pointer-events:none），
+     所以角标不占网格、不碰演示主体，也不改卡片 hover 的抬升与描边。 */
+  const DRV_WORD = { pointer: '指针', scroll: '滚动', hover: '悬停', tap: '点击', drag: '拖拽', hold: '按住' };
+  const DRV_BY_PLAY = { hover: 'hover', press: 'hold' };
+  /* highlight 自己 2.6s 一轮，不需要手 */
+  const DRV_BY_BEHAVIOR = { tilt: 'pointer', magnet: 'pointer', originAware: 'tap' };
+  const DRV_BY_KIND = {
+    list: 'tap', scroll: 'scroll', drag: 'drag',
+    /* 同一个 kind 里靠按钮、点、按住驱动的那些模式 */
+    'drag:ripple': 'tap', 'drag:shared': 'tap', 'drag:direction': 'tap', 'drag:hold': 'hold',
+    'scroll:smooth': 'tap', 'morph:viewTransition': 'tap',
+    /* morph / perf 多数模式自己有钟（cycle、watch），只给真要动手的那几个模式挂 */
+    'perf:drop': 'tap', 'perf:perceived': 'tap', 'perf:purpose': 'tap', 'perf:thrash': 'tap', 'perf:cv': 'scroll',
+    /* runtime.js 那批舞台：拖动、点一下、指针跟随 */
+    'cube:orbit': 'drag', 'canvas2d:physics': 'tap', lottie: 'drag', rive: 'tap', 'rig:ik': 'pointer', scrub: 'drag'
+  };
+  function drvBadge(s) {
+    /* compound.js 已经给每个组合模式挂了自己的 chip，这里再挂就是一张卡两个提示 */
+    if (s.kind === 'compound') return '';
+    const k = DRV_BY_PLAY[s.play] || DRV_BY_BEHAVIOR[s.behavior] ||
+      /* data-live 的弹簧只认鼠标点，自己的钟被 park 住了（见 mountSpring） */
+      (s.interactive ? 'tap' : '') ||
+      DRV_BY_KIND[(s.kind || '') + ':' + (s.mode || '')] || DRV_BY_KIND[s.kind];
+    if (!k) return '';
+    return '<b class="cp-chip d-' + k + '" aria-hidden="true" data-l10n="' + DRV_WORD[k] + '">' + DRV_WORD[k] + '</b>';
+  }
+
+  /* 这个舞台是不是自己就在循环：真源是数据里的 loop（编译出来就是 infinite）。
+     复选框必须照着它渲染，否则界面上"没勾选"而舞台上一直在循环 */
+  function loopOf(s) { return !!(s.loop || (s.a && s.a.loop) || (s.b && s.b.loop)); }
+
   function stageBlock(t, withTools) {
     const s = t.demo || {};
     const hint = s.hint || ({ list: '点一下试试', drag: '动手拖一下', type: '自动循环播放', perf: '数字是现场量出来的', morph: '自动循环', scroll: '在框里滚动', compound: '可用方向键 / 回车操作' }[s.kind] || '');
@@ -197,37 +234,39 @@
       '<button type="button" class="seg-b" data-sp="0.5">½×</button>' +
       '<button type="button" class="seg-b" data-sp="0.25">¼×</button>' +
       '</span>' +
-      (s.kind === 'frames' || s.kind === 'two' || !s.kind ? '<label class="ctl-chk"><input type="checkbox" data-loop><span data-l10n="循环播放">循环播放</span></label>' : '') +
+      (s.kind === 'frames' || s.kind === 'two' || !s.kind ? '<label class="ctl-chk"><input type="checkbox" data-loop' + (loopOf(s) ? ' checked' : '') + '><span data-l10n="循环播放">循环播放</span></label>' : '') +
       '</div>' : '';
     const kb = s.kind === 'compound' ? ' tabindex="0" aria-label="' + esc(t.en + ' ' + t.zh + '：' + hint) + '"' : '';
     const bar = ctlHTML(s);
     let contactFrames = '';
     if (withTools && s.kind === 'compound' && s.mode === 'frames') {
-      for (let i = 0; i < 24; i++) {
-        const shift = ((.5 - i / 23) * 18).toFixed(1);
-        /* 接触表本身就是读数的一部分，24 张都要在面板出现时可见，不能用 lazy 让后半段变成空白占位。 */
-        contactFrames += '<s data-frame="' + (i + 1) + '" aria-label="第 ' + (i + 1) + ' 帧" style="--frame-shift:' + shift + '%"><img src="assets/img/p16.jpg" alt="第 ' + (i + 1) + ' 帧" draggable="false"><b>' + String(i + 1).padStart(2, '0') + '</b></s>';
+      /* 建到「帧数」滑块的上限 48 格，实际露出几格由 compound.js 跟着 N 走：
+         原来这里烘死 24 格，滑块一拨到 6，读数写 06/6 而接触表还亮着第 24 格。
+         每格的取样位移同样交给运行时，别在这里按 24 复算一遍第二真源。 */
+      for (let i = 0; i < 48; i++) {
+        contactFrames += '<s data-frame="' + (i + 1) + '" aria-label="第 ' + (i + 1) + ' 帧"><img src="assets/img/p16.jpg" alt="第 ' + (i + 1) + ' 帧" draggable="false"><b>' + String(i + 1).padStart(2, '0') + '</b></s>';
       }
     }
     const compoundReadout = withTools && s.kind === 'compound' && s.mode === 'frames'
       ? '<aside class="fr-readout" aria-label="抽帧实时读数" data-l10n="抽帧实时读数" data-l10n-attr="aria-label"><div class="fr-readout-head"><b><i></i> LIVE READOUT</b><span>SCROLL</span></div>' +
         '<div class="fr-readout-main"><small>FRAME</small><strong data-fr-out="frame">01</strong><em data-fr-out="total">/24</em></div>' +
-        '<div class="fr-readout-grid"><div><small>PROGRESS</small><b data-fr-out="progress">0%</b></div><div><small>SAMPLES</small><b data-fr-out="samples">24</b></div></div>' +
+        '<div class="fr-readout-grid"><div><small>SCROLL</small><b data-fr-out="progress">0%</b></div><div><small>STEP / FRAME</small><b data-fr-out="samples">4.3%</b></div></div>' +
         '<div class="fr-readout-track"><i data-fr-out="track"></i></div>' +
-        '<div class="fr-contact-head"><span>FRAME CONTACT SHEET</span><b>24</b></div><div class="fr-contact" aria-label="24 张实际帧缩略图" data-l10n="24 张实际帧缩略图" data-l10n-attr="aria-label">' + contactFrames + '</div>' +
+        '<div class="fr-contact-head"><span>FRAME CONTACT SHEET</span><b data-fr-out="sheet">24</b></div><div class="fr-contact" aria-label="接触表里每一格就是一个真实采样帧" data-l10n="接触表里每一格就是一个真实采样帧" data-l10n-attr="aria-label">' + contactFrames + '</div>' +
         '<p data-l10n="左侧是实际预览，右侧接触表标出当前采样帧。">左侧是实际预览，右侧接触表标出当前采样帧。</p></aside>'
       : withTools && s.kind === 'compound' && s.mode === 'gaze'
       ? '<aside class="gz-readout" aria-label="视线跟随实时读数" data-l10n="视线跟随实时读数" data-l10n-attr="aria-label"><div class="gz-readout-head"><b><i></i> LIVE READOUT</b><span data-gz-out="mode">AUTONOMOUS</span></div>' +
         '<div class="gz-readout-state" aria-live="polite"><i></i><strong data-gz-out="state">IDLE LOOP</strong><small>gaze target</small></div>' +
-        '<div class="gz-readout-focus"><div><small>FOCUS VECTOR</small><strong><span data-gz-out="x">+00</span><em> × </em><span data-gz-out="y">+00</span></strong></div><div class="gz-readout-lag"><small>LAG</small><b data-gz-out="lag">0%</b></div></div>' +
+        '<div class="gz-readout-focus"><div><small>GAZE OFFSET</small><strong><span data-gz-out="x">+0.0</span><em> × </em><span data-gz-out="y">+0.0</span><u>px</u></strong><small>→ target <span data-gz-out="tx">+0.0</span> × <span data-gz-out="ty">+0.0</span>px</small></div><div class="gz-readout-lag"><small>LAG</small><b data-gz-out="lag">0.0px</b></div></div>' +
         '<div class="gz-map" aria-hidden="true"><span class="gz-map-axis x"></span><span class="gz-map-axis y"></span><i class="gz-map-center"></i><i class="gz-map-dot"></i><b>−X</b><b>+X</b><em>−Y</em><em>+Y</em></div>' +
         '<div class="gz-readout-grid"><div><small>SMOOTH</small><b data-gz-out="smooth">0.16</b></div><div><small>RANGE</small><b data-gz-out="range">7.5px</b></div></div>' +
         '<p data-l10n="指针决定目标方向；松开后，视线回到低频游走。">指针决定目标方向；松开后，视线回到低频游走。</p></aside>'
       : '';
     /* 卡片：舞台下面直接跟参数条。弹窗：参数条排在慢放/循环之下，别挤在演示和工具条中间 */
     const modeAttr = s.kind === 'compound' && s.mode ? ' data-mode="' + esc(s.mode) + '"' : '';
+    /* 徽标只给卡片：详情页的 .stage-tools 里已经有同一件事的完整说法，两处并存就是重复提示 */
     return '<div class="stage kind-' + (s.kind || 'frames') + '"' + stageAttrs(s) + modeAttr + kb + '>' +
-      stageHTML(t) + '</div>' +
+      (withTools ? '' : drvBadge(s)) + stageHTML(t) + '</div>' +
       compoundReadout +
       (withTools ? '<div class="stage-tools">' + (hint ? '<span class="hint" data-l10n="' + esc(hint) + '">' + esc(hint) + '</span>' : '<span></span>') +
         (canReplay ? '<button class="tool replay" type="button">↻ 重播</button>' : '') + '</div>' + ctl + bar
@@ -282,6 +321,11 @@
       if (stage._ro) { stage._ro.disconnect(); stage._ro = null; }
       if (stage._update) tickers.delete(stage._update);
     }
+    /* motion.js 的 watch 现在只在离开 DOM 时停摆，不自己摘——
+       真正的销毁发生在这里（LRU 逐出 / 节点移除），否则逐条累积成永久空跑的闭包 */
+    [node].concat($$('*', node)).forEach(function (el) {
+      if (el._watchers) { el._watchers.forEach(f => tickers.delete(f)); el._watchers = null; }
+    });
     node.remove();
   }
   function detailNode(id) {
@@ -400,6 +444,7 @@
       pinVisible(stage, true);
       replay(stage);
       if (window.REFS) window.REFS.wire(node, id);
+      if (window.PGLAB) window.PGLAB.wire(node, id);
       if (window.HUD) window.HUD.wire(node, id);
       p.scrollTop = 0;
       /* 焦点跟进来：不然键盘/读屏用户点开卡片后焦点仍留在被盖住的那一侧 */
@@ -517,6 +562,9 @@
     if (!stage) return;
     const sp = stage._speed || 1;
     const els = animatedIn(stage);
+    /* 悬停 / 按住才存在的动画：指针一离开舞台，这里就没有对象可施加。
+       记一笔等下次接触时补上，否则工具条上的慢放与循环按了等于没按。 */
+    stage._pendTiming = !els.length;
     els.forEach(function (el) {
       if (el.dataset.dur0 == null) {
         const cs = getComputedStyle(el);
@@ -542,8 +590,14 @@
       el.style.animationDelay = (stage._prm && stage._prm.st != null && el._si != null)
         ? (el._si * stage._prm.st) + 'ms'
         : scaleTime(el.dataset.delay0, sp);
-      el.style.animationIterationCount = stage._loop ? 'infinite' : el.dataset.iter0;
-      el.style.animationDirection = (stage._loop && el.dataset.dir0 === 'normal') ? 'alternate' : '';
+      /* 数据里写着 loop 的舞台，基线本身就是 infinite：只把 _loop 置回 false、
+         再把 iter0 抄回去等于什么都没做（取消勾选停不下来就是这个原因），
+         所以关掉循环时要显式收回成一次播放 */
+      const wasLoop = el.dataset.iter0 === 'infinite';
+      el.style.animationIterationCount = stage._loop ? 'infinite' : (wasLoop ? '1' : el.dataset.iter0);
+      /* 来回（alternate）只给"本来是一次性"的动效：转圈、跑马灯这类自己就是循环的，
+         被强改成 alternate 会转一圈再倒着转回来 */
+      el.style.animationDirection = (stage._loop && !wasLoop && el.dataset.dir0 === 'normal') ? 'alternate' : '';
     });
   }
   /* 重播：清掉 animation 再强制回流，对 CSS 关键帧动画最稳 */
@@ -556,6 +610,12 @@
       nodes.forEach(el => { el.style.animation = ''; });
     }
     applyTiming(stage);
+  }
+  /* 一次性动效播完就停在终态：这时候拖「时长」改的只是一个看不见的数字
+     （往短了拖连终态都不动）。没有动画在跑就重播一次，让新参数立刻看得见。 */
+  function wakeIfIdle(stage) {
+    const as = stage.getAnimations({ subtree: true });
+    if (as.length && as.every(a => a.playState === 'finished')) replay(stage);
   }
   /* 慢放倍速：CSS 动画改 duration/delay，JS 演示读 stage._speed */
   function setSpeed(stage, speed) {
@@ -595,6 +655,11 @@
   /* ---------------- 轨道 / 曲线 / 弹簧 ---------------- */
   function mountTrack(stage) {
     const fn = (EASE[stage.dataset.fn] || EASE.easeOut);
+    /* 详情页右侧的实验台可以换掉这条曲线：stage._ease 有值就以它为准。
+       这里必须返回"算好的值"而不是把函数递出去——上一版写成 () => stage._ease || fn
+       再 ease(q) * travel，等于拿函数去乘像素，得到 NaN，浏览器静默丢掉整条 transform，
+       于是 live 块永远停在起点，只有灰色参照在动。 */
+    const eased = (x) => (stage._ease || fn)(x);
     const live = $('.live', stage), ref = $('.ref', stage), lane = $('.lane', stage);
     let t0 = performance.now();
     /* translateX 的百分比是相对元素自身宽度的，所以这里必须换算成轨道可用像素。
@@ -614,7 +679,9 @@
       let p = (now - t0) / dur;
       if (p > 1.6) { t0 = now; p = 0; }
       const q = Math.min(1, Math.max(0, p));
-      live.style.transform = 'translateX(' + (fn(q) * travel).toFixed(2) + 'px)';
+      /* 相位公布给详情页右列的实验台：那边的游标必须走这同一条时钟 */
+      stage._phase = q;
+      live.style.transform = 'translateX(' + (eased(q) * travel).toFixed(2) + 'px)';
       ref.style.transform = 'translateX(' + (q * travel).toFixed(2) + 'px)';
       live.style.opacity = ref.style.opacity = p > 1.35 ? '.35' : '1';
     };
@@ -656,8 +723,9 @@
   function mountCurve(stage) {
     const cv = $('.cv', stage), probe = $('.cprobe i', stage);
     const fn = EASE[stage.dataset.fn] || EASE.easeOut;
+    const eased = (x) => (stage._ease || fn)(x);
     let t0 = performance.now();
-    const redraw = function () { drawCurve(cv, fn); };
+    const redraw = function () { drawCurve(cv, (stage._ease || fn)); };
     redraw();
     stage._resize = redraw;
     if (window.ResizeObserver) { stage._ro = new ResizeObserver(redraw); stage._ro.observe(cv); }
@@ -666,9 +734,10 @@
       let p = (now - t0) / (((stage._prm && stage._prm.dur) || 1400) / (stage._speed || 1));
       if (p > 1.4) { t0 = now; p = 0; }
       const q = Math.min(1, p);
+      stage._phase = q;
       const m = cv._map; if (!m) return;
       probe.style.left = m.px(q) + 'px';
-      probe.style.top = m.mapY(fn(q)) + 'px';
+      probe.style.top = m.mapY(eased(q)) + 'px';
       probe.style.opacity = p > 1.15 ? '.25' : '1';
     };
     tickers.add(stage._update);
@@ -738,6 +807,8 @@
     const stage = $('.stage', term);
     const s = term.__demo;
     stage._prm = stage._prm || {};
+    /* 循环的初始状态跟复选框一致，否则第一次 applyTiming 就按"没勾选"去抄基线 */
+    stage._loop = loopOf(s);
     io.observe(stage);
     if (s.kind === 'track') mountTrack(stage);
     else if (s.kind === 'curve') mountCurve(stage);
@@ -769,6 +840,12 @@
     if (s.play === 'press') {
       stage.addEventListener('pointerdown', () => term.classList.add('pressing'));
       ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => stage.addEventListener(ev, () => term.classList.remove('pressing')));
+    }
+    /* 工具条在舞台外面，点它的时候指针必然已经离开舞台——所以这两类舞台上的
+       慢放 / 循环要在下一次接触时补施加，控件才是活的 */
+    if (s.play === 'hover' || s.play === 'press') {
+      ['pointerenter', 'pointerdown', 'focusin'].forEach(ev =>
+        stage.addEventListener(ev, () => { if (stage._pendTiming) { stage._pendTiming = false; applyTiming(stage); } }));
     }
     $('.replay', term) && $('.replay', term).addEventListener('click', () => replay(stage));
     if (s.loop || s.kind === 'track' || s.kind === 'curve' || s.kind === 'spring') stage.classList.add('auto');
@@ -1212,9 +1289,11 @@
     });
     $('#page-body').addEventListener('change', function (e) {
       const c = e.target.closest('[data-loop]'); if (!c) return;
-      const stage = c.closest('.term--detail').querySelector('.stage');
+      const node = c.closest('.term--detail'), stage = node.querySelector('.stage');
       setLoop(stage, c.checked);
       replay(stage);
+      /* 勾选/取消循环会改这条曲线的形状（一次性斜坡 ⇄ 三角波），面板必须跟着重建 */
+      if (window.HUD) window.HUD.rebuild(node, node.dataset.id);
     });
     window.addEventListener('resize', redrawCurves);
   }

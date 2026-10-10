@@ -231,7 +231,9 @@ main { padding: 0 clamp(16px, 4.2vw, 64px) 80px; max-width: 1560px; margin: 0 au
 .lab-hd h2 { font-size: clamp(22px, 2.4vw, 28px); font-weight: 400; letter-spacing: -.015em; }
 .cat-en { font-family: var(--body); font-size: 12px; font-weight: 400; color: var(--muted); letter-spacing: .04em; margin-left: 10px; }
 .lab-hd p { margin: 0; color: var(--muted); font-size: 13.5px; flex: 1 1 320px; }
-.lab-grid { display: grid; grid-template-columns: minmax(190px, 250px) minmax(280px, 1fr) minmax(300px, 420px); gap: 16px; }
+/* 三栏一行到底：曲线 + 代码那一栏掉到第二行，等于把「拖控制点 → 看它运动 → 抄代码」
+   这条阅读顺序拆断了，所以宁可把列宽压到 900px 才允许换行。 */
+.lab-grid { display: grid; grid-template-columns: minmax(178px, 240px) minmax(0, 1.15fr) minmax(268px, 400px); gap: 14px; }
 .lab-col { background: var(--panel); border-radius: 24px; padding: 18px; }
 .lab-col h4 { font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: .06em; margin-bottom: 12px; text-transform: uppercase; }
 .hint-sm { font-size: 10.5px; color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
@@ -625,6 +627,15 @@ html.has-page { overflow: hidden; }
 .sub .substage { min-height: 54px; border: 1px dashed var(--line-soft); border-radius: 9px; background: color-mix(in srgb, var(--panel) 60%, transparent); }
 .sub .substage .obj { width: 54px; height: 36px; }
 .wipebar { position: absolute; left: 50%; top: 50%; width: 150px; height: 74px; margin: -37px 0 0 -75px; background: var(--accent); border-radius: 10px; transform-origin: left; z-index: 2; }
+/* 擦入要真的换内容：两块内容叠着，谁露出来由色块走到哪决定。
+   换的瞬间落在色块完全盖住的那一格（step-end 保证是硬切不是渐变），
+   所以观众只看到「扫过去之后底下换了」，看不见切换本身 */
+.wipepair { position: relative; width: 150px; height: 74px; }
+.wipepair .wp { position: absolute; left: 0; top: 0; width: 150px; height: 74px; display: grid; place-items: center; font-family: var(--mono); font-size: 15px; border-radius: 10px; }
+.wipepair .wp-a { animation: wipeOld 1100ms step-end infinite both; }
+.wipepair .wp-b { background: linear-gradient(150deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--accent-3))); color: var(--accent-ink); animation: wipeNew 1100ms step-end infinite both; }
+@keyframes wipeOld { 0%, 24.9% { opacity: 1 } 25%, 74.9% { opacity: 0 } 75%, 100% { opacity: 1 } }
+@keyframes wipeNew { 0%, 24.9% { opacity: 0 } 25%, 74.9% { opacity: 1 } 75%, 100% { opacity: 0 } }
 .diss { position: absolute !important; }
 .diss.b { opacity: 0; }
 .pulse { background: var(--accent) !important; }
@@ -668,10 +679,13 @@ html.has-page { overflow: hidden; }
 .cam .far { width: 120px; height: 80px; margin: -40px 0 0 -60px; transform: translateZ(-90px); opacity: .45; background: var(--obj-b); }
 .cam .near { width: 62px; height: 44px; margin: -22px 0 0 -31px; transform: translateZ(30px); background: var(--accent); }
 /* 弹窗舞台宽得多，镜头类场景按卡片尺寸画会显得又小又空。
-   整体缩放 .stagein 而不是逐个改子元素，3D 关系与 translateZ 幅度都能等比保留 */
+   整体缩放 .stagein 而不是逐个改子元素，3D 关系与 translateZ 幅度都能等比保留。
+   但缩放前得先把它收成场景实际大小：原本 100% 铺满舞台，1.6 倍后这个空盒子自己
+   就顶穿舞台（scrollWidth 927 > 728）；3D 物件靠居中不靠铺满，收尺寸不改观感，
+   也就不用再套一层 overflow 去裁掉动效 */
 .term--detail .stage:has(.cam) .stagein,
 .term--detail .stage:has(.d25) .stagein,
-.term--detail .stage:has(.turn) .stagein { transform: scale(1.6); }
+.term--detail .stage:has(.turn) .stagein { width: min(260px, 62%); height: min(150px, 44%); transform: scale(1.6); }
 .panstrip { display: flex; gap: 10px; width: max-content; }
 .panstrip i { width: 56px; height: 74px; border-radius: 9px; background: linear-gradient(160deg, var(--obj-b), var(--obj-a)); opacity: .85; }
 .panstrip i:nth-child(even) { background: linear-gradient(160deg, var(--obj-a), var(--accent-3)); }
@@ -680,6 +694,27 @@ html.has-page { overflow: hidden; }
 .turn .f1 { transform: translateZ(32px); background: var(--accent); }
 .turn .f2 { transform: rotateY(120deg) translateZ(38px); background: var(--obj-b); opacity: .85; }
 .turn .f3 { transform: rotateY(240deg) translateZ(38px); background: var(--accent-3); opacity: .8; }
+/* 穿越式推进：第一层用 mask 挖出一个真窗口，第二层就摆在窗口后面。
+   第一层放大淡出的后半程，第二层从窗口大小长到满幅——转场是「接上」的，
+   不是把一个画面推没再看下一个。两层同一时长，所以永远同步 */
+.zthrough { position: relative; width: 130px; height: 82px; }
+.zthrough .znext {
+  position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; gap: 5px; padding: 9px;
+  border-radius: 10px; background: var(--panel-2); border: 1px solid var(--line-soft);
+  transform-origin: 50% 50%; animation: znext-in 1600ms cubic-bezier(0.7, 0, 0.84, 0) infinite alternate both;
+}
+.zthrough .znext s { flex: 0 0 auto; width: 100%; height: 8px; border-radius: 4px; background: var(--accent); text-decoration: none; }
+.zthrough .znext s:nth-child(2) { width: 74%; background: var(--obj-b); }
+.zthrough .znext s:nth-child(3) { width: 52%; background: var(--line); }
+.obj.img.zoomhole {
+  width: 130px; height: 82px; z-index: 2;
+  mask-image: radial-gradient(20px 14px at 50% 50%, transparent 98%, #000 100%);
+}
+.zoomhole .hole {
+  position: absolute; left: 50%; top: 50%; width: 40px; height: 28px; margin: -14px 0 0 -20px;
+  border: 1.5px solid rgba(255, 255, 255, .62); border-radius: 9px;
+}
+@keyframes znext-in { 0%, 45% { opacity: 0; transform: scale(.5); } 100% { opacity: 1; transform: scale(1); } }
 .scene-mini { position: relative; width: 120px; height: 84px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; }
 .scene-mini i { position: absolute; width: 20px; height: 20px; border-radius: 5px; background: var(--accent); }
 .scene-mini i:nth-child(1) { left: 10px; top: 12px; }
@@ -687,16 +722,30 @@ html.has-page { overflow: hidden; }
 .scene-mini i:nth-child(3) { left: 82px; top: 16px; background: var(--accent-3); }
 .scene-mini i:nth-child(4) { left: 30px; top: 56px; background: var(--muted); }
 .stack { position: relative; width: 82px; height: 62px; }
+/* 「叠」的错位放在外层 .deck 上，动画只写 .obj 的 transform：
+   两者不抢同一个属性，才既看得出是一叠，又看得出是一张张抽出来的 */
+.stack .deck { position: absolute; left: 0; top: 0; width: 66px; height: 46px; display: block; }
+.stack .deck:nth-child(2) { transform: translate(8px, -8px) scale(.96); opacity: .8; }
+.stack .deck:nth-child(3) { transform: translate(16px, -16px) scale(.92); opacity: .6; }
 .stack .obj { position: absolute; left: 0; top: 0; width: 66px; height: 46px; }
-.stack .obj:nth-child(2) { transform: translate(8px, -8px) scale(.96); opacity: .8; }
-.stack .obj:nth-child(3) { transform: translate(16px, -16px) scale(.92); opacity: .6; }
-.glasswrap { position: relative; width: 160px; height: 100px; display: grid; place-items: center; }
+.glasswrap { position: relative; width: 210px; height: 104px; display: grid; place-items: center; overflow: hidden; border-radius: 14px; }
 .glasswrap .bg { position: absolute; inset: 0; background: linear-gradient(120deg, var(--obj-b), var(--accent) 55%, var(--accent-3)); opacity: .7; border-radius: 12px; }
-.glasswrap .bg.colorful { background: conic-gradient(from 20deg, var(--accent), var(--obj-b), var(--accent-3), var(--accent)); }
+/* 玻璃后面必须放「认得出来的东西」：硬条纹缓慢横移，才一眼看出哪块被磨砂了。
+   位移写在 ::after 的 background-position 上而不是 .bg 的 transform——app.js 的
+   applyTiming 拿舞台上第一个带动画的元素当基准时长，多塞一条会把面板入场时长一起算歪 */
+.glasswrap .bg.colorful { opacity: 1; }
+.glasswrap .bg.colorful::after {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(74deg, rgba(255, 255, 255, .78) 0 9px, transparent 9px 30px),
+              repeating-linear-gradient(90deg, rgba(18, 12, 30, .5) 0 3px, transparent 3px 34px);
+  animation: glassdrift 4.2s linear infinite alternate;
+}
+@keyframes glassdrift { from { background-position: 0 0, 0 0; } to { background-position: 96px 0, -96px 0; } }
 .obj.glass { width: 118px; height: 62px; display: grid; place-items: center; font-size: 12px; font-family: var(--mono); color: var(--ink); background: color-mix(in srgb, #fff 52%, transparent); backdrop-filter: blur(14px) saturate(1.5); border: 1px solid rgba(255, 255, 255, .8); border-radius: 14px; }
 [data-theme=ember] .obj.glass { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .18); }
 
-.obj.glass.edge { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35); }
+/* 玻璃材质常驻：1px 描边 + 顶部内高光 + 底部内衬光，入场动画只管面板出现 */
+.obj.glass.edge { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .42), inset 0 0 0 1px rgba(255, 255, 255, .12), 0 10px 22px -14px rgba(12, 8, 24, .5); }
 .dof { display: flex; gap: 8px; align-items: center; }
 .dof .card { width: 54px; height: 40px; }
 .dof .near { background: var(--accent); }
@@ -704,6 +753,23 @@ html.has-page { overflow: hidden; }
 .dof .far { background: var(--muted); }
 .rack { display: flex; gap: 14px; align-items: center; font-family: var(--disp); font-size: 26px; }
 .gl, .chroma { font-family: var(--disp); font-weight: 700; letter-spacing: .04em; }
+/* 故障入场：偏色副本各切上半/下半、按入场进度反向错开，扫描线随进度一起退场。
+   偏移量和透明度读的都是入场那条动画写下的自定义属性，所以伪元素不用另配一份时序，
+   慢放、重播、时长滑块会自动一起生效 */
+@property --glitch-x { syntax: '<length>'; inherits: true; initial-value: 0px; }
+@property --glitch-a { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --glitch-line { syntax: '<number>'; inherits: true; initial-value: 0; }
+.obj.txt.glitch {
+  font-weight: 700;
+  background-image: repeating-linear-gradient(0deg,
+    color-mix(in srgb, currentColor calc(var(--glitch-line) * 46%), transparent) 0 1px, transparent 1px 4px);
+}
+.glitch::before, .glitch::after {
+  content: attr(data-text); position: absolute; left: 0; top: 0;
+  opacity: var(--glitch-a); pointer-events: none;
+}
+.glitch::before { color: rgba(255, 60, 120, .82); clip-path: inset(0 0 52% 0); transform: translateX(var(--glitch-x)); }
+.glitch::after { color: rgba(60, 200, 255, .82); clip-path: inset(48% 0 0 0); transform: translateX(calc(var(--glitch-x) * -.62)); }
 .num { font-family: var(--mono); font-size: 22px; font-variant-numeric: tabular-nums; }
 .num.notab { font-variant-numeric: proportional-nums; }
 .caret-demo { display: flex; align-items: center; gap: 2px; }
@@ -711,10 +777,19 @@ html.has-page { overflow: hidden; }
 .obj.link::after { transform: scaleX(0); }
 .obj.txt.hl { background: linear-gradient(var(--accent), var(--accent)) 0 76% / 0% 40% no-repeat; padding: 0 3px; }
 .obj.field.focus-demo, .focus-demo { outline: 2px solid transparent; }
+/* 焦点环的定义约束就是「只在 :focus-visible 出现」，所以引擎给的那份无条件循环
+   改成停在 0% 备用：键盘焦点进来才放行这 180ms，离开时描边必须压回透明
+   （!important 是必要的——已结束动画的 both 填充值优先级高于普通声明） */
+.stage .obj.focus-demo:not(:focus-visible) {
+  animation-play-state: paused;
+  outline-color: transparent !important;
+  outline-offset: 4px !important;
+}
+.stage .obj.focus-demo:focus-visible { animation-play-state: running; }
 .tilt-target { transition: transform .35s cubic-bezier(.16, 1, .3, 1); }
 .magnet { transition: transform .4s cubic-bezier(.16, 1, .3, 1); }
 .origin-demo { transform-origin: center; }
-.stage:has(.dfield), .stage:has(.thumbs), .stage:has(.scrolly), .stage:has(.cp) { cursor: inherit; }
+.stage:has(.dfield), .stage:has(.thumbs), .stage:has(.scrolly), .stage:has(.sj), .stage:has(.cp) { cursor: inherit; }
 :focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
 /* 原则类舞台的附属部件 */
 .follow { display: flex; align-items: center; }
@@ -746,6 +821,29 @@ html.has-page { overflow: hidden; }
 .rv { display: grid; place-items: center; height: 62px; margin: 10px 12px; border-radius: 9px; background: var(--panel); border: 1px solid var(--line-soft); font-size: 12.5px; color: var(--ink-2); opacity: 0; transform: translateY(22px); transition: opacity .5s cubic-bezier(.16, 1, .3, 1), transform .5s cubic-bezier(.16, 1, .3, 1); }
 .rv.on { opacity: 1; transform: none; }
 .scrolly[data-mode=driven] .rv { transition: none; }
+/* 滚动监听开销：和 scroll-driven 共用一个舞台时读者看不出这条在讲什么，所以给它
+   一个真对照组——同一个滚动进度驱动两条等长行程（46px，写死 px 才保证两边真的等长）
+   的轨道：上条只改 transform（合成线程就能画完），下条每帧改 margin（每帧回主线程
+   重排）。进度用 CSS 滚动驱动动画绑定，正好不挂 scroll 监听，是这条术语的正面答案。
+   下条的 steps(6) 是「掉帧」的示意：真主线程被堵多久取决于机器，演示不能赌它。
+   时长写 1s 而不是 auto：applyTiming 会把 parseFloat 失败的 'auto' 写成 0s。 */
+.sj { position: relative; width: 100%; height: 100%; overflow: hidden auto; overscroll-behavior: contain; border-radius: 9px; background: var(--bg-2); scrollbar-width: thin; }
+.sj::-webkit-scrollbar { width: 6px; }
+.sj::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+.sj-run { display: block; height: 420px; }
+.sj-row {
+  position: sticky; display: flex; align-items: center; width: 84px; height: 30px; padding: 0 9px;
+  border-radius: 8px; font: 10px/1 var(--mono); font-style: normal; white-space: nowrap;
+}
+.sj-row.a { top: 10px; background: var(--accent); color: var(--accent-ink); }
+.sj-row.b { top: 46px; background: var(--obj-b); color: var(--ink); }
+@supports (animation-timeline: scroll()) {
+  .sj-row { animation-duration: 1s; animation-fill-mode: both; animation-timeline: scroll(nearest block); }
+  .sj-row.a { animation-name: sjx; animation-timing-function: linear; }
+  .sj-row.b { animation-name: sjg; animation-timing-function: steps(6); }
+}
+@keyframes sjx { from { transform: translateX(0); } to { transform: translateX(46px); } }
+@keyframes sjg { from { margin-left: 0; } to { margin-left: 46px; } }
 .plx { position: absolute; left: 0; right: 0; display: grid; place-items: center; font-family: var(--mono); font-size: 11px; height: 60px; border-radius: 8px; }
 .plx.far { top: 20px; background: color-mix(in srgb, var(--obj-b) 30%, transparent); color: var(--ink-2); }
 .plx.mid { top: 110px; background: color-mix(in srgb, var(--obj-b) 60%, transparent); }
@@ -929,6 +1027,45 @@ html.has-page { overflow: hidden; }
 .fps-t { display: block; font-family: var(--mono); font-size: 9.5px; font-style: normal; color: var(--muted); text-align: center; }
 .spark { display: flex; gap: 2px; height: 26px; align-items: flex-end; justify-content: center; }
 .spark i { width: 3px; height: 100%; background: var(--accent); border-radius: 2px; transform-origin: bottom; transform: scaleY(var(--h, .5)); }
+/* 感知性能：乐观更新。状态先变、服务器后到，两件事分开显示才讲得清「感知」 */
+.opt { width: 100%; max-width: 340px; display: grid; gap: 8px; }
+.orow {
+  display: grid; grid-template-columns: 1fr auto; gap: 1px 10px; align-items: center;
+  padding: 9px 11px; border: 1px solid var(--line); border-radius: 11px; background: var(--panel-2);
+  transition: transform .18s var(--ease-out), border-color .2s, background .2s;
+}
+.orow:active { transform: scale(.985); }
+.orow > b { font: 600 12.5px var(--body); }
+.orow > s { color: var(--muted); font: 10.5px/1.4 var(--body); text-decoration: none; }
+.orow .obtn { grid-column: 2; grid-row: 1 / span 2; justify-self: end; }
+.orow .ost { grid-column: 1 / -1; padding-top: 5px; color: var(--muted); font: 500 10px var(--mono); }
+.orow.is-done { border-color: color-mix(in srgb, var(--ok) 42%, transparent); background: color-mix(in srgb, var(--ok) 9%, var(--panel-2)); }
+.orow.is-synced .ost { color: var(--ok); }
+
+/* 有目的的动效：同一次操作，左边带来源、右边只换字 */
+.ppair { display: flex; gap: 12px; align-items: flex-start; }
+.pcar {
+  position: relative; flex: none; display: grid; gap: 7px; width: 148px; padding: 10px;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--panel-2);
+}
+.pcar > em { color: var(--muted); font: 500 9.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; font-style: normal; }
+.pslot {
+  display: grid; place-items: center; height: 44px; border: 1px dashed var(--line); border-radius: 9px;
+  font: 600 12px var(--body); color: var(--ink-2);
+}
+.pslot.flash { animation: p-slot-flash .5s var(--ease-out); }
+@keyframes p-slot-flash { from { background: color-mix(in srgb, var(--accent) 24%, transparent); } to { background: transparent; } }
+.pitems { display: grid; gap: 5px; }
+.pitems s {
+  padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel);
+  font: 500 11px var(--body); text-decoration: none; cursor: pointer;
+}
+.pghost {
+  position: absolute; display: grid; place-items: center; padding: 6px 8px;
+  border: 1px solid var(--accent); border-radius: 8px; background: var(--panel);
+  font: 500 11px var(--body); color: var(--ink); pointer-events: none; will-change: transform;
+}
+
 .bench { width: 100%; display: grid; gap: 7px; }
 .bench .run { justify-self: start; }
 .brow { display: grid; grid-template-columns: 62px 1fr 54px; gap: 8px; align-items: center; font-size: 11px; }
@@ -963,6 +1100,8 @@ html.has-page { overflow: hidden; }
   border-radius: 8px; background: var(--accent); font-family: var(--mono); font-size: 10px;
   color: var(--accent-ink); font-style: normal; white-space: nowrap;
 }
+/* 行要跑 90px，就得先把这 90px 让出来：不留空档的话 translateX 直接把舞台撑出横向溢出 */
+.wc i { max-width: calc(100% - 92px); }
 .wc .wc-b { background: var(--obj-b); color: var(--ink); }
 /* compositing 的 A 侧必须完全交给 CSS：JS 逐帧写就不算“留在合成线程” */
 .stage.kind-perf .wc-a { animation: wc-slide 3s cubic-bezier(.37,0,.63,1) infinite alternate both; will-change: auto; }
@@ -1005,14 +1144,18 @@ html.has-page { overflow: hidden; }
 @keyframes tkdot { from { transform: translate(0, 0); } to { transform: translate(22px, -16px); } }
 .cvbox { padding: 0; background: none; }
 .cvlist { width: 100%; display: grid; gap: 5px; padding: 6px; }
-.cvi { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line-soft); background: var(--panel); font-size: 10.5px; }
+/* 一条规则搞定：后一份 .cvi 把 display 改回 grid 居中，标签被拆成两行居中，
+   perf:cv 的「普通区块 vs CV」反而读不出来，高度也和 contain-intrinsic-size 对不上 */
+.cvi {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px; min-height: 30px;
+  padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line-soft); background: var(--panel);
+  font-size: 10.5px; font-style: normal; color: var(--muted);
+}
 .cvi b { font-weight: 400; font-family: var(--mono); font-size: 10px; color: var(--ink-2); }
 .cvi s { text-decoration: none; color: var(--muted); font-size: 9.5px; white-space: nowrap; }
 /* 真的挂上 CV：跳过渲染时这一格高度由 intrinsic-size 撑住，滚动条会出现可感知的跳动 */
-.cvi.cv { contain-intrinsic-size: auto 30px; background: color-mix(in srgb, var(--accent) 8%, var(--panel)); border-color: color-mix(in srgb, var(--accent) 28%, transparent); }
+.cvi.cv { contain-intrinsic-size: auto 30px; background: color-mix(in srgb, var(--accent) 8%, var(--panel)); border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
 .stage:has(.cvbox) .cvi.cv { content-visibility: auto; }
-.cvi { display: grid; place-items: center; min-height: 46px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line-soft); font-size: 10.5px; font-family: var(--mono); font-style: normal; color: var(--muted); }
-.cvi.cv { border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); color: var(--ok); }
 
 /* ---------------- 配方抽屉 ---------------- */
 .recipe {
@@ -1343,7 +1486,7 @@ html.has-page { overflow: hidden; }
 .term--detail .pk-l u { height: 9px; }
 .term--detail .vx-space { perspective: 620px; border-radius: var(--r-lg); }
 .term--detail .vx-field { width: 460px; height: 460px; }
-.term--detail .vx-r { width: 350px; height: 350px; border-width: 3px; }
+.term--detail .vx-r { border-width: 3px; }
 .term--detail .vx-st { width: 4px; height: 44px; margin: -22px 0 0 -2px; transform-origin: 50% 22px; }
 .term--detail .vx-core { width: 44px; height: 44px; margin: -22px 0 0 -22px; }
 .term--detail .hs-pin { border-radius: var(--r-lg); }
@@ -1460,8 +1603,10 @@ html.has-page { overflow: hidden; }
 /* 7. 滚动驱动涡旋穿隧 */
 .vx-space { position: sticky; top: 0; display: grid; place-items: center; height: 100%; perspective: 460px; perspective-origin: 50% 50%; overflow: hidden; border-radius: var(--r-md); background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--accent) 22%, var(--bg-2)), var(--bg-2) 72%); }
 .vx-field { position: relative; display: block; width: 260px; height: 260px; transform-style: preserve-3d; will-change: transform; }
+/* 环径按场的百分比给（--rs 是卡片上的尺寸滑块）：卡片 260px、详情页 460px，
+   写死像素就得为两个尺寸各维护一份 */
 .vx-r {
-  position: absolute; inset: 0; margin: auto; width: 200px; height: 200px; border-radius: 50%;
+  position: absolute; inset: 0; margin: auto; width: var(--rs, 76%); height: var(--rs, 76%); border-radius: 50%;
   border: 2px solid var(--accent-2); will-change: transform, opacity;
   box-shadow: 0 0 22px -6px color-mix(in srgb, var(--accent) 60%, transparent) inset;
 }
@@ -1917,7 +2062,9 @@ html.has-page { overflow: hidden; }
 .pf-row s { text-decoration: none; opacity: .5; }
 .pf-row.on { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); border-color: var(--accent); color: var(--ink); transform: translateX(5px); }
 .pf-card {
-  position: relative; display: grid; gap: 5px; justify-items: center; padding: 8px; border-radius: 14px;
+  /* 卡片贴右缘时，跟随位移 + 倾斜会把右边 20px 裁进舞台边缘，留一点回缩空间 */
+  position: relative; margin-inline-end: 18px;
+  display: grid; gap: 5px; justify-items: center; padding: 8px; border-radius: 14px;
   border: 1px solid var(--line-soft); background: var(--bg); opacity: .96; box-shadow: 0 16px 32px -16px rgba(20, 16, 36, .55);
   will-change: transform; transition: opacity .26s;
 }
@@ -2079,14 +2226,10 @@ html[data-dir=prev]::view-transition-new(ml-body) { animation: ml-in-l .36s var(
 }
 
 /* ---------------- 响应式 ---------------- */
-/* 1440 这一段三栏还塞得下但已经贴边，先把贝塞尔编辑栏挪到第二行整宽 */
-@media (max-width: 1440px) {
-  .lab-grid { grid-template-columns: minmax(190px, 250px) minmax(0, 1fr); }
-  .curve-out { grid-column: span 2; }
-}
+/* 窄一点但仍要三栏：把右侧「曲线 + 代码」栏收一档让给中间那栏，
+   否则中间（预览 + 时长/距离/动什么 + 四个控制点）会被挤到 248px，比右边还窄。 */
 @media (max-width: 1180px) {
-  .lab-grid { grid-template-columns: 1fr 1fr; }
-  .curve-out { grid-column: span 2; }
+  .lab-grid { grid-template-columns: minmax(178px, 210px) minmax(0, 1.3fr) minmax(230px, 300px); }
 }
 @media (max-width: 900px) {
   .lede { grid-template-columns: 1fr; }
@@ -2490,14 +2633,16 @@ h1, h2 { font-weight: 560; }
 .dr-door::after { content: ""; position: absolute; top: 53%; width: 15px; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--accent-ink) 88%, transparent); }
 .dr-door.tl { left: 0; top: 0; transform-origin: left center; border-radius: 14px 3px 3px 3px; }
 .dr-door.tr { right: 0; top: 0; transform-origin: right center; border-radius: 3px 14px 3px 3px; }
-.dr-door.bl { left: 0; bottom: 0; transform-origin: left center; border-radius: 3px 3px 3px 14px; transition-delay: .05s; }
-.dr-door.br { right: 0; bottom: 0; transform-origin: right center; border-radius: 3px 3px 14px 3px; transition-delay: .05s; }
+.dr-door.bl { left: 0; bottom: 0; transform-origin: left center; border-radius: 3px 3px 3px 14px; transition-delay: var(--stg, 45ms); }
+.dr-door.br { right: 0; bottom: 0; transform-origin: right center; border-radius: 3px 14px 3px 3px; transition-delay: var(--stg, 45ms); }
 .dr-door.tl::after, .dr-door.bl::after { right: 13px; }
 .dr-door.tr::after, .dr-door.br::after { left: 13px; }
-.cp-bloom.open .dr-door.tl { transform: rotateY(-104deg); }
-.cp-bloom.open .dr-door.tr { transform: rotateY(104deg); }
-.cp-bloom.open .dr-door.bl { transform: rotateY(-104deg); }
-.cp-bloom.open .dr-door.br { transform: rotateY(104deg); }
+/* 开度与错峰都是卡片上的滑块：app.js 的 initCtl 会把 <key> 直接写成 --<key>，
+   所以这里读 var(--op) / var(--stg) 就够了，不需要再经一遍 JS */
+.cp-bloom.open .dr-door.tl { transform: rotateY(calc(-1 * var(--op, 88deg))); }
+.cp-bloom.open .dr-door.tr { transform: rotateY(var(--op, 88deg)); }
+.cp-bloom.open .dr-door.bl { transform: rotateY(calc(-1 * var(--op, 88deg))); }
+.cp-bloom.open .dr-door.br { transform: rotateY(var(--op, 88deg)); }
 .cp-bloom.open .dr-glow { opacity: 1; }
 .cp-bloom.open .dr-cabin .dr-brand { text-shadow: 0 0 38px var(--accent); }
 .term--detail .dr-scene { width: 280px; height: 216px; }
@@ -2912,3 +3057,20 @@ h1, h2 { font-weight: 560; }
 }
 
 /* final restore for gaze after all legacy detail rules */
+
+/* Keyboard users can skip the persistent header and search controls. */
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: .75rem;
+  z-index: 1000;
+  transform: translateY(-180%);
+  padding: .55rem .8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--ink);
+  font: 600 .78rem/1 var(--sans);
+  transition: transform .2s ease;
+}
+.skip-link:focus { transform: translateY(0); }

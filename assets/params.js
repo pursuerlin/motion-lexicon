@@ -17,6 +17,10 @@
   const stag = function (max, v) {
     return { p: 'st', l: '错峰', min: 0, max: max, step: 5, v: v, u: 'ms' };
   };
+  /* 默认值优先读词条里那份 d/st：词条改一次数字，滑块不用再改第二遍。
+     两处写死必然漂移——这次审计就抓到 6 条滑块默认值和 demo 定义不一致。 */
+  const dataD = function (id, fb) { const d = (byId[id] || {}).demo || {}; return d.d ? parseFloat(d.d) : fb; };
+  const dataSt = function (id, fb) { const d = (byId[id] || {}).demo || {}; return d.st == null ? fb : +d.st; };
   const num = function (p, l, min, max, v, step, u) {
     return { p: p, l: l, min: min, max: max, step: step == null ? 1 : step, v: v, u: u || '' };
   };
@@ -38,24 +42,24 @@
   give('stiffness', [num('k', '刚度 k', 40, 420, 260), num('c', '阻尼 c', 2, 60, 20)]);
   give('damping', [num('c', '阻尼 c', 1, 60, 8), num('k', '刚度 k', 40, 420, 180)]);
   give('mass', [num('m', '质量 m', 0.2, 8, 4, 0.1), num('k', '刚度 k', 40, 420, 200)]);
-  give('stepped', [dur(400, 3200, 1200, 50)]);
+  give('stepped', [dur(400, 3200, dataD('stepped', 1200), 50)]);
 
   /* ---------- 02 时长与时序 ---------- */
-  give('duration', [dur(120, 2000, 520)]);
-  give('delay', [stag(500, 240), dur(120, 1200, 420)]);
-  give('stagger', [stag(260, 70), dur(120, 1200, 460)]);
-  give('orchestration', [stag(260, 110), dur(200, 1600, 700)]);
-  give('timing-scale', [stag(260, 90)]);
-  give('iteration', [dur(160, 1600, 520)]);
+  give('duration', [dur(120, 2000, dataD('duration', 520))]);
+  give('delay', [stag(500, dataSt('delay', 60)), dur(120, 1200, dataD('delay', 420))]);
+  give('stagger', [stag(260, dataSt('stagger', 40)), dur(120, 1200, dataD('stagger', 460))]);
+  give('orchestration', [stag(260, dataSt('orchestration', 110)), dur(200, 1600, dataD('orchestration', 700))]);
+  give('timing-scale', [stag(260, dataSt('timing-scale', 90))]);
+  give('iteration', [dur(160, 1600, dataD('iteration', 520))]);
   give('playback-rate', [dur(400, 3200, 1600, 50)]);
-  give('fill-mode', [dur(120, 1600, 420)]);
+  give('fill-mode', [dur(120, 1600, dataD('fill-mode', 420))]);
 
   /* ---------- 03 入场 ---------- */
   ['fade-in', 'slide-in', 'scale-in', 'pop-in', 'drop-in'].forEach(function (id) {
     give(id, [dur(120, 1600, byId[id].demo.d ? parseFloat(byId[id].demo.d) : 460)]);
   });
   give('bounce-in', [dur(300, 2400, 900, 50)]);
-  give('rise-in', [stag(240, 80), dur(120, 1400, 480)]);
+  give('rise-in', [stag(240, dataSt('rise-in', 80)), dur(120, 1400, dataD('rise-in', 240))]);
   ['clip-reveal', 'blur-in', 'flip-in', 'stack-in', 'glitch-in'].forEach(function (id) {
     give(id, [dur(160, 2000, parseFloat(byId[id].demo.d) || 700)]);
   });
@@ -85,22 +89,22 @@
   give('hover-lift', [dur(60, 700, 220, 10)]);
   give('hover-zoom', [dur(80, 900, 420, 10)]);
   give('underline-expand', [dur(60, 700, 280, 10)]);
-  give('press-feedback', [dur(40, 500, 90, 10)]);
-  give('focus-ring', [dur(40, 500, 180, 10)]);
-  give('shake', [dur(120, 1400, 520)]);
-  give('nudge', [dur(160, 1600, 620)]);
-  give('pulse', [dur(500, 5000, 1800, 50)]);
-  give('skeleton', [dur(500, 4000, 1600, 50)]);
-  give('progress-bar', [dur(400, 4000, 1600, 50)]);
-  give('toast-in', [dur(600, 5000, 2400, 50)]);
+  give('press-feedback', [dur(40, 500, dataD('press-feedback', 90), 10)]);
+  give('focus-ring', [dur(40, 500, dataD('focus-ring', 180), 10)]);
+  give('shake', [dur(120, 1400, dataD('shake', 440))]);
+  give('nudge', [dur(160, 1600, dataD('nudge', 620))]);
+  give('pulse', [dur(500, 5000, dataD('pulse', 1800), 50)]);
+  give('skeleton', [dur(500, 4000, dataD('skeleton', 1600), 50)]);
+  give('progress-bar', [dur(400, 4000, dataD('progress-bar', 1600), 50)]);
+  give('toast-in', [dur(600, 5000, dataD('toast-in', 2400), 50)]);
 
   /* ---------- 09 循环与环境动效 ---------- */
-  give('loop', [dur(600, 6000, 2400, 50)]);
-  give('marquee', [dur(1200, 16000, 6000, 100)]);
-  give('orbit', [dur(1000, 12000, 4200, 100)]);
-  give('float', [dur(800, 8000, 2600, 50)]);
-  give('idle-breathing', [dur(800, 8000, 2800, 50)]);
-  give('spinner', [dur(300, 3000, 900)]);
+  give('loop', [dur(600, 6000, dataD('loop', 2400), 50)]);
+  give('marquee', [dur(1200, 16000, dataD('marquee', 6000), 100)]);
+  give('orbit', [dur(1000, 12000, dataD('orbit', 4200), 100)]);
+  give('float', [dur(800, 8000, dataD('float', 3200), 50)]);
+  give('idle-breathing', [dur(800, 8000, dataD('idle-breathing', 4500), 50)]);
+  give('spinner', [dur(300, 3000, dataD('spinner', 900))]);
 
   /* ---------- 12 镜头与叙事 ---------- */
   give('dolly', [dur(600, 6000, 2200, 50)]);
@@ -110,10 +114,12 @@
   give('zoom-through', [dur(400, 4000, 1600, 50)]);
 
   /* ---------- 13 动画原则 ---------- */
+  /* 步长要能整除词条里那份 d：secondary-action 是 620ms，50ms 一档时浏览器会
+     吸附到 600，卡片上写的数和滑块真实值就成了两个数。用默认 20ms。 */
   ['squash-stretch', 'anticipation', 'follow-through', 'secondary-action', 'slow-in-out', 'arc', 'exaggeration', 'staging']
     .forEach(function (id) {
       if (!byId[id] || !byId[id].demo || !byId[id].demo.frames) return;
-      give(id, [dur(200, 4000, parseFloat(byId[id].demo.d) || 1000, 50)]);
+      give(id, [dur(200, 4000, parseFloat(byId[id].demo.d) || 1000)]);
     });
 
   /* ---------- 10 文字动效 / 11 润色与特效 ---------- */
@@ -144,15 +150,15 @@
   give('scene-parallax', [num('fx', '位移', 3, 22, 9, 1), num('rot', '偏转', 0, 14, 5, 1, 'deg')]);
   give('luminous-flow', [num('g', '雾增益', 2, 24, 9, 1), num('bz', '推镜', 0, 16, 6, 1, '%')]);
   give('helix-flow', [num('rr', '半径', 18, 96, 58, 2, 'px'), num('sp', '自转', 0, 20, 6, 1)]);
-  give('vortex-transit', [num('sp', '圈速', 0.4, 4, 1.7, 0.1), num('rs', '尺寸', 40, 110, 76, 2, 'px')]);
-  give('door-bloom', [num('stg', '错峰', 0, 160, 45, 5, 'ms'), num('op', '开度', 20, 88, 64, 2, 'deg')]);
+  give('vortex-transit', [num('sp', '圈速', 0.4, 4, 1.7, 0.1), num('rs', '尺寸', 40, 110, 76, 2, '%')]);
+  give('door-bloom', [num('stg', '错峰', 0, 160, 45, 5, 'ms'), num('op', '开度', 20, 96, 88, 2, 'deg')]);
   give('card-peel', [num('sz', '角', 14, 60, 34, 2, 'px')]);
   give('hover-fan', [num('spread', '展开', 6, 40, 23, 1, 'px'), num('rot', '角度', 0, 26, 12, 1, 'deg')]);
   give('scrub-frames', [num('nf', '帧数', 6, 48, 24, 1)]);
   give('scroll-orbit', [num('tn', '圈数', 0.5, 4, 1, 0.1)]);
   give('pinned-hero', [num('es', '收缩', 0.4, 0.98, 0.74, 0.01)]);
   give('section-stack', [num('step', '层距', 4, 34, 14, 1, 'px')]);
-  give('fab-to-sheet', [num('w', '展开宽', 110, 230, 178, 5, 'px'), num('h', '展开高', 60, 140, 106, 5, 'px')]);
+  give('fab-to-sheet', [num('w', '展开宽', 110, 230, 178, 2, 'px'), num('h', '展开高', 60, 140, 106, 2, 'px')]);
   give('button-tri-state', [num('ld', '处理时长', 300, 3000, 1250, 50, 'ms')]);
   give('horizontal-scroll', [num('sk', '位移', 0, 160, 100, 5, '%')]);
   give('immersive-float', [num('sp', '生长时长', 200, 1600, 620, 20, 'ms')]);
@@ -161,7 +167,7 @@
   give('line-mask-reveal', [num('gp', '行间隔', 4, 26, 13, 1, '%')]);
   give('velocity-skew', [num('sk', '倾斜', 8, 90, 34, 2)]);
   give('proximity-glow', [num('r', '半径', 16, 80, 42, 2, '%'), num('sm', '跟随', 4, 40, 12, 1)]);
-  give('liquid-follow', [num('sm', '弹性', 4, 30, 14, 1), num('st', '拉伸', 6, 40, 18, 1)]);
+  give('liquid-follow', [num('sm', '弹性', 4, 30, 14, 1), num('sx', '拉伸', 6, 40, 18, 1)]);
   give('chart-build', [num('mx', '峰值', 40, 400, 128, 8)]);
   give('preview-follow', [num('sm', '跟随', 6, 34, 16, 1)]);
   give('throw-dismiss', [num('rot', '旋转', 2, 16, 7, 1)]);

@@ -10,13 +10,15 @@ window.MOTION = (function () {
 
   /* ---------------- 公共工具 ---------------- */
   function watch(el, fn) {
-    /* 节点被移出 DOM（详情页逐出）后自动把自己从主循环里摘掉，
-       否则 ticker 闭包会一直强引用节点，每帧空跑还挡 GC */
+    /* 离开 DOM 有两种：LRU 逐出（真的没了）和详情页关闭（还会再打开）。
+       原来只要 !isConnected 就把自己从主循环摘掉，于是缓存里的节点再打开时
+       演示是死的——jank 的轨道、描边的路径都会永久停摆，而且不报错。
+       现在改成「离开就停摆、回来就继续」，真正的销毁由 ENGINE.dropDetail 统一摘。 */
     const u = function (now) {
-      if (!el.isConnected) { window.ENGINE.tickers.delete(u); return; }
-      if (window.ENGINE.isVisible(el)) fn(now);
+      if (el.isConnected && window.ENGINE.isVisible(el)) fn(now);
     };
     window.ENGINE.tickers.add(u);
+    (el._watchers || (el._watchers = [])).push(u);
     return u;
   }
   function cycle(el, period, fn) {
@@ -656,6 +658,19 @@ window.MOTION = (function () {
       '<div class="dropwrap"><div class="droprow"><label>帧轨道</label><i class="frames"></i></div>' +
       '<div class="droprow"><label>有效帧占比</label><i class="dropbar"><b></b></i></div>' +
       '<p class="bnote">一格 = 一帧：绿色是按时画出的，矮灰格就是被跳过的。不注入长任务时这台机器跑满 60fps，轨道会一直是全绿。</p></div></div>';
+    /* perceived：乐观更新。UI 的答案和服务器真正回来的时间，分开给，才看得见「感知」二字 */
+    const PB = '点一下：状态立刻变（这是 UI 给的答案），右下角那行才是服务器真正回来的时间。同样的网络，用户感知到的等待是前者。';
+    if (mode === 'perceived') return '<div class="opt">' + [['离线缓存', '下次打开立刻可读'], ['协作光标', '先画自己的，再收别人的'], ['表单校验', '先给结论，请求慢慢回']]
+      .map(function (x) { return '<i class="orow"><b data-l10n="' + x[0] + '">' + x[0] + '</b><s data-l10n="' + x[1] + '">' + x[1] + '</s>' +
+        '<button type="button" class="mini obtn" data-l10n="完成">完成</button><u class="ost" data-l10n="待处理">待处理</u></i>'; }).join('') +
+      '</div><p class="bnote" data-l10n="' + PB + '">' + PB + '</p>';
+    /* purpose：同一次操作，左边带来源、右边只换字。关掉动效谁损失信息，一目了然 */
+    const PU = '左：点任意一条，它会飞进上面的框，你因此知道这块内容从哪来。右：同样的操作只换文字。把动效都关掉，左边失去信息、右边什么都不少 —— 这就是「有没有目的」的判据。';
+    if (mode === 'purpose') return '<div class="ppair">' + [['src', '有连续性'], ['fade', '只有装饰']]
+      .map(function (c) { return '<i class="pcar" data-why="' + c[0] + '"><em data-l10n="' + c[1] + '">' + c[1] + '</em>' +
+        '<b class="pslot" data-l10n="详情">详情</b><u class="pitems">' +
+        ['来源 A', '来源 B', '来源 C'].map(function (t) { return '<s data-l10n="' + t + '">' + t + '</s>'; }).join('') + '</u></i>'; }).join('') +
+      '</div><p class="bnote" data-l10n="' + PU + '">' + PU + '</p>';
     /* jank：两条同样行程的轨道，B 侧每帧插一段真的长任务 */
     return '<div class="jank"><i class="j-a">transform · 顺滑</i><i class="j-b">强制同步布局 · 卡顿</i></div>' +
       '<p class="bnote">同一段行程：A 只动 transform，B 每帧写样式后立刻读几何，主线程被堵</p>';
@@ -754,6 +769,54 @@ window.MOTION = (function () {
         b1.style.willChange = (p > .03 && p < .97) ? 'transform' : 'auto';
         b1.style.transform = 'translateX(' + x + ')';
         a1.style.transform = 'translateX(' + x + ')';
+      });
+    }
+
+    if (mode === 'perceived') {
+      /* 这三条是运行时改写的文本，data-l10n 那套只认静态挂载点，所以自己按语言取 */
+      const isEn = function () { return window.I18N && window.I18N.lang === 'en'; };
+      /* 可逆：再点一次撤回，同样是「先给结果」。不需要额外的重置按钮 */
+      $$('.orow', stage).forEach(function (row) {
+        const btn = $('.obtn', row), st = $('.ost', row);
+        let timer = 0;
+        btn.addEventListener('click', function () {
+          const on = row.classList.toggle('is-done');
+          row.classList.remove('is-synced');
+          btn.textContent = isEn() ? (on ? 'Undo' : 'Done') : (on ? '撤回' : '完成');
+          st.textContent = isEn() ? 'Syncing…' : '同步中…';
+          clearTimeout(timer);
+          const wait = 700 + Math.round(Math.random() * 800);
+          timer = setTimeout(function () {
+            row.classList.add('is-synced');
+            st.textContent = isEn() ? (on ? 'Saved · server replied after ' : 'Reverted · server replied after ') + wait + 'ms'
+              : (on ? '已保存 · ' : '已撤回 · ') + wait + 'ms 后才回来';
+          }, wait);
+        });
+      });
+    }
+
+    if (mode === 'purpose') {
+      $$('.pcar', stage).forEach(function (car) {
+        const slot = $('.pslot', car), fly = car.dataset.why === 'src';
+        $$('.pitems s', car).forEach(function (it) {
+          it.addEventListener('click', function () {
+            slot.textContent = it.textContent;
+            slot.classList.remove('flash'); void slot.offsetWidth; slot.classList.add('flash');
+            if (!fly) return;
+            const cr = stage.getBoundingClientRect(), a = it.getBoundingClientRect(), b = slot.getBoundingClientRect();
+            const g = document.createElement('i');
+            g.className = 'pghost'; g.textContent = it.textContent;
+            g.style.left = (a.left - cr.left) + 'px'; g.style.top = (a.top - cr.top) + 'px';
+            g.style.width = a.width + 'px'; g.style.height = a.height + 'px';
+            stage.appendChild(g);
+            const dx = (b.left + b.width / 2) - (a.left + a.width / 2);
+            const dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+            const an = g.animate([{ transform: 'translate(0,0) scale(1)', opacity: .95 },
+              { transform: 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px) scale(' + (b.width / a.width).toFixed(3) + ')', opacity: .3 }],
+              { duration: 420, easing: 'cubic-bezier(0.16,1,0.3,1)' });
+            an.onfinish = function () { g.remove(); };
+          });
+        });
       });
     }
 

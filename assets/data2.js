@@ -103,7 +103,7 @@ window.TERMS.push(
     say: 'shake：x 位移 3 次衰减，400ms',
     def: '左右快速衰减抖动，表示拒绝或错误。是人类摇头动作的抽象，因此只能用在失败反馈上；频率高、时长短（<500ms）。',
     code: '@keyframes shake { 20%{transform:translateX(-8px)} 40%{translateX(6px)} 60%{-4px} 80%{2px} }',
-    demo: { kind: 'frames', html: '<div class="obj field">错误密码</div>', frames: [[0, 'transform:translateX(0)'], [15, 'transform:translateX(-10px)'], [35, 'transform:translateX(8px)'], [55, 'transform:translateX(-5px)'], [75, 'transform:translateX(3px)'], [100, 'transform:translateX(0)']], e: 'ease-in-out', d: '520ms', hint: '每次进入自动重播' }
+    demo: { kind: 'frames', html: '<div class="obj field">错误密码</div>', frames: [[0, 'transform:translateX(0)'], [15, 'transform:translateX(-10px)'], [35, 'transform:translateX(8px)'], [55, 'transform:translateX(-5px)'], [75, 'transform:translateX(3px)'], [100, 'transform:translateX(0)']], e: 'ease-in-out', d: '440ms', hint: '每次进入自动重播' }
   },
   {
     id: 'nudge', en: 'Nudge / Wiggle', zh: '轻推提示', cat: 'feedback',
@@ -130,7 +130,7 @@ window.TERMS.push(
     say: ':focus-visible 显示 2px outline + offset',
     def: '键盘导航时显示的可见焦点。它是无障碍的强制项而不是可选装饰；只在 focus-visible（键盘触发）时显示，避免鼠标点击也出现描边。',
     code: ':focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }',
-    demo: { kind: 'frames', html: '<div class="obj btn focus-demo">Tab 我</div>', frames: [[0, 'outline-offset:6px; outline-color:transparent'], [100, 'outline-offset:2px; outline-color:currentColor']], e: 'ease-out', d: '180ms', loop: true, alt: true, focusfx: true }
+    demo: { kind: 'frames', html: '<div class="obj btn focus-demo" tabindex="0">Tab 我</div>', frames: [[0, 'outline-offset:6px; outline-color:transparent'], [100, 'outline-offset:2px; outline-color:var(--accent)']], e: 'ease-out', d: '180ms', hint: '按 Tab 把焦点移进来' }
   },
   {
     id: 'cursor-magnet', en: 'Magnetic hover', zh: '磁吸跟随', cat: 'feedback',
@@ -166,7 +166,7 @@ window.TERMS.push(
     say: 'toast：translateY+fade 240ms，4s 后 ease-in 退场',
     def: '临时通知的进出场。要点：从屏幕边缘进入（表明来源是系统）、不打断输入、自动消失且消失比出现快。',
     code: 'animation: toast-in 240ms cubic-bezier(0.16,1,0.3,1) both;\nanimation: toast-out 160ms ease-in both;',
-    demo: { kind: 'frames', html: '<div class="obj toast">已保存到云端</div>', frames: [[0, 'opacity:0; transform:translateY(14px) scale(.96)'], [12, 'opacity:1; transform:none'], [88, 'opacity:1; transform:none'], [100, 'opacity:0; transform:translateY(-6px)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '2400ms', loop: true }
+    demo: { kind: 'frames', html: '<div class="obj toast">已保存到云端</div>', frames: [[0, 'opacity:0; transform:translateY(14px) scale(.96)'], [10, 'opacity:1; transform:none'], [93.33, 'opacity:1; transform:none'], [100, 'opacity:0; transform:translateY(-6px)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '2400ms', loop: true }
   },
   {
     id: 'progress-bar', en: 'Progress indicator', zh: '进度指示', cat: 'feedback',
@@ -213,7 +213,7 @@ window.TERMS.push(
     say: 'float：Y ±6px + 微旋转，3–5s alternate',
     def: '缓慢上下漂浮，暗示元素处于失重或悬浮状态。周期要长（3s 以上）、幅度要小，配合阴影变化才可信。',
     code: 'animation: float 4s ease-in-out infinite alternate;',
-    demo: { kind: 'frames', frames: [[0, 'transform:translateY(7px) rotate(-1.5deg)'], [100, 'transform:translateY(-7px) rotate(1.5deg)']], e: 'ease-in-out', d: '2600ms', loop: true, alt: true }
+    demo: { kind: 'frames', frames: [[0, 'transform:translateY(7px) rotate(-1.5deg)'], [100, 'transform:translateY(-7px) rotate(1.5deg)']], e: 'ease-in-out', d: '3200ms', loop: true, alt: true }
   },
   {
     id: 'idle-breathing', en: 'Idle / Breathing', zh: '待机呼吸', cat: 'loop',
@@ -222,7 +222,7 @@ window.TERMS.push(
     say: 'idle：scale 1→1.015，4.5s 周期',
     def: '静止状态下极微弱的持续变化（呼吸、微缩放、光晕），让吉祥物和插画不显得死板。理想效果是用户说不出它在动，但停掉会觉得死。',
     code: 'animation: breathe 4.5s ease-in-out infinite alternate;',
-    demo: { kind: 'frames', html: '<div class="obj blob"></div>', frames: [[0, 'transform:scale(1)'], [100, 'transform:scale(1.05) translateY(-2px)']], e: 'ease-in-out', d: '2800ms', loop: true, alt: true }
+    demo: { kind: 'frames', html: '<div class="obj blob"></div>', frames: [[0, 'transform:scale(1)'], [100, 'transform:scale(1.015)']], e: 'ease-in-out', d: '4500ms', loop: true, alt: true }
   },
   {
     id: 'spinner', en: 'Spinner', zh: '加载指示器', cat: 'loop',
@@ -249,7 +249,7 @@ window.TERMS.push(
     say: '大面积渐变缓慢位移/旋转，15–30s 周期',
     def: '让渐变本身随时间变化，常用于 hero 背景。周期必须极长（15s+），任何可察觉的“节奏”都会显得廉价并抢内容。',
     code: 'background-size: 300% 300%; animation: drift 24s ease-in-out infinite alternate;',
-    demo: { kind: 'frames', html: '<div class="obj grad wide"></div>', frames: [[0, 'background-position:0% 50%'], [100, 'background-position:100% 50%']], e: 'ease-in-out', d: '5000ms', loop: true, alt: true }
+    demo: { kind: 'frames', html: '<div class="obj grad wide"></div>', frames: [[0, 'background-position:0% 50%'], [100, 'background-position:100% 50%']], e: 'ease-in-out', d: '15000ms', loop: true, alt: true }
   },
   {
     id: 'confetti', en: 'Particle burst / Confetti', zh: '粒子喷发', cat: 'loop',
@@ -441,7 +441,7 @@ window.TERMS.push(
     say: '多层 box-shadow 扩散 + 亮度饱和做泛光',
     def: '让亮部向外溢出。真实泛光需要“亮部超过 1 再向下压缩”，CSS 里用多层模糊阴影近似；颜色要偏亮而不是偏浓。',
     code: 'box-shadow: 0 0 12px var(--c), 0 0 40px color-mix(in srgb, var(--c) 60%, transparent);',
-    demo: { kind: 'frames', html: '<div class="obj dot glowdot"></div>', frames: [[0, 'box-shadow:0 0 0 0 rgba(214,255,63,0)'], [100, 'box-shadow:0 0 22px 8px rgba(214,255,63,.55)']], e: 'ease-in-out', d: '1400ms', loop: true, alt: true }
+    demo: { kind: 'frames', html: '<div class="obj dot"></div>', frames: [[0, 'box-shadow:0 0 0 0 rgba(214,255,63,0)'], [100, 'box-shadow:0 0 22px 8px rgba(214,255,63,.55)']], e: 'ease-in-out', d: '1400ms', loop: true, alt: true }
   },
   {
     id: 'grain', en: 'Grain / Noise', zh: '颗粒噪点', cat: 'polish',
@@ -486,7 +486,7 @@ window.TERMS.push(
     say: '半透明面板 + backdrop-blur + 1px 高光描边',
     def: '模糊背景 + 半透明填充 + 细亮边，构成“玻璃”材质。真正让它成立的是边缘那道 1px 高光，没有它只会看起来像脏了的灰块。',
     code: 'border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(16px);',
-    demo: { kind: 'frames', html: '<div class="glasswrap"><i class="bg colorful"></i><div class="obj glass edge">Glass</div></div>', frames: [[0, 'opacity:.5'], [100, 'opacity:1']], e: 'ease-out', d: '1200ms', loop: true, alt: true }
+    demo: { kind: 'frames', html: '<div class="glasswrap"><i class="bg colorful"></i><div class="obj glass edge">Glass</div></div>', frames: [[0, 'opacity:0; transform:translateX(-58px)'], [100, 'opacity:1; transform:none']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '700ms' }
   },
   {
     id: 'depth-field', en: 'Depth of field', zh: '景深', cat: 'polish',
@@ -533,7 +533,7 @@ window.TERMS.push(
     say: '高速平移 + 方向性模糊，中段完成换镜',
     def: '极快的横向甩动，靠运动模糊遮蔽换镜瞬间。剪辑感很强，适合段落切换；一屏内多次使用会令人迷失。',
     code: '/* 甩动 180ms + blur(方向性 24px)，在 50% 处替换内容 */',
-    demo: { kind: 'frames', html: '<div class="obj sheet whip"></div>', frames: [[0, 'transform:translateX(0); filter:blur(0)'], [45, 'transform:translateX(-60%); filter:blur(14px)'], [55, 'transform:translateX(60%); filter:blur(14px)'], [100, 'transform:translateX(0); filter:blur(0)']], e: 'cubic-bezier(0.76,0,0.24,1)', d: '1200ms', loop: true }
+    demo: { kind: 'frames', html: '<div class="obj sheet"></div>', frames: [[0, 'transform:translateX(0); filter:blur(0)'], [45, 'transform:translateX(-60%); filter:blur(14px)'], [55, 'transform:translateX(60%); filter:blur(14px)'], [100, 'transform:translateX(0); filter:blur(0)']], e: 'cubic-bezier(0.76,0,0.24,1)', d: '1200ms', loop: true }
   },
   {
     id: 'zoom-through', en: 'Zoom through', zh: '穿越式推进', cat: 'camera',
@@ -542,7 +542,7 @@ window.TERMS.push(
     say: 'scale 推到画面外，同时把下一层接上',
     def: '镜头穿过某个元素进入下一层空间（Prezi 式）。空间隐喻强、导航成本低，但对晕动敏感用户不友好，必须提供减少动效开关。',
     code: '/* 元素放大到覆盖视口，然后其内部成为新页面 */',
-    demo: { kind: 'frames', html: '<div class="obj img zoomhole"><i class="hole"></i></div>', frames: [[0, 'transform:scale(1)'], [100, 'transform:scale(6) ; opacity:.2']], e: 'cubic-bezier(0.7,0,0.84,0)', d: '1600ms', loop: true, alt: true }
+    demo: { kind: 'frames', html: '<div class="zthrough"><i class="znext"><s></s><s></s><s></s></i><div class="obj img zoomhole"><i class="hole"></i></div></div>', frames: [[0, 'transform:scale(1)'], [100, 'transform:scale(5); opacity:.18']], e: 'cubic-bezier(0.7,0,0.84,0)', d: '1600ms', loop: true, alt: true }
   },
   {
     id: 'match-cut', en: 'Match cut', zh: '匹配剪辑', cat: 'camera',
@@ -578,15 +578,15 @@ window.TERMS.push(
     say: '整体随机位移 ±6px，衰减 300ms',
     def: '整个画面做衰减随机位移，表达冲击。必须短且快速衰减，且抖动幅度随“事件重量”分级——一次通知不该震屏。',
     code: '/* x,y = random() * amp; amp *= 0.85 每帧衰减 */',
-    demo: { kind: 'frames', html: '<div class="obj sheet shakeit">BOOM</div>', frames: [[0, 'transform:translate(0,0)'], [20, 'transform:translate(-8px,6px)'], [40, 'transform:translate(7px,-5px)'], [60, 'transform:translate(-5px,3px)'], [80, 'transform:translate(3px,-2px)'], [100, 'transform:none']], e: 'steps(1)', d: '360ms', loop: true, wait: '1200ms' }
+    demo: { kind: 'frames', html: '<div class="obj sheet">BOOM</div>', frames: [[0, 'transform:translate(0,0)'], [20, 'transform:translate(-8px,6px)'], [40, 'transform:translate(7px,-5px)'], [60, 'transform:translate(-5px,3px)'], [80, 'transform:translate(3px,-2px)'], [100, 'transform:none']], e: 'steps(1)', d: '360ms', loop: true, wait: '1200ms' }
   },
   {
     id: 'orbit-camera', en: 'Orbit camera', zh: '环绕运镜', cat: 'camera',
     alias: ['3D 环绕', '轨道相机', 'turntable'],
     vague: '围着这个东西转一圈看',
-    say: '相机绕 Y 轴环绕（turntable），物体不动',
-    def: '相机绕物体做圆弧运动，用于产品展示。关键是保持物体高度不变、只改水平角，并限制俯仰范围，否则空间感会翻车。',
-    code: 'scene { transform: rotateY(var(--a)) translateZ(var(--d)); }',
+    say: 'CSS 里没有相机这一层：把整层场景绕 Y 轴反着转，冒充相机环绕',
+    def: '相机绕物体做水平圆弧运动（turntable），物体不动、只改水平角，并限制俯仰范围，否则空间感会翻车。CSS 动不了相机，只能反着做：转的是场景，物体留在原位，靠透视变化把它读成环绕——效果一致，但别误以为真的有轨道相机。',
+    code: 'scene { transform: rotateY(var(--a)) translateZ(var(--d)); }  /* 转场景，不是转物体 */',
     demo: { kind: 'frames', html: '<div class="turn"><i class="obj card face f1"></i><i class="obj card face f2"></i><i class="obj card face f3"></i></div>', frames: [[0, 'transform:rotateY(-38deg)'], [100, 'transform:rotateY(38deg)']], e: 'ease-in-out', d: '2600ms', loop: true, alt: true, turn: true }
   },
   {
@@ -616,7 +616,7 @@ window.TERMS.push(
     say: '主动作前 100ms 反向预备（下蹲/后摆）',
     def: '大动作前先朝反方向轻微运动，告诉观众“要来了”，同时赋予力量感。跳之前先蹲、扔之前先后摆——UI 里对应拖拽时的形变与蓄力。',
     code: '/* 主时间轴 -8%：scale(1.06,.9) 反向预压 */',
-    demo: { kind: 'frames', html: '<div class="obj ball ant"></div>', frames: [[0, 'transform:translateY(0) scale(1,1)'], [30, 'transform:translateY(10px) scale(1.16,.84)'], [45, 'transform:translateY(-34px) scale(.88,1.16)'], [100, 'transform:translateY(0) scale(1,1)']], e: 'cubic-bezier(0.3,0.9,0.4,1)', d: '1500ms', loop: true }
+    demo: { kind: 'frames', html: '<div class="obj ball"></div>', frames: [[0, 'transform:translateY(0) scale(1,1)'], [6.7, 'transform:translateY(10px) scale(1.16,.84)'], [22, 'transform:translateY(-34px) scale(.88,1.16)'], [100, 'transform:translateY(0) scale(1,1)']], e: 'cubic-bezier(0.3,0.9,0.4,1)', d: '1500ms', loop: true }
   },
   {
     id: 'follow-through', en: 'Follow-through', zh: '跟随与缓冲', cat: 'principles',
@@ -634,7 +634,7 @@ window.TERMS.push(
     say: '主体运动 + 次要元素错 40ms 呼应',
     def: '为主动作服务的补充运动（飘带、光点、附属小图标），用来丰富层次而不抢主线。判断标准：删掉它，主题信息是否仍然完整。',
     code: '/* secondary: delay 40–80ms, 幅度约主体 30% */',
-    demo: { kind: 'frames', html: '<div class="sec"><i class="obj card main"></i><i class="dot"></i><i class="dot"></i></div>', frames: [[0, 'opacity:0; transform:translateY(18px)'], [100, 'opacity:1; transform:none']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '620ms', loop: true, alt: true, secondary: true, st: 70 }
+    demo: { kind: 'frames', html: '<div class="sec"><i class="obj card"></i><i class="dot"></i><i class="dot"></i></div>', frames: [[0, 'opacity:0; transform:translateY(18px)'], [100, 'opacity:1; transform:none']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '620ms', loop: true, alt: true, secondary: true, st: 40 }
   },
   {
     id: 'arc', en: 'Arc', zh: '弧线运动', cat: 'principles',
@@ -646,7 +646,7 @@ window.TERMS.push(
     /* 这条教的本来就是「横向 linear + 纵向抛物线」。原来只有三个点且整条
        transform 套 ease-in-out：X 不是匀速，端点还各爬 ~270ms。
        现在按 y = 10 - 144·t(1-t) 采样 9 个点、时间走 linear，才是它说的那个东西。 */
-    demo: { kind: 'frames', html: '<div class="obj ball arc"></div>', frames: [[0, 'transform:translate(-52px,10px)'], [12.5, 'transform:translate(-39px,-5.75px)'], [25, 'transform:translate(-26px,-17px)'], [37.5, 'transform:translate(-13px,-23.75px)'], [50, 'transform:translate(0,-26px)'], [62.5, 'transform:translate(13px,-23.75px)'], [75, 'transform:translate(26px,-17px)'], [87.5, 'transform:translate(39px,-5.75px)'], [100, 'transform:translate(52px,10px)']], e: 'linear', d: '1300ms', loop: true, alt: true }
+    demo: { kind: 'frames', html: '<div class="obj ball"></div>', frames: [[0, 'transform:translate(-52px,10px)'], [12.5, 'transform:translate(-39px,-5.75px)'], [25, 'transform:translate(-26px,-17px)'], [37.5, 'transform:translate(-13px,-23.75px)'], [50, 'transform:translate(0,-26px)'], [62.5, 'transform:translate(13px,-23.75px)'], [75, 'transform:translate(26px,-17px)'], [87.5, 'transform:translate(39px,-5.75px)'], [100, 'transform:translate(52px,10px)']], e: 'linear', d: '1300ms', loop: true, alt: true }
   },
   {
     id: 'slow-in-out', en: 'Slow in & slow out', zh: '慢入慢出', cat: 'principles',
@@ -691,7 +691,7 @@ window.TERMS.push(
     say: '乐观更新：先播成功动效，请求失败再回滚',
     def: '用动效改变等待的主观感受：即时按压反馈、骨架屏、乐观更新、进度可视化。合理的动效能让同样的 800ms 显得比 200ms 无反馈更“快”。',
     code: '/* 点击立刻入队 UI，失败再回滚 + shake */',
-    demo: { kind: 'perf', mode: 'perceived' }
+    demo: { kind: 'perf', mode: 'perceived', hint: '点每一行的「完成」，看两行数字的差距' }
   },
   {
     id: 'purposeful', en: 'Purposeful animation', zh: '有目的的动效', cat: 'principles',
@@ -700,7 +700,7 @@ window.TERMS.push(
     say: '这个动效解决的是连续性问题，不是装饰',
     def: '每条动效必须回答一个问题：它解释了空间关系、提供了反馈、还是引导了注意力？三者的答案都不是，就应该删掉。这是词汇表里最重要的一个词。',
     code: '/* 自检：把它关掉，界面是否更难理解？ */',
-    demo: { kind: 'perf', mode: 'purpose' }
+    demo: { kind: 'perf', mode: 'purpose', hint: '左右各点一条来源，比较你失去了什么' }
   },
   {
     id: 'spatial-consistency', en: 'Spatial consistency', zh: '空间一致性', cat: 'principles',
@@ -817,9 +817,9 @@ window.TERMS.push(
     alias: ['passive listener', 'scroll 事件', '节流'],
     vague: '加了 scroll 监听页面变粘',
     say: 'scroll 监听用 passive:true，或改用 IntersectionObserver',
-    def: '在 scroll 事件里做重活会阻塞滚动合成，让滚动本身变得黏手。解法：passive 监听（承诺不 preventDefault）、IntersectionObserver、或原生 scroll-driven animation。',
+    def: '在 scroll 事件里做重活会阻塞滚动合成，让滚动本身变得黏手。解法：passive 监听（承诺不 preventDefault）、IntersectionObserver、或原生 scroll-driven animation。舞台里同一个滚动进度驱动两条等长轨道：上条只动 transform，下条每帧改几何，顺不顺一眼分得出来。',
     code: "addEventListener('scroll', onScroll, { passive: true });",
-    demo: { kind: 'scroll', mode: 'driven', hint: '滚动：这条不阻塞' }
+    demo: { kind: 'frames', html: '<div class="sj"><i class="sj-row a">transform</i><i class="sj-row b">每帧改几何</i><i class="sj-run"></i></div>', hint: '滚动：上条跟手，下条一顿一顿' }
   },
   {
     id: 'content-visibility', en: 'content-visibility', zh: '内容可见性优化', cat: 'perf',

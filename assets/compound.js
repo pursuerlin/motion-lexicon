@@ -51,7 +51,7 @@
       vague: '滚下去的时候大图别走，下面的东西排进来',
       say: '主视觉 sticky 钉住并按滚动进度 scale 0.74、左移，内容卡从堆叠态错峰展开成一行',
       def: '把主视觉钉在视口里当“锚”，用同一个滚动进度同时驱动它收缩和内容重排。两条时间线共用一个进度，画面才不会各走各的。',
-      code: 'hero.style.transform = `scale(${lerp(1, .74, p)}) translateX(${-p * 13}%)`;\ncard.style.transform = `translateX(${(1 - k) * (i - 1) * -54}px)`;',
+      code: 'hero.style.transform = `scale(${lerp(1, .74, p)}) translateX(${-p * 13}%)`;\ncard.style.transform = `translateX(${-(i - mid) * step * (1 - k)}px) scale(${lerp(.94, 1, k)})`;',
       demo: { kind: 'compound', mode: 'pinned', hint: '在框里滚动' }
     },
     {
@@ -799,6 +799,8 @@
     const outX = readout && $('[data-gz-out="x"]', readout);
     const outY = readout && $('[data-gz-out="y"]', readout);
     const outLag = readout && $('[data-gz-out="lag"]', readout);
+    const outTx = readout && $('[data-gz-out="tx"]', readout);
+    const outTy = readout && $('[data-gz-out="ty"]', readout);
     const outMode = readout && $('[data-gz-out="mode"]', readout);
     const outSmooth = readout && $('[data-gz-out="smooth"]', readout);
     const outRange = readout && $('[data-gz-out="range"]', readout);
@@ -826,12 +828,17 @@
         target.style.setProperty('--ty', (p.live ? p.y : cy).toFixed(3));
       }
       if (readout) {
-        const vx = Math.round((p.live ? p.x : cx) * 100), vy = Math.round((p.live ? p.y : cy) * 100);
+        /* 主读数讲「眼睛此刻真的看向哪」，用和 RANGE 同一把尺（px）；目标另起一行。
+           原来 live 时这个字段读目标、idle 时读平滑值，同一个位置两种含义，
+           而 LAG 又是这两者相减 —— 读数解释不了画面，得反过来让画面解释读数。 */
+        const sgn = function (v) { return (v >= 0 ? '+' : '') + v.toFixed(1); };
         if (outState) outState.textContent = p.live ? 'TRACKING' : 'IDLE LOOP';
         if (outMode) outMode.textContent = p.live ? 'POINTER' : 'AUTONOMOUS';
-        if (outX) outX.textContent = (vx >= 0 ? '+' : '') + String(vx).padStart(2, '0');
-        if (outY) outY.textContent = (vy >= 0 ? '+' : '') + String(vy).padStart(2, '0');
-        if (outLag) outLag.textContent = Math.round(Math.hypot(cx - tx, cy - ty) * 100) + '%';
+        if (outX) outX.textContent = sgn(cx * R);
+        if (outY) outY.textContent = sgn(cy * R);
+        if (outTx) outTx.textContent = sgn(tx * R);
+        if (outTy) outTy.textContent = sgn(ty * R);
+        if (outLag) outLag.textContent = (Math.hypot(cx - tx, cy - ty) * R).toFixed(1) + 'px';
         if (outSmooth) outSmooth.textContent = sm.toFixed(2);
         if (outRange) outRange.textContent = R.toFixed(1) + 'px';
         if (mapDot) {
@@ -860,17 +867,27 @@
         head.style.setProperty('--ss', (0.34 * e).toFixed(3));
       }
       if (hero) {
+        /* 「收缩到 0.74、左移」是这条术语的说法本身，所以收缩幅度是卡片上的旋钮，左移要真的移 */
+        hero.style.transform = 'scale(' + lerp(1, P(stage, 'es', .74), e).toFixed(4) + ') translateX(' +
+          (-e * 13).toFixed(2) + '%)';
         hero.style.opacity = String(lerp(1, .82, e));
         const t = hero.querySelector('b'), st = hero.querySelector('s');
         if (t) t.style.fontSize = lerp(19, 12, e).toFixed(1) + 'px';
         if (st) st.style.opacity = String(lerp(1, 0, clamp(e * 2.2 - .5, 0, 1)));
       }
-      /* 竖排的宽条 → 横向一行小卡，这就是「重组」本身 */
+      /* 堆叠态 → 一行小卡，这就是「重组」本身。
+         原来这里给的是 scaleX(3.1) + translateY(i*30)：卡片各自向右下摊开、宽到出框，
+         起始画面糊成一片斜向残影，不像任何真实网页的初始态。
+         改成把它们收到同一处叠成一摞（横向并拢 + 每层错 5px），错峰展开成一行。 */
+      const mid = (cards.length - 1) / 2;
+      /* 间距按真实布局量：卡片宽度与间隙在卡片和详情页里不一样，
+         写死一个系数会留下一条缝（.86 就还剩 29px 的扇形），永远叠不到一起。 */
+      const step = cards.length > 1 ? (cards[1].offsetLeft - cards[0].offsetLeft) : (cards[0].offsetWidth || 116);
       cards.forEach(function (el, i) {
         const d = clamp((e - .06 - i * .07) / .52, 0, 1), k = 1 - Math.pow(1 - d, 3);
-        el.style.transform = 'translateY(' + ((1 - k) * i * 30).toFixed(1) + 'px) scaleX(' +
-          lerp(3.1, 1, k).toFixed(3) + ')';
-        el.style.opacity = String(lerp(.18, 1, k));
+        el.style.transform = 'translateX(' + (-(i - mid) * step * (1 - k)).toFixed(1) + 'px) translateY(' +
+          ((i - mid) * 5 * (1 - k)).toFixed(1) + 'px) scale(' + lerp(.94, 1, k).toFixed(3) + ')';
+        el.style.opacity = String(lerp(.5, 1, k));
       });
     };
     onScroll(stage, sc.box, upd);
@@ -1168,18 +1185,24 @@
       }
       if (readout) {
         const progress = Math.round(sc.prog() * 100);
-        const rf = $('[data-fr-out="frame"]', readout), rt0 = $('[data-fr-out="total"]', readout), rp = $('[data-fr-out="progress"]', readout), rs = $('[data-fr-out="samples"]', readout), rt = $('[data-fr-out="track"]', readout);
+        const rf = $('[data-fr-out="frame"]', readout), rt0 = $('[data-fr-out="total"]', readout), rp = $('[data-fr-out="progress"]', readout), rs = $('[data-fr-out="samples"]', readout), rt = $('[data-fr-out="track"]', readout), sheet = $('[data-fr-out="sheet"]', readout);
         if (rf) rf.textContent = String(f + 1).padStart(2, '0');
         if (rt0) rt0.textContent = '/' + N;
         if (rp) rp.textContent = progress + '%';
-        if (rs) rs.textContent = N;
+        /* 「样本数 24」和右上角的 /N 是同一个数写两遍；换成每帧独占的滚动行程，
+           那才是抽帧这件事的量：N=24 → 一帧吃掉 4.3% 的滚动 */
+        if (rs) rs.textContent = (100 / Math.max(1, N - 1)).toFixed(1) + '%';
         if (rt) rt.style.transform = 'scaleX(' + (progress / 100).toFixed(3) + ')';
+        if (sheet) sheet.textContent = N;
         if (contact.length) {
-          const active = Math.round(f / Math.max(1, N - 1) * (contact.length - 1));
           contact.forEach(function (el, i) {
-            const on = i === active;
+            const shown = i < N;
+            el.hidden = !shown;
+            const on = shown && i === f;
             el.classList.toggle('on', on);
             el.setAttribute('aria-current', on ? 'true' : 'false');
+            /* 位移按自己的 N 现算：舞台里那一帧怎么取样，这一格就怎么取样 */
+            if (shown) el.style.setProperty('--frame-shift', ((.5 - i / Math.max(1, N - 1)) * 18).toFixed(1) + '%');
           });
         }
       }
@@ -1395,7 +1418,7 @@
       tx2 = lerp(tx2, tx, k * .45); ty2 = lerp(ty2, ty, k * .45);
       const W = stage.clientWidth || 300, H = stage.clientHeight || 200;
       const vx = (x - px) * W, vy = (y - py) * H;
-      const m = Math.min(1, Math.hypot(vx, vy) / P(stage, 'st', 18));
+      const m = Math.min(1, Math.hypot(vx, vy) / P(stage, 'sx', 18));
       const a = Math.atan2(vy, vx) * 180 / Math.PI;
       const t = 'translate(' + ((x - .5) * W).toFixed(1) + 'px,' + ((y - .5) * H).toFixed(1) + 'px) rotate(' +
         a.toFixed(1) + 'deg) scale(' + (1 + m * .55).toFixed(3) + ',' + (1 - m * .38).toFixed(3) + ')';
@@ -1458,8 +1481,11 @@
       px = x;
       const sm = P(stage, 'sm', 16) / 100;
       x = lerp(x, p.live ? p.x : .72, sm); y = lerp(y, p.live ? p.y : .5, sm);
-      /* 位移幅度收在列表右侧空白区里，别盖到行上 */
-      card.style.transform = 'translate(' + ((x - .5) * W * .16).toFixed(1) + 'px,' + ((y - .5) * H * .3).toFixed(1) +
+      /* 位移收在列表右侧空白区里，并且按卡片自己的布局位置夹一次：
+         不夹的话光标贴到右缘时，预览卡会直接顶出舞台（实测溢出 33px） */
+      const room = Math.max(0, W - card.offsetLeft - card.offsetWidth - 6), back = Math.max(0, card.offsetLeft - 6);
+      const dx = clamp((x - .5) * W * .16, -back, room);
+      card.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + ((y - .5) * H * .3).toFixed(1) +
         'px) rotate(' + clamp((x - px) * 90, -7, 7).toFixed(2) + 'deg)';
       card.style.opacity = p.live ? '1' : '.5';
     });

@@ -3,3 +3,9 @@ motion-web/
 图片素材/
 .playwright-mcp/
 __pycache__/
+
+# Local QA captures and browser probes
+.qa/
+_probe.js
+_sweep.js
+_passB.js

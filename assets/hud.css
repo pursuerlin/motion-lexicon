@@ -1,21 +1,44 @@
 /* ============================================================
-   hud.css —— 详情页遥测栏。所有改版面的规则都挂在 .term--detail.hud-on
-   下面：顶栏「遥测 关」时，详情页布局和生产原样一致。
+   hud.css —— 详情页右列：遥测栏（hud.js）与缓动实验台（pglab.js）。
+   两块共用同一套版面与仪表语法，改版面的规则都挂在
+   .term--detail:is(.hud-on,.lab-on) 下面；实验台只出现在缓动族那几条，
+   顶栏「遥测 关」时其余条目的布局和生产原样一致。
    ============================================================ */
-.term--detail.hud-on .pg-visual {
+.term--detail:is(.hud-on,.lab-on) .pg-visual {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 264px;
-  grid-template-rows: 1fr auto auto;
+  grid-template-rows: 1fr auto auto auto auto;
   border: 1px solid var(--line-soft);
   border-radius: var(--r-lg);
   overflow: hidden;
   box-shadow: var(--shadow);
 }
-.term--detail.hud-on .pg-visual > .stage { grid-column: 1; grid-row: 1; position: relative; }
-.term--detail.hud-on .pg-visual > .stage-tools { grid-column: 1 / -1; grid-row: 2; }
-.term--detail.hud-on .pg-visual > .stage-tools[hidden] { display: none; }
-.term--detail.hud-on .hud { grid-column: 2; grid-row: 1; }
-.term--detail.hud-on .hud-formula { grid-column: 1 / -1; grid-row: 3; }
+.term--detail:is(.hud-on,.lab-on) .pg-visual > .stage { grid-column: 1; grid-row: 1; position: relative; }
+.term--detail:is(.hud-on,.lab-on) .pg-visual > .stage-tools { grid-column: 1 / -1; grid-row: 2; }
+.term--detail:is(.hud-on,.lab-on) .pg-visual > .stage-tools[hidden] { display: none; }
+.term--detail:is(.hud-on,.lab-on) .hud { grid-column: 2; grid-row: 1; }
+/* 遥测栏那一支：慢放条与参数条横跨整幅。不写这两条，参数滑块会被塞进 264px 的右列、
+   掉在遥测栏下面挤成一坨，而左边的慢放条独占 728px，两条控制行一宽一窄。
+   行号写死，公式条才不会被顶到控制条下面。 */
+.term--detail:is(.hud-on,.lab-on) .pg-visual > .dt-ctl { grid-column: 1 / -1; grid-row: 3; }
+.term--detail:is(.hud-on,.lab-on) .pg-visual > .pctl { grid-column: 1 / -1; grid-row: 4; }
+.term--detail:is(.hud-on,.lab-on) .hud-formula { grid-column: 1 / -1; grid-row: 5; }
+
+/* 实验台这一支排得更紧：慢放与参数条挪进右列贴在面板下面，舞台跨满那三行。
+   面板比 380px 的舞台高时，1fr 的行被面板撑开、而舞台高度是写死的，
+   左列底下就会露出一条谁都不用的空带。 */
+.term--detail.lab-on .pg-visual { grid-template-rows: auto auto auto auto; }
+.term--detail.lab-on .pg-visual > .stage { grid-column: 1; grid-row: 1 / span 3; height: auto; min-height: 380px; }
+.term--detail.lab-on .pg-visual > .hud { grid-column: 2; grid-row: 1; }
+.term--detail.lab-on .pg-visual > .dt-ctl {
+  grid-column: 2; grid-row: 2; justify-content: flex-start;
+  border-top: 1px solid var(--line-soft); border-left: 1px solid var(--line-soft);
+}
+.term--detail.lab-on .pg-visual > .pctl {
+  grid-column: 2; grid-row: 3; padding: 2px var(--sp-4) 16px;
+  border-top: 1px solid var(--line-soft); border-left: 1px solid var(--line-soft);
+}
+.term--detail.lab-on .pg-visual > .stage-tools { grid-column: 1 / -1; grid-row: 4; }
 
 /* 组合抽帧自己的实时读数：和 LIVE READOUT 同一语法，但不把“实现原理”塞进舞台。 */
 .term--detail .pg-visual:has(.fr-readout) {
@@ -33,7 +56,7 @@
   min-width: 0; padding: 18px 18px 20px; border-left: 1px solid var(--line-soft);
   background: linear-gradient(180deg, var(--bg-2), var(--panel) 220%); font-family: var(--mono);
 }
-.fr-readout-head { display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; letter-spacing: .15em; color: var(--muted); }
+.fr-readout-head { display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; letter-spacing: .15em; color: var(--hud-dim, var(--muted)); }
 .fr-readout-head b { display: flex; align-items: center; gap: 6px; font-weight: 500; color: var(--ink-2); }
 .fr-readout-head i { width: 5px; height: 5px; border-radius: 50%; background: var(--hud-accent); animation: hud-breathe 1.5s var(--ease) infinite; }
 .fr-readout-main { display: flex; align-items: baseline; gap: 4px; }
@@ -47,7 +70,9 @@
 .fr-readout-track i { display: block; width: 100%; height: 100%; border-radius: inherit; transform: scaleX(0); transform-origin: left; background: var(--hud-accent); }
 .fr-contact-head { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--line-soft); font-size: 8px; letter-spacing: .12em; color: var(--muted); }
 .fr-contact-head b { color: var(--hud-accent); font-size: 10px; font-weight: 600; }
-.fr-contact { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.fr-contact { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; max-height: 172px; overflow-y: auto; scrollbar-width: thin; }
+/* 帧数滑块拨到 6 就只该看见 6 格：.fr-contact > s 自己写了 display，会盖掉 [hidden] */
+.fr-contact > s[hidden] { display: none; }
 .fr-contact > s { position: relative; display: block; min-width: 0; aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent); border-radius: 3px; opacity: .48; background: #D9E9E8; transition: opacity .16s, border-color .16s, box-shadow .16s, transform .16s; }
 .fr-contact > s img { display: block; width: 100%; height: 100%; object-fit: cover; transform: translateX(var(--frame-shift)) scale(1.22); transform-origin: 50% 50%; will-change: transform; filter: saturate(.86) contrast(1.02); }
 .fr-contact > s b { position: absolute; left: 3px; bottom: 2px; font: 500 6.5px var(--mono); color: rgba(255,255,255,.92); text-shadow: 0 1px 3px rgba(20,12,36,.5); }
@@ -82,6 +107,8 @@
 .gz-readout-focus { display: flex; align-items: end; justify-content: space-between; gap: 10px; }
 .gz-readout-focus > div { display: flex; flex-direction: column; gap: 4px; }
 .gz-readout-focus strong { color: var(--ink); font-size: 34px; line-height: .95; letter-spacing: -.06em; font-variant-numeric: tabular-nums; }
+.gz-readout-focus strong u { color: var(--muted); font-size: 12px; font-weight: 500; text-decoration: none; margin-left: 3px; }
+.gz-readout-focus > div > small + small, .gz-readout-focus small:last-child { margin-top: 2px; }
 .gz-readout-focus em { color: var(--muted); font-size: 14px; font-style: normal; letter-spacing: 0; }
 .gz-readout-lag { text-align: right; }
 .gz-readout-lag b { color: var(--ink-2); font-size: 14px; font-weight: 600; }
@@ -114,34 +141,37 @@
 /* 编号水印 = 这条术语在自己分类里排第几 */
 .hud-num {
   position: absolute; left: 20px; bottom: 8px; z-index: 0; pointer-events: none;
-  font: 700 104px/0.8 var(--mono); letter-spacing: -.04em;
+  font: 700 clamp(46px, 22%, 104px)/0.8 var(--mono); letter-spacing: -.04em;
   color: color-mix(in srgb, var(--hud-accent) 11%, transparent);
 }
 
 .hud {
+  /* 仪表的小字全是 9–10px，用 --muted 在浅色主题上实测 4.25:1，过不了 AA。
+     只在这一栏里把「次要」往正文色收一档，不动全站 --muted 的排版层级。 */
+  --hud-dim: color-mix(in srgb, var(--muted) 62%, var(--ink));
   position: relative;
   background: linear-gradient(180deg, var(--bg-2), var(--panel) 220%);
   border-left: 1px solid var(--line-soft);
-  padding: 15px 16px 18px;
+  padding: 15px 18px 26px;
   display: flex; flex-direction: column; justify-content: center; gap: 13px;
   font-family: var(--mono); min-width: 0;
 }
-.hud-head { display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; letter-spacing: .15em; color: var(--muted); }
+.hud-head { display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; letter-spacing: .15em; color: var(--hud-dim); }
 .hud-head b { display: flex; align-items: center; gap: 6px; font-weight: 500; color: var(--ink-2); }
 .hud-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--hud-accent); animation: hud-breathe 1.5s var(--ease) infinite; }
 @keyframes hud-breathe { 0%,100% { opacity: 1 } 50% { opacity: .25 } }
 
 .hud-f { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.hud-f s { font-size: 9.5px; letter-spacing: .13em; color: var(--muted); text-decoration: none; text-transform: uppercase; }
+.hud-f s { font-size: 9.5px; letter-spacing: .13em; color: var(--hud-dim); text-decoration: none; text-transform: uppercase; }
 .hud-f var { font-style: normal; font-weight: 700; font-size: 34px; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
-.hud-f var u { font-size: 14px; font-weight: 500; color: var(--muted); text-decoration: none; margin-left: 1px }
+.hud-f var u { font-size: 14px; font-weight: 500; color: var(--hud-dim); text-decoration: none; margin-left: 1px }
 .hud-f.sm { flex-direction: row; align-items: baseline; justify-content: space-between; gap: 8px; }
 .hud-f.sm var { font-size: 15px; }
 .hud-row { display: flex; gap: 14px; }
 .hud-row .hud-f { flex: 1; }
 .hud-hi var { color: var(--hud-accent); }
 
-.hud-chart { width: 100%; height: 138px; flex: none; display: block; overflow: visible; margin: 0 -6px; touch-action: none; }
+.hud-chart { width: 100%; height: 138px; flex: none; display: block; overflow: visible; margin: 0 -6px; touch-action: pan-y; }
 .hud-chart .hud-ax { stroke: var(--line); stroke-width: 1.2; }
 .hud-chart .hud-zone { fill: color-mix(in srgb, var(--hud-accent) 13%, transparent); }
 .hud-chart .hud-cycle { stroke: var(--hud-accent); stroke-width: 1.2; stroke-dasharray: 2 3; opacity: .5; }
@@ -152,11 +182,11 @@
 .hud-chart .hud-cdot { fill: var(--hud-accent); stroke: var(--bg); stroke-width: 2; }
 .hud-chart .hud-pk { fill: var(--hud-accent); }
 .hud-chart .hud-pklbl { font: 700 9.5px var(--mono); fill: var(--hud-accent); letter-spacing: .02em; }
-.hud-chart text { font: 500 8.5px var(--mono); fill: var(--muted); letter-spacing: .04em; }
-.hud-cap { display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; font-size: 9px; letter-spacing: .1em; color: var(--muted); margin-top: -6px; }
+.hud-chart text { font: 500 9.5px var(--mono); fill: var(--hud-dim); letter-spacing: .04em; }
+.hud-cap { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; font-size: 9px; letter-spacing: .1em; color: var(--hud-dim); margin-top: -6px; }
 
 .hud-verdict {
-  display: flex; align-items: center; gap: 7px; padding: 7px 9px;
+  display: flex; align-items: center; gap: 7px; padding: 7px 9px; margin-inline: 12px;
   border: 1px solid color-mix(in srgb, var(--hud-accent) 32%, transparent);
   background: color-mix(in srgb, var(--hud-accent) 7%, transparent);
   border-radius: var(--r-sm); font-size: 10.5px; color: var(--ink-2); letter-spacing: .02em;
@@ -173,7 +203,8 @@
   border-left: 3px solid var(--hud-accent);
   font: 500 12px/1.5 var(--mono); color: var(--ink-2); letter-spacing: .01em;
 }
-.hud-formula em { font-style: normal; color: var(--muted) }
+.hud-formula { --hud-dim: color-mix(in srgb, var(--muted) 62%, var(--ink)); }
+.hud-formula em { font-style: normal; color: var(--hud-dim) }
 .hud-formula i { font-style: normal; color: var(--hud-accent); font-weight: 700 }
 .hud-formula .tool.replay { margin-left: auto; font-size: 11px; padding: 5px 13px; }
 .hud-tag {
@@ -181,16 +212,25 @@
   border: 1px solid var(--line); border-radius: var(--r-pill); padding: 2px 7px;
 }
 
-@media (prefers-reduced-motion: reduce) { .hud-dot { animation: none } }
-.no-motion .hud-dot { animation: none }
+@media (prefers-reduced-motion: reduce) { .hud-dot, .fr-readout-head i, .gz-readout-head i, .gz-readout-state i { animation: none } }
+.no-motion .hud-dot, .no-motion .fr-readout-head i, .no-motion .gz-readout-head i, .no-motion .gz-readout-state i { animation: none }
 
 /* 窄屏没有 264px 可给：遥测栏退到舞台下方，图变窄 */
 @media (max-width: 1180px) {
-  .term--detail.hud-on .pg-visual { grid-template-columns: minmax(0, 1fr); }
-  .term--detail.hud-on .pg-visual > .stage { grid-column: 1; }
-  .term--detail.hud-on .hud { grid-column: 1; grid-row: 3; border-left: 0; }
-  .term--detail.hud-on .pg-visual > .stage-tools { grid-row: 2; }
-  .term--detail.hud-on .hud-formula { grid-row: 4; }
+  .term--detail:is(.hud-on,.lab-on) .pg-visual { grid-template-columns: minmax(0, 1fr); }
+  .term--detail:is(.hud-on,.lab-on) .pg-visual > .stage { grid-column: 1; }
+  .term--detail:is(.hud-on,.lab-on) .hud { grid-column: 1; grid-row: 3; border-left: 0; }
+  .term--detail:is(.hud-on,.lab-on) .pg-visual > .stage-tools { grid-row: 2; }
+  .term--detail:is(.hud-on,.lab-on) .pg-visual > .dt-ctl { grid-row: 4; }
+  .term--detail:is(.hud-on,.lab-on) .pg-visual > .pctl { grid-row: 5; }
+  .term--detail:is(.hud-on,.lab-on) .hud-formula { grid-column: 1; grid-row: 6; }
+  /* 窄屏回到一条竖列：宽屏那套「舞台跨三行 + 参数进右列」必须整个退掉，
+     否则 grid-column: 2 会在单列网格里凭空撑出第二列 */
+  .term--detail.lab-on .pg-visual > .stage { grid-column: 1; grid-row: 1; height: 380px; min-height: 0; }
+  .term--detail.lab-on .pg-visual > .dt-ctl,
+  .term--detail.lab-on .pg-visual > .pctl { grid-column: 1; border-left: 0; }
+  .term--detail.lab-on .pg-visual > .dt-ctl { border-top: 1px solid var(--line-soft); }
+  .term--detail.lab-on .pg-visual > .pctl { border-top: 0; }
   .term--detail .pg-visual:has(.fr-readout) { grid-template-columns: minmax(0, 1fr); }
   .term--detail .pg-visual:has(.fr-readout) > .stage { grid-column: 1; }
   .term--detail .pg-visual:has(.fr-readout) > .fr-readout { grid-column: 1; grid-row: 2; border-left: 0; border-top: 1px solid var(--line-soft); }
@@ -220,11 +260,36 @@
 .hud-chart .hud-c3 { stroke: var(--hud-accent); stroke-dasharray: 5 3; }
 .hud-legend { display: flex; flex-direction: column; gap: 4px; }
 .hud-clk { display: flex; align-items: center; gap: 7px; font-size: 10px; min-width: 0; }
-.hud-clk s { letter-spacing: .08em; color: var(--muted); text-decoration: none; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hud-clk s { letter-spacing: .08em; color: var(--hud-dim); text-decoration: none; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hud-clk var { font-style: normal; font-weight: 700; font-size: 13px; color: var(--ink); font-variant-numeric: tabular-nums; margin-left: auto; }
-.hud-clk u { font-size: 9.5px; color: var(--muted); text-decoration: none; min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
+.hud-clk u { font-size: 9.5px; color: var(--hud-dim); text-decoration: none; min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
 .hud-key { width: 12px; height: 2.5px; border-radius: 2px; flex: none; }
 .hud-key.hud-c0 { background: var(--ink); }
 .hud-key.hud-c1 { background: var(--hud-accent); }
 .hud-key.hud-c2 { background: var(--ink-2); }
 .hud-key.hud-c3 { background: var(--hud-accent); }
+
+/* ── 缓动实验台（pglab.js）──────────────────────────────
+   同一套仪表语法，读的是曲线本身：图 + 四个控制点 + 两个标量结论。
+   强调色不再按分类调色，直接用主题强调色——--hud-accent 若没人设值，
+   上面 .hud-hi var / .hud-verdict 的 color-mix 会整条失效，所以这里必须给。 */
+.hud-lab { --hud-accent: var(--accent); gap: 10px; padding: 13px 16px 20px; }
+.hud-lab .hud-hi { gap: 3px; }
+.lab-code {
+  display: block; font: 700 15px/1.3 var(--mono); letter-spacing: -.015em;
+  color: var(--hud-accent); word-break: break-word;
+}
+.hud-lab .lab-chart { height: 118px; }
+.lab-chart .lab-hd { stroke: color-mix(in srgb, var(--hud-accent) 45%, transparent); stroke-width: 1.3; }
+.lab-chart .lab-hc { fill: var(--bg); stroke: var(--hud-accent); stroke-width: 2; }
+/* 一行两个旋钮，标签浮在滑杆上方：横排「标签+滑杆+读数」在 264px 里只剩 60px 可拖，
+   竖排四个则把右列撑到 560，比舞台高出一大截 */
+.lab-knobs { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 12px; }
+.lab-k { display: grid; gap: 0; min-width: 0; }
+.lab-k > span {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 4px;
+  font: 500 9.5px var(--mono); letter-spacing: .06em; color: var(--hud-dim);
+}
+.lab-k output { color: var(--ink-2); font-size: 10px; }
+.lab-k input[type=range] { width: 100%; height: 18px; margin: 0; }
+.lab-note { margin: 0; font: 400 10.5px/1.5 var(--body); color: var(--hud-dim); }

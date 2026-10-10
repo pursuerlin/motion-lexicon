@@ -203,7 +203,7 @@ window.TERMS = [
     demo: {
       kind: 'frames',
       frames: [[0, 'transform:translateX(-44px)'], [100, 'transform:translateX(44px)']],
-      e: 'steps(6)', d: '1200ms', loop: true, alt: true
+      e: 'steps(8)', d: '1200ms', loop: true, alt: true
     }
   },
   {
@@ -238,7 +238,7 @@ window.TERMS = [
     def: '动画启动前的等待时间。用来制造先后关系、给主元素让路。注意：延迟会直接加进用户感知的总耗时，滥用是界面“慢半拍”的元凶。',
     code: 'animation-delay: 60ms;',
     demo: {
-      kind: 'frames', multi: 3, st: 240,
+      kind: 'frames', multi: 3, st: 60,
       frames: [[0, 'opacity:0; transform:translateY(14px)'], [100, 'opacity:1; transform:none']],
       e: 'cubic-bezier(0.16,1,0.3,1)', d: '420ms'
     }
@@ -251,7 +251,7 @@ window.TERMS = [
     def: '一组元素以固定时间差依次播放同一动画。让多个对象显得“有编排”而不是同时蹦出，是提升质感最划算的一招。间隔 30–60ms 为宜，超过 100ms 就变成等待。',
     code: '.item:nth-child(n) { animation-delay: calc(var(--i) * 40ms); }',
     demo: {
-      kind: 'frames', multi: 5, st: 70,
+      kind: 'frames', multi: 5, st: 40,
       frames: [[0, 'opacity:0; transform:translateY(16px) scale(.94)'], [100, 'opacity:1; transform:none']],
       e: 'cubic-bezier(0.16,1,0.3,1)', d: '460ms'
     }
@@ -371,10 +371,10 @@ window.TERMS = [
     id: 'scale-in', en: 'Scale in', zh: '缩放入场', cat: 'entrance',
     alias: ['放大出现', 'zoom in', '由小变大'],
     vague: '从小长出来',
-    say: '从 0.92 scale 放大到 1，配淡入',
+    say: '从 0.96 scale 放大到 1，配淡入',
     def: '尺寸由小变大进入。起点 scale 越接近 1（0.94–0.98）越像系统级精致；从 0 长出来则像弹窗广告。',
-    code: 'transform: scale(.92); → transform: scale(1);',
-    demo: { kind: 'frames', frames: [[0, 'opacity:0; transform:scale(.86)'], [100, 'opacity:1; transform:scale(1)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '440ms' }
+    code: 'transform: scale(.96); → transform: scale(1);',
+    demo: { kind: 'frames', frames: [[0, 'opacity:0; transform:scale(.96)'], [100, 'opacity:1; transform:scale(1)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '440ms' }
   },
   {
     id: 'pop-in', en: 'Pop in', zh: '弹出（带过冲）', cat: 'entrance',
@@ -383,7 +383,7 @@ window.TERMS = [
     say: 'pop-in：scale 0.7→1 + ease-out-back，末端回弹',
     def: '快速放大并轻微冲过终点再落回，像气泡出现。适合徽章、通知、新增项、贴纸；一次屏幕上不要超过一个 pop。',
     code: 'animation: pop 320ms cubic-bezier(0.34,1.56,0.64,1) both;',
-    demo: { kind: 'frames', frames: [[0, 'opacity:0; transform:scale(.6)'], [100, 'opacity:1; transform:scale(1)']], e: 'cubic-bezier(0.34,1.56,0.64,1)', d: '520ms' }
+    demo: { kind: 'frames', frames: [[0, 'opacity:0; transform:scale(.7)'], [100, 'opacity:1; transform:scale(1)']], e: 'cubic-bezier(0.34,1.56,0.64,1)', d: '520ms' }
   },
   {
     id: 'bounce-in', en: 'Bounce in', zh: '弹跳入场', cat: 'entrance',
@@ -411,10 +411,10 @@ window.TERMS = [
     id: 'rise-in', en: 'Rise / Slide-up fade', zh: '上浮入场', cat: 'entrance',
     alias: ['上移淡入', '滑上来', 'rise', 'fade-up'],
     vague: '轻轻抬上来',
-    say: 'translateY(8→0) + opacity 0→1，240ms ease-out',
+    say: 'translateY(14→0) + opacity 0→1，240ms ease-out',
     def: '轻微上移同时淡入，业界最通用的“万能入场”。位移只给 8–16px，用户感知到的是“浮现”，而不是“搬家”。',
-    code: 'transform: translateY(8px); opacity: 0;  /* 初始态 */\n/* 目标态 */ transform: none; opacity: 1;',
-    demo: { kind: 'frames', multi: 3, st: 80, frames: [[0, 'opacity:0; transform:translateY(18px)'], [100, 'opacity:1; transform:none']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '480ms' }
+    code: 'transform: translateY(14px); opacity: 0;  /* 初始态 */\n/* 目标态 */ transform: none; opacity: 1;',
+    demo: { kind: 'frames', multi: 3, st: 80, frames: [[0, 'opacity:0; transform:translateY(14px)'], [100, 'opacity:1; transform:none']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '240ms' }
   },
   {
     id: 'unfold', en: 'Unfold / Expand height', zh: '展开', cat: 'entrance',
@@ -467,7 +467,7 @@ window.TERMS = [
     say: 'rotateY(-90deg)→0，带 perspective',
     def: '围绕自身轴旋转 90° 进入，需要 perspective 才成立，否则退化成横向挤压。适合卡片、图片墙、封面。',
     code: 'perspective: 900px; transform: rotateY(-90deg) → rotateY(0);',
-    demo: { kind: 'frames', html: '<div class="obj card flip3d"></div>', frames: [[0, 'opacity:0; transform:perspective(700px) rotateY(-92deg)'], [100, 'opacity:1; transform:perspective(700px) rotateY(0)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '720ms' }
+    demo: { kind: 'frames', html: '<div class="obj card"></div>', frames: [[0, 'opacity:0; transform:perspective(700px) rotateY(-92deg)'], [100, 'opacity:1; transform:perspective(700px) rotateY(0)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '720ms' }
   },
   {
     id: 'stack-in', en: 'Stack in', zh: '层叠入场', cat: 'entrance',
@@ -477,9 +477,9 @@ window.TERMS = [
     def: '多个元素沿深度方向略微偏移并缩小，形成一叠；再依次抽出。常用于账单、票券、作品集分组。',
     code: 'transform: translateY(calc(var(--i) * -8px)) scale(calc(1 - var(--i) * 0.04));',
     demo: {
-      kind: 'frames', html: '<div class="stack"><i class="obj card"></i><i class="obj card"></i><i class="obj card"></i></div>',
+      kind: 'frames', html: '<div class="stack"><s class="deck"><i class="obj card"></i></s><s class="deck"><i class="obj card"></i></s><s class="deck"><i class="obj card"></i></s></div>',
       frames: [[0, 'opacity:0; transform:translateY(28px) scale(.92)'], [100, 'opacity:1; transform:none']],
-      e: 'cubic-bezier(0.16,1,0.3,1)', d: '620ms', stack: true
+      e: 'cubic-bezier(0.16,1,0.3,1)', d: '620ms', stack: true, st: 130
     }
   },
   {
@@ -489,7 +489,7 @@ window.TERMS = [
     say: '色块 wipe 扫过，扫过之后露出新内容',
     def: '一个实心形状扫过画面，在其背后替换内容。比淡入更有编辑感和节奏感，常用于图片切换和章节转场。',
     code: '/* 覆盖层 scaleX 0→1（transform-origin:left），再 100%→0（origin:right） */',
-    demo: { kind: 'frames', html: '<div class="obj img"></div><div class="obj wipebar"></div>', frames: [[0, 'transform:scaleX(0)'], [45, 'transform:scaleX(1)'], [55, 'transform:scaleX(1)'], [100, 'transform:scaleX(0)']], e: 'cubic-bezier(0.76,0,0.24,1)', d: '1100ms', loop: true, wipe: true }
+    demo: { kind: 'frames', html: '<div class="wipepair"><i class="obj img wp wp-a">01</i><i class="obj img wp wp-b">02</i><i class="wipebar"></i></div>', frames: [[0, 'transform:scaleX(0); transform-origin:left'], [22, 'transform:scaleX(1); transform-origin:left'], [25, 'transform:scaleX(1); transform-origin:right'], [47, 'transform:scaleX(0); transform-origin:right'], [50, 'transform:scaleX(0); transform-origin:right'], [72, 'transform:scaleX(1); transform-origin:right'], [75, 'transform:scaleX(1); transform-origin:left'], [97, 'transform:scaleX(0); transform-origin:left'], [100, 'transform:scaleX(0); transform-origin:left']], e: 'cubic-bezier(0.76,0,0.24,1)', d: '1100ms', loop: true, wipe: true }
   },
   {
     id: 'glitch-in', en: 'Glitch in', zh: '故障式入场', cat: 'entrance',
@@ -498,7 +498,7 @@ window.TERMS = [
     say: 'RGB 通道分离 + 随机位移，3–5 帧后稳定',
     def: '用错位、色差、扫描线模拟信号损坏的出现方式。风格强烈，属于审美调味，必须短（<400ms）且只在特定语境使用。',
     code: '/* 多层错位副本 + mix-blend-mode: screen + steps() 抖动 */',
-    demo: { kind: 'frames', html: '<div class="obj txt glitch" data-text="MOTION">MOTION</div>', frames: [[0, 'opacity:0; transform:translateX(-6px) skewX(8deg)'], [30, 'opacity:1; transform:translateX(5px) skewX(-6deg)'], [60, 'transform:translateX(-3px)'], [100, 'opacity:1; transform:none']], e: 'steps(3)', d: '420ms' }
+    demo: { kind: 'frames', html: '<div class="obj txt glitch" data-text="MOTION">MOTION</div>', frames: [[0, 'opacity:0; --glitch-a:1; --glitch-x:9px; --glitch-line:1; transform:translateX(-6px) skewX(8deg)'], [30, 'opacity:1; --glitch-a:.92; --glitch-x:6px; --glitch-line:.9; transform:translateX(5px) skewX(-6deg)'], [60, '--glitch-a:.7; --glitch-x:3px; --glitch-line:.55; transform:translateX(-3px)'], [100, 'opacity:1; --glitch-a:0; --glitch-x:0px; --glitch-line:0; transform:none']], e: 'steps(3)', d: '380ms' }
   },
 
   /* ================= 4. 出场 ================= */
@@ -509,7 +509,7 @@ window.TERMS = [
     say: '160ms ease-in 淡出后卸载',
     def: '透明度归零后移除。出场几乎都该比入场更快（约一半时长），因为用户已经知道它要去哪，不需要再看清过程。',
     code: 'animation: fade-out 160ms ease-in both;',
-    demo: { kind: 'frames', frames: [[0, 'opacity:1'], [100, 'opacity:0']], e: 'ease-in', d: '420ms' }
+    demo: { kind: 'frames', frames: [[0, 'opacity:1'], [100, 'opacity:0']], e: 'ease-in', d: '200ms' }
   },
   {
     id: 'slide-out', en: 'Slide out', zh: '滑出', cat: 'exit',
@@ -875,7 +875,7 @@ window.TERMS = [
     say: 'Ken Burns：20s 内缓慢 scale 1→1.12 + 平移',
     def: '对静态图像做极缓慢的推拉与平移（源自纪录片），让画面“活着”。时长要长（10–25s）、幅度要小到不易察觉，否则观众会意识到在动。',
     code: 'animation: kb 18s ease-in-out infinite alternate;',
-    demo: { kind: 'frames', html: '<div class="obj img wide kb"></div>', frames: [[0, 'transform:scale(1) translate(0,0)'], [100, 'transform:scale(1.14) translate(-3%, -2%)']], e: 'ease-in-out', d: '6000ms', loop: true, alt: true }
+    demo: { kind: 'frames', html: '<div class="obj img wide"></div>', frames: [[0, 'transform:scale(1) translate(0,0)'], [100, 'transform:scale(1.14) translate(-3%, -2%)']], e: 'ease-in-out', d: '6000ms', loop: true, alt: true }
   },
   {
     id: 'infinite-load', en: 'Infinite scroll loading', zh: '无限滚动加载', cat: 'scroll',
