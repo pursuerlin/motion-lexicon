@@ -444,7 +444,6 @@
       pinVisible(stage, true);
       replay(stage);
       if (window.REFS) window.REFS.wire(node, id);
-      if (window.PGLAB) window.PGLAB.wire(node, id);
       if (window.HUD) window.HUD.wire(node, id);
       p.scrollTop = 0;
       /* 焦点跟进来：不然键盘/读屏用户点开卡片后焦点仍留在被盖住的那一侧 */

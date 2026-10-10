@@ -1073,6 +1073,17 @@
     if (!node) return;
     var term = (window.TERMS || []).filter(function (t) { return t.id === id; })[0];
     if (!term) return strip(node);
+    /* 缓动与曲线已经有顶部的 Easing Lab；详情页再放一块读数面板会重复
+       同一条曲线，而且它无法可靠反映自定义曲线、重播和慢放后的真实状态。
+       这一类详情页明确关闭遥测，避免显示看似精确但不可信的数字。 */
+    if (term.cat === 'easing') {
+      stripPanel(node);
+      node._hudId = id;
+      node._clocks = null;
+      node._traced = null;
+      node.dataset.telemetry = 'off';
+      return;
+    }
     if (node._hudId !== id) {
       stripPanel(node);
       node._hudId = id;
@@ -1207,7 +1218,7 @@
   paintBtn();
 
   window.HUD = {
-    wire: wire, repaintBtn: paintBtn,
+    wire: wire, strip: function (node) { if (node) strip(node); }, repaintBtn: paintBtn,
     /* 曲线的形状是 build 时一次画好的（48 个采样点），而轴标签每帧跟着 paint 走。
        所以凡是会改变形状的控制（只有「循环播放」：它同时改 iterations 和 direction，
        一次性斜坡会变成三角波，反过来三角波会退回半条）都必须重建，
