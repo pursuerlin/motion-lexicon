@@ -602,7 +602,7 @@
     },
     compare: function () {
       return '<div class="cp cp-cp" data-wipe="50" role="group" aria-label="前后画面对比">' +
-        '<i class="cp-after">' + im('city-1.jpg', '调整后的夜景照片') + '<b class="cp-grade" aria-hidden="true">COLOR GRADE<br><small>亮部提起 · 阴影收紧</small></b></i>' +
+        '<i class="cp-after">' + im('city-1-graded.jpg', '调整后的夜景照片') + '<b class="cp-grade" aria-hidden="true">COLOR GRADE<br><small>亮部提起 · 阴影收紧</small></b></i>' +
         '<i class="cp-before">' + im('city-1.jpg', '原始夜景照片') + '<b class="cp-raw" aria-hidden="true">RAW FRAME<br><small>未校色 · 原始对比度</small></b></i>' +
         '<b class="cp-line" aria-hidden="true"><s class="cp-hd" role="slider" tabindex="0" aria-orientation="horizontal" aria-label="对比滑块" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="50% 原图"></s></b>' +
         '<span class="cp-cap" aria-live="off">wipe 50%</span></div>';
