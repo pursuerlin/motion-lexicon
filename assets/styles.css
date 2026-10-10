@@ -437,6 +437,7 @@ html.has-page { overflow: hidden; }
   letter-spacing: -.028em; margin: 0 0 var(--sp-6); display: flex; flex-wrap: wrap; align-items: baseline; gap: 14px;
 }
 .pg-title em { font-style: normal; font-weight: 500; font-size: .58em; letter-spacing: -.01em; color: var(--accent); }
+.pg-copy { max-width: 960px; margin: 0 auto; }
 .pg-visual {
   border: 1px solid var(--line-soft); border-radius: var(--r-lg); overflow: hidden;
   background: var(--panel); margin-bottom: var(--sp-7); box-shadow: var(--shadow);
@@ -444,6 +445,10 @@ html.has-page { overflow: hidden; }
 .pg-visual .stage { height: 380px; background-color: var(--bg); border-radius: 0; }
 /* 1240 宽的列配 340 高是 3.6:1 的信箱，演示再怎么放大也填不满；把舞台拉高比放大内容更有效 */
 .pg-visual .stage.kind-compound { height: 440px; }
+.pg-kicker { display: flex; align-items: center; gap: 9px; }
+.pg-kicker::before { content: ""; width: 18px; height: 1px; background: var(--accent); opacity: .72; }
+.pg-title { text-wrap: balance; }
+.pg-visual { box-shadow: 0 18px 48px -34px color-mix(in srgb, var(--ink) 36%, transparent); }
 /* 舞台下面这三段（提示 / 慢放循环 / 参数）原本是三条各自带分隔线的带子，
    叠在一起像三个独立面板；合并成一块连续区域，只留最上面那道线。 */
 .term--detail .stage-tools { padding: 11px var(--sp-4) 9px; }
@@ -482,6 +487,16 @@ html.has-page { overflow: hidden; }
 .term--detail .codewrap code { font-size: 13px; line-height: 1.72; }
 .term--detail .foot { max-width: none; margin-top: 0; padding-top: var(--sp-5); border-top: 1px solid var(--line-soft); }
 .term--detail .alias span { background: var(--panel); border: 1px solid var(--line-soft); border-radius: var(--r-pill); padding: 4px 12px; font-size: 12px; }
+.term--detail .pg-copy > :last-child { margin-bottom: 0; }
+.term--detail .pg-copy > .foot { margin-top: var(--sp-7); }
+.term--detail .callout { max-width: none; padding: 22px 26px 22px 34px; border: 1px solid color-mix(in srgb, var(--accent) 14%, transparent); box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 52%, transparent); }
+.term--detail .callout::before { left: 12px; top: 5px; }
+.term--detail .pg-def { max-width: 74ch; }
+.term--detail .pg-say { max-width: none; border-style: solid; border-color: var(--line-soft); background: var(--panel); }
+.term--detail .codewrap { overflow: hidden; border: 1px solid var(--line-soft); border-radius: var(--r-md); background: var(--panel); }
+.term--detail .codewrap pre { border: 0; border-radius: 0; padding: 20px; background: transparent; }
+.term--detail .codewrap .copy { z-index: 1; }
+.term--detail .refs { margin-top: var(--sp-7); }
 
 /* 左右缘的翻页胶囊：跟着视口居中，标签就是目标术语名 */
 .edge-nav {
@@ -1970,8 +1985,8 @@ html.has-page { overflow: hidden; }
 .cp-after, .cp-before { position: absolute; inset: 0; }
 /* 真实照片两层：下层调色后成品，上层压暗去饱和当原图 */
 .cp-after img, .cp-before img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.cp-after img { filter: saturate(1.32) contrast(1.06); }
-.cp-before img { filter: saturate(.45) brightness(.94) contrast(.96); }
+.cp-after img { filter: saturate(1.12) contrast(1.03); }
+.cp-before img { filter: saturate(.82) contrast(.99); }
 .cp-after::after, .cp-before::after { position: absolute; left: 12px; top: 9px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; z-index: 1; }
 .cp-after::after { content: "调色后"; left: auto; right: 12px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
 .cp-before::after { content: "原图"; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
@@ -2211,6 +2226,16 @@ html.has-page { overflow: hidden; }
 ::view-transition-old(root) { animation: none; }
 ::view-transition-new(root) { animation: ml-fade-in .18s ease-out both; }
 @keyframes ml-fade-in { from { opacity: 0; } }
+@keyframes detail-copy-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.term--detail .pg-kicker { animation: detail-copy-in .36s var(--ease-out) .04s both; }
+.term--detail .pg-title { animation: detail-copy-in .42s var(--ease-out) .08s both; }
+.term--detail .pg-copy { animation: detail-copy-in .48s var(--ease-out) .12s both; }
+.no-motion .term--detail .pg-kicker,
+.no-motion .term--detail .pg-title,
+.no-motion .term--detail .pg-copy { animation: none; }
 /* 翻页：正文按方向横向交接，与参考站的 detail-body 一致 */
 html.has-page #page-body { view-transition-name: ml-body; }
 html[data-dir=next]::view-transition-old(ml-body) { animation: ml-out-l .3s var(--ease) both; }
@@ -2223,6 +2248,7 @@ html[data-dir=prev]::view-transition-new(ml-body) { animation: ml-in-l .36s var(
 @keyframes ml-in-l { from { opacity: 0; transform: translateX(-6vw); } }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+  .term--detail .pg-kicker, .term--detail .pg-title, .term--detail .pg-copy { animation: none !important; }
 }
 
 /* ---------------- 响应式 ---------------- */
@@ -2827,86 +2853,71 @@ h1, h2 { font-weight: 560; }
    精修层 7 · 六处反馈修复
    ========================================================================== */
 
-/* 1. 擦除对比：「原图」不能把夜景压成绿灰——提亮压平，读得出"未调色"但不脏 */
-.cp-after img { filter: saturate(1.34) contrast(1.08) brightness(1.04); }
-.cp-before img { filter: saturate(.58) brightness(1.16) contrast(.9); }
-.cp-after::after, .cp-before::after {
-  top: 12px; padding: 3px 9px; border-radius: 999px;
-  background: rgba(12, 10, 16, .48); backdrop-filter: blur(4px);
-}
-.cp-after::after { right: 14px; left: auto; }
-
-/* compare v2: one isolated image stack, one source of truth for the wipe position */
+/* 拖拽对比：一个清晰的图层堆栈，不叠加带色的全幅遮罩 */
 .term--detail .cp-cp {
   isolation: isolate;
   overflow: hidden;
-  background: #171522;
-  border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
-  box-shadow: 0 24px 48px -30px rgba(42, 31, 74, .5);
+  background: var(--bg-2);
+  border: 0;
+  box-shadow: none;
 }
 .term--detail .cp-cp::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(255,255,255,.08), transparent 22%, transparent 78%, rgba(16,12,28,.12));
+  content: none;
 }
 .term--detail .cp-cp .cp-after,
 .term--detail .cp-cp .cp-before {
   z-index: 1;
   overflow: hidden;
-  isolation: isolate;
+  pointer-events: none;
 }
 .term--detail .cp-cp .cp-after img,
 .term--detail .cp-cp .cp-before img {
-  filter: none !important;
-  transform: scale(1.012);
+  transform: none;
   backface-visibility: hidden;
 }
-.term--detail .cp-cp .cp-after img { filter: saturate(1.08) contrast(1.04) brightness(1.03) !important; }
-.term--detail .cp-cp .cp-before img { filter: grayscale(.12) saturate(.84) brightness(1.01) contrast(.98) !important; }
+.term--detail .cp-cp .cp-after img { filter: saturate(1.12) contrast(1.03); }
+.term--detail .cp-cp .cp-before img { filter: saturate(.82) contrast(.99); }
 .term--detail .cp-cp .cp-after::after,
 .term--detail .cp-cp .cp-before::after {
   top: 14px;
-  z-index: 4;
+  z-index: 2;
   padding: 4px 9px;
   border: 1px solid rgba(255,255,255,.22);
   border-radius: 999px;
-  background: rgba(20,16,34,.46);
+  background: rgba(14,18,24,.58);
   color: rgba(255,255,255,.92);
   font: 500 9px var(--mono);
   letter-spacing: .1em;
   text-shadow: none;
-  backdrop-filter: blur(7px);
+  backdrop-filter: blur(8px);
 }
 .term--detail .cp-cp .cp-before::after { left: 14px; content: "BEFORE · 原图"; }
 .term--detail .cp-cp .cp-after::after { right: 14px; content: "AFTER · 调整后"; }
 .term--detail .cp-cp .cp-line {
-  z-index: 5;
-  width: 1px;
-  margin-left: 0;
+  z-index: 3;
+  width: 2px;
+  margin-left: -1px;
   background: rgba(255,255,255,.9);
-  box-shadow: 0 0 0 1px rgba(49,39,81,.12), 0 0 18px rgba(255,255,255,.38);
+  box-shadow: 0 0 0 1px rgba(12,16,22,.16), 0 0 14px rgba(255,255,255,.28);
 }
 .term--detail .cp-cp .cp-hd {
   width: 36px;
   height: 36px;
   margin: -18px 0 0 -18px;
-  border: 1px solid rgba(255,255,255,.72);
-  background: rgba(255,255,255,.92);
-  color: #403a5d;
-  box-shadow: 0 5px 16px rgba(23,17,47,.24);
+  border: 1px solid rgba(255,255,255,.82);
+  background: rgba(255,255,255,.96);
+  color: #29313a;
+  box-shadow: 0 5px 16px rgba(12,18,24,.24);
 }
 .term--detail .cp-cp .cp-hd::after { content: "↔"; font-size: 13px; }
 .term--detail .cp-cp .cp-cap {
-  z-index: 6;
+  z-index: 4;
   left: 14px;
   bottom: 12px;
   border: 0;
-  background: rgba(255,255,255,.82);
-  color: #4b4568;
-  box-shadow: 0 4px 12px rgba(23,17,47,.16);
+  background: rgba(255,255,255,.92);
+  color: #29313a;
+  box-shadow: 0 4px 12px rgba(12,18,24,.16);
 }
 
 /* 2. 滚动抽帧：照片收进取景框，胶片条垫在下面——不再是满铺背景 */

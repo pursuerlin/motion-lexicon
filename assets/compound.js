@@ -601,10 +601,11 @@
         '<u class="tb-ok">✓</u></i><span class="cp-cap">同一个节点形变，不换 DOM</span></div>';
     },
     compare: function () {
-      return '<div class="cp cp-cp" data-wipe="50"><i class="cp-after">' + im('city-1.jpg') + '</i>' +
-        '<i class="cp-before">' + im('city-1.jpg') + '</i>' +
-        '<b class="cp-line"><s class="cp-hd" role="slider" tabindex="0" aria-orientation="horizontal" aria-label="对比滑块" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"></s></b>' +
-        '<span class="cp-cap">wipe 50%</span></div>';
+      return '<div class="cp cp-cp" data-wipe="50" role="group" aria-label="前后画面对比">' +
+        '<i class="cp-after">' + im('city-1.jpg', '调整后的夜景照片') + '</i>' +
+        '<i class="cp-before">' + im('city-1.jpg', '原始夜景照片') + '</i>' +
+        '<b class="cp-line" aria-hidden="true"><s class="cp-hd" role="slider" tabindex="0" aria-orientation="horizontal" aria-label="对比滑块" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="50% 原图"></s></b>' +
+        '<span class="cp-cap" aria-live="off">wipe 50%</span></div>';
     },
     linemask: function () {
       return '<div class="scrolly cp cp-lm"><i class="lm-pin">' +
@@ -1317,27 +1318,34 @@
     let x = .5, drag = false;
     const set = function (v) {
       x = clamp(v, 0, 1);
-      if (hd) hd.setAttribute('aria-valuenow', String(Math.round(x * 100)));
+      const pct = Math.round(x * 100);
+      if (hd) {
+        hd.setAttribute('aria-valuenow', String(pct));
+        hd.setAttribute('aria-valuetext', pct + '% 原图');
+      }
       wrap.dataset.wipe = String(Math.round(x * 100));
       before.style.clipPath = 'inset(0 ' + ((1 - x) * 100).toFixed(1) + '% 0 0)';
       line.style.left = (x * 100).toFixed(1) + '%';
-      if (cap) cap.textContent = 'wipe ' + Math.round(x * 100) + '%';
+      if (cap) cap.textContent = 'wipe ' + pct + '%';
     };
     const from = function (e) {
       const r = wrap.getBoundingClientRect();
       if (r.width) set((e.clientX - r.left) / r.width);
     };
-    stage.addEventListener('pointerdown', function (e) {
+    wrap.addEventListener('pointerdown', function (e) {
+      if (e.button != null && e.button !== 0) return;
       drag = true;
-      if (stage.setPointerCapture) { try { stage.setPointerCapture(e.pointerId); } catch (err) {} }
+      if (wrap.setPointerCapture) { try { wrap.setPointerCapture(e.pointerId); } catch (err) {} }
       from(e);
     });
-    stage.addEventListener('pointermove', function (e) { if (drag) from(e); });
-    ['pointerup', 'pointercancel'].forEach(function (ev) { stage.addEventListener(ev, function () { drag = false; }); });
+    wrap.addEventListener('pointermove', function (e) { if (drag) from(e); });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (ev) { wrap.addEventListener(ev, function () { drag = false; }); });
     hd.addEventListener('keydown', function (e) {
-      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
       e.preventDefault(); e.stopPropagation();
-      set(x + (e.key === 'ArrowRight' ? .08 : -.08));
+      if (e.key === 'Home') set(0);
+      else if (e.key === 'End') set(1);
+      else set(x + (e.key === 'ArrowRight' ? .05 : -.05));
     });
     set(.5);
   }

@@ -295,6 +295,7 @@
       '<h2 class="pg-title" id="page-title">' + esc(t.zh) + '<em>' + esc(t.en) + '</em></h2>' +
       /* 这块就是卡片里那个舞台形变而来的地方，所以 VT 名字挂在它身上 */
       '<div class="pg-visual">' + stageBlock(t, true) + '</div>' +
+      '<div class="pg-copy">' +
       '<blockquote class="callout"><b>' + esc(L('maySay')) + '</b><p>' + esc(t.vague) + '</p></blockquote>' +
       '<p class="pg-def">' + esc(t.def) + '</p>' +
       '<div class="pg-say"><b class="sw sharp">' + esc(L('sayIt')) + '</b><span>' + esc(t.say) + '</span></div>' +
@@ -305,6 +306,7 @@
       '<div class="foot"><div class="alias">' +
       (t.alias || []).map(a => '<span>' + esc(a) + '</span>').join('') +
       '</div><button class="add" type="button" data-add="' + t.id + '">+ 加入配方</button></div>' +
+      '</div>' +
       '</article>';
   }
 
