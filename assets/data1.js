@@ -698,27 +698,27 @@ window.TERMS = [
   {
     id: 'shared-element', en: 'Shared element transition', zh: '共享元素转场', cat: 'state',
     alias: ['hero animation', '连续元素', '图片放大过渡'],
-    vague: '点列表进去，图片顺移到详情页',
-    say: '列表缩略图 ⇄ 详情大图做共享元素转场',
-    def: '两个界面之间的同一元素被连续地搬运过去（位置、尺寸、圆角一起动）。移动端与作品集的主流手法，能让“跳转”变成“深入”。',
-    code: '<ViewTransition name="hero">  /* React 19 /原生 View Transitions */',
-    demo: { kind: 'drag', mode: 'shared', hint: '点击卡片放大，再点收回' }
+    vague: '点一张缩略图，它要像镜头推进一样变成大图',
+    say: '列表里的图片放大成详情主图，返回时沿原路缩回',
+    def: '列表缩略图与详情主图代表同一张图片。切换时让这张图连续改变位置、大小和圆角，用户就能看懂它从哪里展开、又回到哪里。实现时可以给两端的元素设置相同的转场名称。',
+    code: '/* 更新 DOM 前后，为同一张图设置相同且唯一的名称 */\nsource.style.viewTransitionName = "hero";\ndocument.startViewTransition(() => showDetail());',
+    demo: { kind: 'drag', mode: 'shared', hint: '点击封面放大，再点同一封面收回' }
   },
   {
     id: 'layout-animation', en: 'Layout animation', zh: '布局动画', cat: 'state',
     alias: ['自动布局过渡', '位置变化补间'],
     vague: '加了个东西别整个页面乱跳',
-    say: '开启 layout animation，让新增项挤压布局时平滑过渡',
-    def: '当尺寸/位置因布局计算改变时自动补间。实现方式：框架内置（Framer Motion 的 layout）、原生 View Transitions、或手写 FLIP。',
+    say: '有内容新增、删除或改尺寸时，让周围内容平滑让位',
+    def: '内容增删或尺寸变化时，相关元素从旧位置平滑移动到新位置。可由动画框架、浏览器转场能力或 FLIP 等方式实现。',
     code: '<motion.div layout transition={{ type: "spring", stiffness: 350, damping: 30 }}>',
     demo: { kind: 'list', mode: 'layout', hint: '点按钮增删列表项' }
   },
   {
-    id: 'flip', en: 'FLIP technique', zh: 'FLIP 技术', cat: 'state',
+    id: 'flip', en: 'FLIP technique', zh: 'FLIP 卡片平滑换位', cat: 'state',
     alias: ['First Last Invert Play', '反转变换'],
     vague: '列表重排时我想要丝滑地互换位置',
-    say: '用 FLIP：量 First/Last，反转后 Play',
-    def: 'First-Last-Invert-Play：先记录初始位置，立刻跳到终态，再用 transform 把位移差反转回来并播放归零。因为只动 transform，重排动画可以稳定 60fps。',
+    say: '先记下卡片原来的位置，重新排好后再平滑移过去（FLIP）',
+    def: 'FLIP 是 First、Last、Invert、Play 的缩写：记录变化前后的位置，用反向位移把元素放回起点，再播放到新位置。它通常能减少逐帧布局计算，但是否流畅仍取决于页面和设备。',
     code: 'const first = el.getBoundingClientRect();\napplyNewLayout();\nconst last = el.getBoundingClientRect();\nel.animate([{ transform: `translate(${first.x - last.x}px, ${first.y - last.y}px)` }, { transform: "none" }], { duration: 300, easing: "ease-out" });',
     demo: { kind: 'list', mode: 'reorder', hint: '点“换序”看 FLIP 补位' }
   },
@@ -741,31 +741,22 @@ window.TERMS = [
     demo: { kind: 'drag', mode: 'direction', hint: '点“前进/返回”' }
   },
   {
-    id: 'view-transition', en: 'View Transition', zh: '视图转场（原生）', cat: 'state',
-    alias: ['View Transitions API', 'document.startViewTransition'],
-    vague: '整站换页能不能自带丝滑过渡',
-    say: '用原生 View Transitions API 做跨 DOM 转场',
-    def: '浏览器原生能力：把一次 DOM 更新截成前后两帧并自动补间，跨页面也可用（MPA 需 @view-transition nav）。省掉了手写共享元素的所有测量工作。',
-    code: 'document.startViewTransition(() => updateDOM());',
-    demo: { kind: 'morph', mode: 'viewTransition' }
-  },
-  {
     id: 'tab-indicator', en: 'Sliding indicator', zh: '滑动指示条', cat: 'state',
     alias: ['下划线跟随', 'tab 滑块', 'segmented control'],
-    vague: '选中的下划线要滑过去',
-    say: '指示条 translate + scaleX 跟随激活项',
-    def: '选中态标记从旧位置滑到新位置，而不是瞬移。用 transform: translateX + scaleX 表达“两者之间的距离”，比逐 tab 淡入淡出更连贯。',
-    code: 'indicator.style.transform = `translateX(${x}px) scaleX(${w / base})`;',
+    vague: '分段选项的底色要滑到新选项下面',
+    say: '切换选项时，指示条跟着滑过去，并调整到合适的宽度',
+    def: '选中态由同一个滑块从旧选项连续移动到新选项，并同步改变宽度。用 transform 与宽度过渡表达位置和尺寸变化；选中文字颜色跟随切换，形成清楚的落点反馈。',
+    code: 'indicator.style.transform = `translateX(${x}px)`;\nindicator.style.width = `${w}px`;',
     demo: { kind: 'list', mode: 'tabs', hint: '点不同标签' }
   },
   {
-    id: 'smooth-reorder', en: 'Sort / Filter reflow', zh: '筛选重排', cat: 'state',
-    alias: ['排序动画', '过滤补位', 'grid shuffle'],
-    vague: '点筛选后卡片别瞬间换一批',
-    say: '筛选：留下的 FLIP 归位，退出的淡出缩小',
-    def: '对集合做排序/过滤时的补位动画：保留项用 FLIP 移动到新格位，移除项淡出缩小，新增项交叉淡入。三件事同时进行才显得“一池内容”而非“整页重绘”。',
-    code: '/* exit → FLIP move → enter 三段编排 */',
-    demo: { kind: 'list', mode: 'filter', hint: '点筛选标签' }
+    id: 'smooth-reorder', en: 'Filter reflow', zh: '筛选后平滑补位', cat: 'state',
+    alias: ['过滤后补位', '筛选动画', 'filter reflow'],
+    vague: '筛选一换，留下的卡片别跳，新卡片也别从远处飞来',
+    say: '留下的卡片平滑补位，离开的淡出，新出现的原地显现',
+    def: '筛选后，留下的卡片轻轻移到新位置；不符合条件的卡片淡出，新卡片在最终位置轻柔出现。内容变化看起来像同一组卡片在整理，而不是整块突然刷新。',
+    code: '/* 留下的卡片平移补位；新卡片在最终位置淡入 */',
+    demo: { kind: 'list', mode: 'filter', hint: '切换标签：留下的卡片平滑补位，新卡片原地显现' }
   },
   {
     id: 'expand-collapse-btn', en: 'Expand on click', zh: '点击就地展开', cat: 'state',
@@ -844,11 +835,11 @@ window.TERMS = [
   {
     id: 'scroll-snap', en: 'Scroll snap', zh: '滚动吸附', cat: 'scroll',
     alias: ['scroll-snap-type', '整屏吸附', '分屏翻页'],
-    vague: '滚完要正好停在整屏',
-    say: 'scroll-snap-type: y mandatory 做整屏吸附',
-    def: '滚动停下时自动对齐到预设锚点。常用于全屏分镜、画廊、轮播。mandatory 严格对齐、proximity 只在靠近时吸附。',
-    code: '.scroller { scroll-snap-type: y mandatory; }\n.panel { scroll-snap-align: start; }',
-    demo: { kind: 'scroll', mode: 'snap', hint: '在框里滚动' }
+    vague: '滚轮停下时，选中的数字要刚好卡在中间',
+    say: '滚动吸附：每个选项对齐中线，惯性停下后落在最近项',
+    def: '滚动停下时，浏览器把内容对齐到预设位置。iOS 风格的日期滚轮就是一种常见用法：手指松开后，数字按惯性滑动并吸附到中间的选项。',
+    code: '.wheel { scroll-snap-type: y mandatory; }\n.option { scroll-snap-align: center; }',
+    demo: { kind: 'scroll', mode: 'snap', hint: '上下滑动月份、日期或年份' }
   },
   {
     id: 'scrollytelling', en: 'Scrollytelling', zh: '滚动叙事', cat: 'scroll',

@@ -18,11 +18,11 @@ window.TERMS.push(
   {
     id: 'hover-zoom', en: 'Image zoom on hover', zh: '图片悬停放大', cat: 'feedback',
     alias: ['图片hover缩放', '作品墙放大'],
-    vague: '鼠标指着图，图放大一点',
-    say: 'hover 时 img scale 1→1.06，容器 overflow hidden',
-    def: '容器裁切、内部图像放大，形成窥视感。要点是缩放对象是内层图片而不是容器，否则会挤压周围布局。',
-    code: '.thumb { overflow: hidden; } .thumb img { transition: transform 420ms ease-out; } .thumb:hover img { transform: scale(1.06); }',
-    demo: { kind: 'frames', html: '<div class="obj img crop zoom-demo"><i class="fill"></i><b>HOVER TO ZOOM</b></div>', play: 'hover', frames: [[0, 'transform:scale(1)'], [100, 'transform:scale(1.12)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '420ms', inner: true, hint: '悬停或聚焦舞台' }
+    vague: '指到哪里，哪里的细节就放大给我看',
+    say: '悬停时放大图像并以指针为中心取景；触屏点按锁定放大镜',
+    def: '放大镜跟随指针移动，镜内只呈现原图对应位置的放大裁切。桌面端移入即可查看，触屏端点按锁定、再点一次收起；图片容器保持原尺寸，周围布局不跟着抖动。',
+    code: '.zoom-frame { overflow: hidden; }\n.zoom-lens { clip-path: circle(50%); }\n/* 镜内图片按指针坐标反向平移，再放大 */',
+    demo: { kind: 'drag', mode: 'zoom', hint: '移入画面查看细节；触屏点按放大镜' }
   },
   {
     id: 'underline-expand', en: 'Underline expand', zh: '下划线展开', cat: 'feedback',
@@ -82,19 +82,19 @@ window.TERMS.push(
     id: 'swipe-dismiss', en: 'Swipe to dismiss', zh: '滑动划走', cat: 'feedback',
     alias: ['侧滑删除', 'swipe away', '滑掉'],
     vague: '往左一划就删了',
-    say: '横向拖过 40% 阈值划走，否则回弹',
-    def: '横向滑出以删除/归档。必须给足阈值判断、回弹动画和下方内容补位——三者缺一，操作就显得不可靠。',
-    code: 'const willDismiss = Math.abs(dx) > width * 0.4;',
-    demo: { kind: 'drag', mode: 'swipe', hint: '向左滑走这张卡' }
+    say: '左右拖动卡片：超过阈值后飞出，下一张原位补上；未过阈值就回弹',
+    def: '卡片跟随手势横向移动并轻微倾斜，位移达到阈值后沿当前方向离场；下一张从原有层级顺势补位，未达到阈值则弹回。示例同时提供左右按钮，触屏、鼠标和键盘都能完成操作。',
+    code: 'const willDismiss = Math.abs(dx) > width * 0.28;\ncard.animate([{ transform: drag }, { transform: `translateX(${sign * width}px)` }]);',
+    demo: { kind: 'drag', mode: 'swipe', hint: '左右拖动卡片，或点两侧按钮选择' }
   },
   {
     id: 'rubber-band', en: 'Rubber-banding', zh: '橡皮筋阻尼', cat: 'feedback',
     alias: ['过拉回弹', 'overscroll', '边界阻尼'],
-    vague: '拉过头了会像皮筋一样往回拽',
-    say: '越界后位移按 1/x 衰减，松手 spring 回弹',
-    def: '滚到或拖到边界后继续用力，位移被非线性压缩（越拉越紧），松手回弹。iOS 的标志性手感，作用是告诉用户“到这里为止了”而不是硬停。',
-    code: 'const damped = 0.55 * over * (1 / (1 + Math.abs(over) / (h * 2)));',
-    demo: { kind: 'drag', mode: 'rubber', hint: '把卡片拽出边界再松手' }
+    vague: '滚到头了还能拉一点，松手会弹回来',
+    say: '内容到达滚动边界后，继续拖动的距离逐渐压缩；松手后弹回边界',
+    def: '滚动内容到达顶部或底部后，手势仍能带动画面继续移动，但越拉越费力；松手时，内容沿着同一条轴线回到边界。阻尼让用户感觉“到头了”，回弹则把位置重新对齐。',
+    code: 'const over = rawScroll - clamp(rawScroll, 0, maxScroll);\nconst stretch = Math.sign(over) * (Math.sqrt(Math.abs(over) + 1) - 1) * 5.2;',
+    demo: { kind: 'drag', mode: 'rubber', hint: '拖动列表到顶部或底部，再继续拉一下' }
   },
   {
     id: 'shake', en: 'Shake', zh: '抖动', cat: 'feedback',
@@ -130,7 +130,7 @@ window.TERMS.push(
     say: ':focus-visible 显示 2px outline + offset',
     def: '键盘导航时显示的可见焦点。它是无障碍的强制项而不是可选装饰；只在 focus-visible（键盘触发）时显示，避免鼠标点击也出现描边。',
     code: ':focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }',
-    demo: { kind: 'frames', html: '<div class="obj btn focus-demo" tabindex="0">Tab 我</div>', frames: [[0, 'outline-offset:6px; outline-color:transparent'], [100, 'outline-offset:2px; outline-color:var(--accent)']], e: 'ease-out', d: '180ms', hint: '按 Tab 把焦点移进来' }
+    demo: { kind: 'frames', html: '<div class="focus-set"><span class="focus-caption">键盘焦点会落在这里</span><button type="button" class="obj focus-demo focus-choice">概览</button><button type="button" class="obj focus-demo focus-choice">动效</button><button type="button" class="obj focus-demo focus-choice">代码</button></div>', behavior: 'focus', frames: [[0, 'outline-offset:5px; outline-color:transparent'], [100, 'outline-offset:2px; outline-color:var(--accent)']], e: 'ease-out', d: '180ms', hint: '按 Tab 依次查看焦点环；Shift + Tab 反向' }
   },
   {
     id: 'cursor-magnet', en: 'Magnetic hover', zh: '磁吸跟随', cat: 'feedback',
@@ -157,7 +157,7 @@ window.TERMS.push(
     say: '骨架屏 + shimmer 扫光，尺寸对齐真实内容',
     def: '用与真实内容同形状的灰色占位块代替 spinner。感知性能利器：它让等待显得更短，并且提前告知布局结构，避免内容到达时的跳动（CLS）。',
     code: 'background: linear-gradient(90deg, #222 25%, #2e2e2e 37%, #222 63%);\nbackground-size: 400% 100%; animation: shimmer 1.4s ease-in-out infinite;',
-    demo: { kind: 'frames', html: '<div class="sk"><i></i><i class="s"></i><i class="s"></i></div>', frames: [[0, 'background-position:120% 0'], [100, 'background-position:-20% 0']], e: 'linear', d: '1600ms', loop: true, shimmer: true, st: -500 }
+    demo: { kind: 'frames', html: '<article class="sk"><div class="sk-top"><i class="sk-avatar"></i><span class="sk-user"><i class="sk-line sk-name"></i><i class="sk-line sk-meta"></i></span></div><i class="sk-cover"></i><i class="sk-line sk-title"></i><i class="sk-line sk-copy"></i><i class="sk-line sk-copy short"></i><div class="sk-bottom"><i class="sk-line sk-tag"></i><i class="sk-line sk-action"></i></div></article>', frames: [[0, 'background-position:120% 0'], [100, 'background-position:-20% 0']], e: 'linear', d: '1600ms', loop: true, shimmer: true, st: -500 }
   },
   {
     id: 'toast-in', en: 'Toast enter', zh: '轻提示入场', cat: 'feedback',
@@ -354,11 +354,7 @@ window.TERMS.push(
     say: 'font-variant-numeric: tabular-nums 固定字宽',
     def: '让每个数字占相同宽度。做数字动效前的必修一行 CSS——否则比例字体会让整行文本在计数过程中左右抽动。',
     code: 'font-variant-numeric: tabular-nums;',
-    demo: {
-      kind: 'two',
-      a: { label: '比例数字 · 行在抖', html: '<div class="obj txt num-card notab"><b>1,234,567</b><small>proportional width</small></div>', frames: [[0, 'transform:translateX(-8px)'], [50, 'transform:translateX(7px)'], [100, 'transform:none']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '900ms', loop: true, alt: true },
-      b: { label: 'tabular-nums · 稳定', html: '<div class="obj txt num-card tab"><b>1,234,567</b><small>fixed width</small></div>', frames: [[0, 'transform:translateY(2px)'], [50, 'transform:translateY(-2px)'], [100, 'transform:none']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '900ms', loop: true, alt: true }
-    }
+    demo: { kind: 'type', mode: 'tabular' }
   },
   {
     id: 'highlight-sweep', en: 'Highlight sweep', zh: '荧光笔划过', cat: 'text',
@@ -405,7 +401,7 @@ window.TERMS.push(
     say: 'backdrop-filter: blur(20px) 做毛玻璃层',
     def: '柔化细节。filter: blur 作用于元素自身，backdrop-filter 作用于其下方内容（毛玻璃）。后者在移动端开销大，需要设上限层数。',
     code: '.glass { backdrop-filter: blur(20px) saturate(1.4); background: rgba(255,255,255,.06); }',
-    demo: { kind: 'frames', html: '<div class="glasswrap"><i class="bg"></i><div class="obj glass">毛玻璃面板</div></div>', frames: [[0, 'backdrop-filter:blur(0px)'], [100, 'backdrop-filter:blur(18px)']], e: 'ease-out', d: '900ms', loop: true, alt: true }
+    demo: { kind: 'frames', html: '<div class="glasswrap"><i class="bg blur-pattern"></i><div class="obj glass blur-demo"><span>磨砂玻璃</span><small>BACKGROUND · CLEAR → SOFT</small></div></div>', frames: [[0, 'backdrop-filter:blur(0px) saturate(1)'], [100, 'backdrop-filter:blur(20px) saturate(1.35)']], e: 'ease-in-out', d: '1800ms', loop: true, alt: true }
   },
   {
     id: 'clip-path', en: 'Clip-path', zh: '裁切路径', cat: 'polish',
@@ -833,9 +829,9 @@ window.TERMS.push(
   {
     id: 'easing-token', en: 'Motion token', zh: '动效令牌', cat: 'perf',
     alias: ['动效规范', 'design token for motion', '工程化治理'],
-    vague: '每个人写的曲线都不一样',
-    say: '曲线、时长、位移量都收敛成 token',
-    def: '把曲线、时长、位移幅度做成设计令牌（如 --ease-emphasized、--dur-2、--lift-2），动效从此可治理、可批量降级，也能一键满足 prefers-reduced-motion。',
+    vague: '每个人写的曲线和快慢都不一样',
+    say: '先定一套统一的速度和曲线，所有动效照着用',
+    def: '把常用的速度、曲线和移动幅度起好名字，大家引用同一套值。比如“快速”统一用 120ms；要调整全站节奏时，改一处就能同步更新所有引用它的动效。',
     code: ':root {\n  --ease-standard: cubic-bezier(0.2, 0, 0, 1);\n  --dur-2: 200ms;\n  --lift-2: 4px;\n}',
     demo: { kind: 'perf', mode: 'token' }
   }

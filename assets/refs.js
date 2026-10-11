@@ -77,6 +77,10 @@
       { title: 'Animbits · Scramble', url: 'https://www.animbits.dev/docs/animations/text/scramble', note: '带 React 代码的解码文字组件', embed: true },
       LNK('GSAP ScrambleTextPlugin', 'https://gsap.com/docs/v3/Plugins/ScrambleTextPlugin/', 'gsap.com', '官方插件文档，商用项目多数走这条')
     ],
+    'path-weave': [LNK('Wise Motion · 双路牵丝织形', 'https://github.com/WiseWong6/wise-motion', 'github.com', '借鉴双路径生长的编织思路；本站的 SVG 与交互为独立实现')],
+    'target-acquisition': [LNK('Wise Motion · 目标扫描捕获锁定', 'https://github.com/WiseWong6/wise-motion', 'github.com', '参考“扫描 → 命中 → 锁定”的阶段编排；本站演示为独立实现')],
+    'morphing-dot-sphere': [LNK('Wise Motion · 点阵连续换形', 'https://github.com/WiseWong6/wise-motion', 'github.com', '与本站已有的点阵球变形对应，保留原条目并标注概念来源')],
+    'dynamic-island': [LNK('Wise Motion · 界面展开与反馈', 'https://github.com/WiseWong6/wise-motion', 'github.com', '同一容器从紧凑信息扩展为实时活动；本站按手机比例重新绘制')],
 
     /* ---------- 三维与运行时 ---------- */
     'preserve-3d': [EMB('3D Shoe Explorer', '3d-shoe-explorer', '真嵌一个 3D 滚动案例，看它怎么保深度')],
@@ -89,12 +93,18 @@
   };
 
   function hostOf(u) { try { return new URL(u).host.replace(/^www\./, ''); } catch (e) { return ''; } }
+  function sourcesFor(id) {
+    return (REFS[id] || []).map(function (r) {
+      return { title: r.title, url: r.url, checkedAt: '2026-09-21', embed: !!r.embed };
+    });
+  }
 
   function panelHTML(id) {
     const list = REFS[id];
     if (!list || !list.length) return '';
     return '<section class="refs" aria-label="真实落地参考" data-l10n="真实落地参考" data-l10n-attr="aria-label">' +
       '<h3 class="refs-hd"><span data-l10n="真实落地参考">真实落地参考</span><span data-l10n="互联网上正在跑的同类实现 · 和本页演示对照着看">互联网上正在跑的同类实现 · 和本页演示对照着看</span></h3>' +
+      '<p class="refs-checked" data-l10n="链接最近核验：2026-09-21">链接最近核验：2026-09-21</p>' +
       '<div class="ref-list">' + list.map(function (r, i) {
         return '<article class="ref' + (r.embed ? ' ref--embed' : ' ref--link') + '">' +
           '<header class="ref-top"><b>' + r.title + '</b>' +
@@ -147,6 +157,7 @@
 
   window.REFS = {
     panelHTML: panelHTML,
-    wire: wire
+    wire: wire,
+    sourcesFor: sourcesFor
   };
 })();

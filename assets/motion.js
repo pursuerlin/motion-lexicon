@@ -104,13 +104,13 @@ window.MOTION = (function () {
     if (mode === 'tabs') {
       return '<div class="tabs"><div class="tabbar">' + ['概览', '动效', '规范'].map((s, i) =>
         '<button type="button" class="tab' + (i === 0 ? ' on' : '') + '">' + s + '</button>').join('') +
-        '<i class="ind"></i></div><div class="tabpanel">指示条用 translate + scaleX 表达“距离”，而不是两块内容互相淡入。</div></div>';
+        '<i class="ind"></i></div><div class="tabpanel">点选项，观察橙色滑块跟到文字下方，并自动调整宽度。</div></div>';
     }
     if (mode === 'filter') {
       return '<div class="lblock"><div class="chips">' + ['全部', '入场', '转场', '反馈'].map((s, i) =>
         '<button type="button" class="fchip' + (i === 0 ? ' on' : '') + '" data-f="' + i + '">' + s + '</button>').join('') +
         '</div><div class="fgrid">' + [
-          ['fade-in', 1], ['crossfade', 2], ['ripple', 3], ['slide-in', 1], ['FLIP', 2], ['hover-lift', 3]
+          ['渐渐出现', 1], ['画面交替', 2], ['点击波纹', 3], ['从侧边进入', 1], ['卡片换位', 2], ['指针悬停', 3]
         ].map(x => '<i class="ftile" data-flip data-k="' + x[1] + '">' + x[0] + '</i>').join('') + '</div></div>';
     }
     if (mode === 'inline') {
@@ -157,10 +157,10 @@ window.MOTION = (function () {
     }
     if (mode === 'tabs') {
       const bar = $('.tabbar', stage), ind = $('.ind', stage), panel = $('.tabpanel', stage);
-      const texts = ['概览：整页结构在这里。', '动效：指示条用 translate + scaleX 表达“距离”，而不是两块内容互相淡入。', '规范：时长与曲线都是令牌。'];
+      const texts = ['概览：整页结构在这里。', '动效：滑块跟随当前选项移动，并适配文字宽度。', '规范：时长与曲线都是令牌。'];
       const place = (t, first) => {
         const r = t.getBoundingClientRect(), br = bar.getBoundingClientRect();
-        ind.style.transform = 'translateX(' + (r.left - br.left) + 'px)';
+        ind.style.transform = 'translateX(' + (r.left - br.left - 4) + 'px)';
         ind.style.width = r.width + 'px';
         if (!first) panel.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: EO });
       };
@@ -168,19 +168,56 @@ window.MOTION = (function () {
         $$('.tab', stage).forEach(x => x.classList.remove('on')); t.classList.add('on');
         panel.textContent = texts[i]; place(t);
       }));
-      requestAnimationFrame(() => place($('.tab.on', stage), true));
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const on = $('.tab.on', stage); if (on) place(on, true);
+      }));
       window.addEventListener('resize', () => { const on = $('.tab.on', stage); if (on) place(on, true); });
     }
     if (mode === 'filter') {
-      $$('.fchip', stage).forEach(c => c.addEventListener('click', function () {
-        $$('.fchip', stage).forEach(x => x.classList.remove('on')); c.classList.add('on');
-        const k = c.dataset.f;
-        flip(stage, function () {
-          $$('.ftile', stage).forEach(t => {
-            const show = k === '0' || t.dataset.k === k;
-            t.classList.toggle('off', !show);
+      const chips = $$('.fchip', stage), tiles = $$('.ftile', stage);
+      let selected = '0', filtering = false;
+      chips.forEach(c => c.addEventListener('click', function () {
+        const next = c.dataset.f;
+        if (filtering || next === selected) return;
+        chips.forEach(x => { x.classList.toggle('on', x === c); x.disabled = true; });
+        const matches = tile => next === '0' || tile.dataset.k === next;
+        const visible = tiles.filter(tile => !tile.classList.contains('off'));
+        const entering = tiles.filter(tile => tile.classList.contains('off') && matches(tile));
+        const exiting = visible.filter(tile => !matches(tile));
+        const staying = visible.filter(matches);
+        if (!window.ENGINE.motionOn()) {
+          tiles.forEach(tile => tile.classList.toggle('off', !matches(tile)));
+          selected = next; chips.forEach(x => { x.disabled = false; }); return;
+        }
+        filtering = true;
+        const before = new Map(staying.map(tile => [tile, tile.getBoundingClientRect()]));
+        const exits = exiting.map(tile => tile.animate([
+          { opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(.97)' }
+        ], { duration: 140, easing: EI, fill: 'forwards' }));
+        Promise.all(exits.map(animation => animation.finished.catch(function () {}))).then(function () {
+          exiting.forEach(tile => {
+            tile.classList.add('off');
+            tile.getAnimations().forEach(animation => animation.cancel());
           });
-        }, 300);
+          entering.forEach(tile => tile.classList.remove('off'));
+
+          const moves = staying.map(tile => {
+            const first = before.get(tile), last = tile.getBoundingClientRect();
+            const dx = first.left - last.left, dy = first.top - last.top;
+            if (Math.abs(dx) < .5 && Math.abs(dy) < .5) return null;
+            return tile.animate([
+              { transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }
+            ], { duration: 300, easing: EO });
+          }).filter(Boolean);
+          const arrivals = entering.map(tile => tile.animate([
+            { opacity: 0, transform: 'scale(.97)' }, { opacity: 1, transform: 'scale(1)' }
+          ], { duration: 220, easing: EO }));
+          selected = next;
+          Promise.all(moves.concat(arrivals).map(animation => animation.finished.catch(function () {}))).then(function () {
+            filtering = false;
+            chips.forEach(x => { x.disabled = false; });
+          });
+        });
       }));
     }
     if (mode === 'inline') {
@@ -194,13 +231,24 @@ window.MOTION = (function () {
     if (mode === 'drag') return '<div class="dfield"><i class="ball drag-ball"></i><span class="tip">抓住拖动 · 松手有惯性</span></div>';
     if (mode === 'reorder') return '<div class="dlist">' + ['上传中…', '转码完成', '等待审阅', '已发布'].map((t, i) =>
       '<div class="drow" data-flip data-i="' + i + '"><i class="grip">⋮⋮</i><span>' + t + '</span></div>').join('') + '</div>';
-    if (mode === 'swipe') return '<div class="swipelane"><div class="swipe-stack"></div></div>';
-    if (mode === 'rubber') return '<div class="rframe"><i class="rpanel">越界试试<br><small>橡皮筋阻尼</small></i></div>';
+    if (mode === 'swipe') return '<div class="swipelane"><div class="swipe-stack" aria-live="polite"></div><div class="swipe-actions"><button type="button" class="swipe-action swipe-no" aria-label="略过这张卡">×</button><span class="swipe-hint">左右拖动卡片 · 松手归档</span><button type="button" class="swipe-action swipe-yes" aria-label="喜欢这张卡">♡</button></div></div>';
+    if (mode === 'rubber') return '<div class="rb-frame" aria-label="可拖动的弹性滚动列表"><div class="rb-edge rb-edge--top"><i></i><span>顶部</span></div>' +
+      '<div class="rb-viewport" tabindex="0" role="group" aria-label="拖动列表，拉过边界后松手观察回弹"><div class="rb-list">' +
+      [['01', '山居清晨', '雾气 · 07:12'], ['02', '林间小径', '松针 · 08:40'], ['03', '溪边石阶', '微光 · 09:16'], ['04', '屋檐雨声', '小雨 · 10:03']].map(x =>
+        '<div class="rb-row"><b>' + x[0] + '</b><span><strong>' + x[1] + '</strong><small>' + x[2] + '</small></span><i aria-hidden="true">↗</i></div>').join('') +
+      '</div></div><div class="rb-edge rb-edge--bottom"><i></i><span>松开回弹</span></div><span class="rb-tension" aria-hidden="true"></span></div>';
     if (mode === 'ripple') return '<button type="button" class="bigbtn ripple-btn">点击任意位置</button>';
     if (mode === 'hold') return '<button type="button" class="bigbtn hold-btn"><i class="hfill"></i><span>按住以确认删除</span></button>';
     if (mode === 'ptr') return '<div class="ptr"><i class="ptr-ind"></i><div class="ptr-list">' + ['最新', '稍早', '更早'].map(t =>
       '<div class="lrow">' + t + '</div>').join('') + '</div></div>';
-    if (mode === 'shared') return '<div class="thumbs"><i class="thumb" data-flip>封面 A</i><i class="thumb" data-flip>封面 B</i><i class="thumb" data-flip>封面 C</i></div>';
+    if (mode === 'shared') return '<div class="sh-demo"><div class="sh-gallery"><div class="sh-overline"><span>精选居所</span><small>03 / COLLECTION</small></div>' +
+      [['雾山居', 'snow-1.jpg', '山野 · 清晨'], ['松林小屋', 'snow-2.jpg', '森林 · 入夜'], ['云间别院', 'snow-3.jpg', '山谷 · 薄雾']].map((x, i) =>
+        '<button type="button" class="sh-card" data-sh-id="' + i + '"><span class="sh-photo"><img src="assets/img/' + x[1] + '" alt="' + x[0] + '" draggable="false"></span><span class="sh-card-copy"><b>' + x[0] + '</b><small>' + x[2] + '</small><i>↗</i></span></button>').join('') +
+      '</div><section class="sh-detail" hidden><div class="sh-detail-photo"><img class="sh-hero" alt="" draggable="false"><span class="sh-photo-index"></span></div>' +
+      '<div class="sh-detail-copy"><small>STAY · SLOW DOWN</small><h3></h3><p>把山间的光、风和安静，留在一段慢下来的时光里。</p><button type="button" class="mini sh-back">← 返回作品集</button></div></section>' +
+      '<span class="sh-transition-ghost" aria-hidden="true"></span><span class="sh-hint">点选一张照片，沿着它展开详情</span></div>';
+    if (mode === 'zoom') return '<button type="button" class="iz-stage" aria-pressed="false" aria-label="移动指针或点击查看图片细节"><img class="iz-image" src="assets/img/snow-1.jpg" alt="晨雾中的山间居所" draggable="false">' +
+      '<span class="iz-caption"><b>雾山居</b><small>把光标移进画面，查看局部细节</small></span><span class="iz-lens" aria-hidden="true"><img src="assets/img/snow-1.jpg" alt="" draggable="false"></span><span class="iz-cross" aria-hidden="true"></span></button>';
     if (mode === 'direction') return '<div class="stack2"><i class="pane p1">列表页</i><i class="pane p2">详情页</i></div>' +
       '<div class="navrow"><button type="button" class="mini fwd">前进 →</button><button type="button" class="mini back">← 返回</button></div>';
     return '<div class="ph">drag</div>';
@@ -230,67 +278,205 @@ window.MOTION = (function () {
 
     if (mode === 'reorder') {
       const list = $('.dlist', stage);
-      $$('.drow', stage).forEach(row => draggable(row, function (e, st) {
-        st.h = row.offsetHeight; st.y0 = 0; row.style.zIndex = 5;
-      }, function (dx, dy, ev, st) {
-        st.y0 = dy; row.style.transform = 'translateY(' + dy + 'px) scale(1.02)';
-        row.style.boxShadow = '0 12px 22px -8px rgba(0,0,0,.6)';
-        const rows = $$('.drow', list);
-        const idx = rows.indexOf(row);
-        const step = Math.round(dy / (st.h + 8));
-        const next = clamp(idx + step, 0, rows.length - 1);
-        if (next !== idx) {
-          flip(list, function () {
-            const target = rows[next];
-            if (idx < next) target.after(row); else target.before(row);
-          }, 240);
-        }
-      }, function (st) {
-        row.style.zIndex = ''; row.style.boxShadow = '';
-        row.animate([{ transform: row.style.transform }, { transform: 'none' }], { duration: 260, easing: EO })
-          .finished.then(() => { row.style.transform = ''; }).catch(function () {});
+      $$('.drow', list).forEach(row => row.addEventListener('pointerdown', function (e) {
+        if (e.button !== 0) return;
+        e.preventDefault();
+        try { row.setPointerCapture(e.pointerId); } catch (err) {}
+        const grabOffset = e.clientY - row.getBoundingClientRect().top;
+        const pointerId = e.pointerId;
+        row.classList.add('dragging');
+        row.style.zIndex = '5';
+        row.style.boxShadow = '0 12px 22px -8px rgba(0,0,0,.28)';
+
+        const move = ev => {
+          if (ev.pointerId !== pointerId) return;
+          const siblings = $$('.drow', list).filter(item => item !== row);
+          /* 每次采样从稳定的布局位置重新算目标，避免累计索引在多次换位后漂移。 */
+          siblings.forEach(item => item.getAnimations().forEach(animation => animation.cancel()));
+          const before = new Map(siblings.map(item => [item, item.getBoundingClientRect()]));
+          const target = siblings.find(item => ev.clientY < item.getBoundingClientRect().top + item.offsetHeight / 2);
+          if (target) list.insertBefore(row, target); else list.appendChild(row);
+
+          /* 被拖行单独跟随指针；FLIP 只动画其他行，二者不再争用 transform。 */
+          row.style.transform = 'none';
+          const baseTop = row.getBoundingClientRect().top;
+          row.style.transform = 'translateY(' + (ev.clientY - grabOffset - baseTop).toFixed(1) + 'px) scale(1.025)';
+          siblings.forEach(item => {
+            const a = item.getBoundingClientRect(), b = before.get(item);
+            const dy = b.top - a.top;
+            if (Math.abs(dy) > 1) item.animate([
+              { transform: 'translateY(' + dy.toFixed(1) + 'px)' }, { transform: 'none' }
+            ], { duration: 190, easing: EO });
+          });
+        };
+        const finish = () => {
+          row.removeEventListener('pointermove', move);
+          row.removeEventListener('pointerup', finish);
+          row.removeEventListener('pointercancel', finish);
+          row.classList.remove('dragging');
+          row.style.zIndex = ''; row.style.boxShadow = '';
+          row.animate([{ transform: row.style.transform }, { transform: 'none' }], { duration: 240, easing: EO })
+            .finished.then(() => { row.style.transform = ''; }).catch(function () {});
+        };
+        row.addEventListener('pointermove', move);
+        row.addEventListener('pointerup', finish);
+        row.addEventListener('pointercancel', finish);
       }));
     }
 
     if (mode === 'swipe') {
       const stack = $('.swipe-stack', stage);
+      const cards = [
+        ['snow-1.jpg', '云岫别院', '浙江安吉 · 山谷晨雾', '把清晨的山色，留给慢下来的一天。', '精选民宿', '01'],
+        ['snow-3.jpg', '山间来信', '雪线之上 · 日落时分', '穿过松林，刚好遇见最后一束光。', '周末灵感', '02'],
+        ['gal-1.jpg', '城市夜行', '街角 · 23:18', '灯亮起来的时候，城市才刚刚开始。', '影像收藏', '03']
+      ];
+      let index = 0, busy = false;
+      const cardMarkup = (i, layer) => {
+        const c = cards[i];
+        return '<article class="swipe-card" data-index="' + i + '" style="--layer:' + layer + '">' +
+          '<img src="assets/img/' + c[0] + '" alt="' + c[1] + '" draggable="false"><span class="swipe-shade"></span>' +
+          '<small class="swipe-kicker">' + c[4] + ' · ' + c[5] + '</small><div class="swipe-copy"><b>' + c[1] + '</b><span>' + c[2] + '</span><p>' + c[3] + '</p></div>' +
+          '<strong class="swipe-stamp swipe-stamp--yes">收藏</strong><strong class="swipe-stamp swipe-stamp--no">略过</strong></article>';
+      };
       const bind = el => draggable(el, function (e, st) { st.w = el.offsetWidth; }, function (dx, dy, ev, st) {
-        const rot = clamp(dx / st.w * 8, -8, 8);
-        el.style.transform = 'translateX(' + dx + 'px) rotate(' + rot + 'deg)';
-        el.style.opacity = String(1 - Math.min(.7, Math.abs(dx) / st.w));
-      }, function (st, ev) {
-        const dx = parseFloat((el.style.transform.match(/translateX\((-?[\d.]+)px/) || [0, 0])[1]);
-        if (Math.abs(dx) > st.w * 0.4) {
-          el.animate([{ transform: el.style.transform, opacity: 1 },
-            { transform: 'translateX(' + (dx > 0 ? 260 : -260) + 'px) rotate(' + (dx > 0 ? 12 : -12) + 'deg)', opacity: 0 }],
-            { duration: 280, easing: EI }).finished.then(function () {
-              flip(stack, () => el.remove());
-              if (!stack.children.length) setTimeout(function () { flip(stack, seed); }, 420);
-            }).catch(function () {});
-        } else {
-          el.animate([{ transform: el.style.transform }, { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(0.34,1.56,0.64,1)' })
-            .finished.then(() => { el.style.transform = ''; el.style.opacity = ''; }).catch(function () {});
+        const rot = clamp(dx / st.w * 12, -12, 12);
+        el.style.transform = 'translate3d(' + dx + 'px,' + clamp(dy * .22, -20, 20) + 'px,0) rotate(' + rot + 'deg)';
+        el.style.setProperty('--swipe-progress', clamp(Math.abs(dx) / (st.w * .34), 0, 1).toFixed(2));
+        el.classList.toggle('swipe-right', dx > 8); el.classList.toggle('swipe-left', dx < -8);
+      }, function (st) {
+        const dx = parseFloat((el.style.transform.match(/translate3d\((-?[\d.]+)px/) || [0, 0])[1]) || 0;
+        el.classList.remove('swipe-right', 'swipe-left');
+        if (Math.abs(dx) > st.w * .28) complete(dx > 0 ? 'right' : 'left');
+        else {
+          el.animate([{ transform: el.style.transform }, { transform: 'translate3d(0,0,0) rotate(0deg)' }], { duration: 460, easing: 'cubic-bezier(.2,.9,.25,1)' })
+            .finished.then(() => { el.style.transform = ''; el.style.removeProperty('--swipe-progress'); }).catch(function () {});
         }
       });
-      /* seed 重建的卡片是新节点，必须当场重新 bind：
-         之前只有初始两张有监听，划走一轮后重置出来的卡永远拖不动 */
-      const seed = () => { stack.innerHTML = ''; ['归档这封邮件', '再划走一条试试'].forEach(t =>
-        stack.insertAdjacentHTML('beforeend', '<div class="swipe" data-flip><span>' + t + '</span><i>划走</i></div>'));
-        $$('.swipe', stack).forEach(bind); };
-      seed();
+      const render = () => {
+        stack.innerHTML = '';
+        if (index >= cards.length) {
+          stack.innerHTML = '<div class="swipe-end"><span>这一组看完了</span><b>再看一次，遇见不同的风景。</b><button type="button" class="swipe-restart">重新开始 <i>↻</i></button></div>';
+          $('.swipe-restart', stack).addEventListener('click', () => { index = 0; render(); });
+          return;
+        }
+        const order = [index + 2, index + 1, index].filter(i => i < cards.length);
+        order.forEach((i, layer) => stack.insertAdjacentHTML('beforeend', cardMarkup(i, order.length - layer - 1)));
+        $$('.swipe-card', stack).forEach(bind);
+      };
+      const complete = direction => {
+        if (busy) return;
+        const top = $('.swipe-card:last-child', stack);
+        if (!top) return;
+        busy = true;
+        const width = Math.max(top.offsetWidth, 180), sign = direction === 'right' ? 1 : -1;
+        top.animate([
+          { transform: top.style.transform || 'translate3d(0,0,0) rotate(0deg)', opacity: 1 },
+          { transform: 'translate3d(' + sign * (width + 150) + 'px, -12px, 0) rotate(' + sign * 16 + 'deg)', opacity: 0 }
+        ], { duration: 360, easing: 'cubic-bezier(.22,.78,.2,1)', fill: 'forwards' }).finished.then(() => {
+          top.remove(); index++;
+          if (index >= cards.length) render();
+          else {
+            const nextBack = index + 2;
+            if (nextBack < cards.length) {
+              stack.insertAdjacentHTML('afterbegin', cardMarkup(nextBack, stack.children.length));
+              bind($('.swipe-card:first-child', stack));
+            }
+            const remaining = $$('.swipe-card', stack);
+            remaining.forEach((card, i) => card.style.setProperty('--layer', remaining.length - i - 1));
+          }
+          busy = false;
+        }).catch(() => { busy = false; });
+      };
+      $('.swipe-no', stage).addEventListener('click', () => complete('left'));
+      $('.swipe-yes', stage).addEventListener('click', () => complete('right'));
+      render();
     }
 
     if (mode === 'rubber') {
-      const p = $('.rpanel', stage);
-      let x = 0, y = 0;
-      const damp = v => (v > 1 ? 1 - 1 / (v + 0.7) : v < -1 ? -1 - 1 / (-v + 0.7) : v) * 52;
-      draggable(p, function (e, st) { st.bx = x; st.by = y; }, function (dx, dy, ev, st) {
-        x = damp(st.bx + dx); y = damp(st.by + dy);
-        p.style.transform = 'translate(' + x + 'px,' + y + 'px)';
-      }, function () {
-        p.animate([{ transform: p.style.transform }, { transform: 'translate(0,0)' }],
-          { duration: 520, easing: 'cubic-bezier(0.22,1.4,0.36,1)' }).finished.then(() => { x = y = 0; }).catch(function () {});
+      const frame = $('.rb-frame', stage), viewport = $('.rb-viewport', stage), list = $('.rb-list', stage);
+      const top = $('.rb-edge--top', stage), bottom = $('.rb-edge--bottom', stage);
+      let scroll = 0, pointer = null, settle = null;
+      const maxScroll = () => Math.max(0, list.scrollHeight - viewport.clientHeight);
+      const damp = v => Math.sign(v) * (Math.sqrt(Math.abs(v) + 1) - 1) * 5.2;
+      const paint = (offset, raw) => {
+        const max = maxScroll(), clamped = clamp(raw, 0, max);
+        scroll = clamped;
+        list.style.transform = 'translate3d(0,' + offset.toFixed(2) + 'px,0)';
+        const over = raw < 0 ? -raw : raw > max ? raw - max : 0;
+        frame.classList.toggle('is-pulling', over > 1);
+        frame.style.setProperty('--pull', clamp(over / 64, 0, 1).toFixed(3));
+        top.classList.toggle('is-active', raw < 0);
+        bottom.classList.toggle('is-active', raw > max);
+      };
+      const start = e => {
+        if (e.button !== undefined && e.button !== 0) return;
+        if (settle) { settle.cancel(); settle = null; }
+        pointer = { id: e.pointerId, y: e.clientY, start: scroll, raw: scroll };
+        try { viewport.setPointerCapture(e.pointerId); } catch (err) {}
+        viewport.classList.add('is-grabbing');
+      };
+      const move = e => {
+        if (!pointer || e.pointerId !== pointer.id) return;
+        const max = maxScroll(), raw = pointer.start - (e.clientY - pointer.y);
+        pointer.raw = raw;
+        const clamped = clamp(raw, 0, max), over = raw < 0 ? raw : raw > max ? raw - max : 0;
+        paint(-clamped + damp(over), raw);
+        e.preventDefault();
+      };
+      const end = e => {
+        if (!pointer || (e && e.pointerId != null && e.pointerId !== pointer.id)) return;
+        const max = maxScroll(), raw = pointer.raw, dest = -clamp(raw, 0, max), from = getComputedStyle(list).transform;
+        pointer = null;
+        viewport.classList.remove('is-grabbing');
+        frame.classList.remove('is-pulling');
+        if (window.ENGINE.motionOn()) {
+          settle = list.animate([{ transform: from }, { transform: 'translate3d(0,' + dest.toFixed(2) + 'px,0)' }],
+            { duration: 560, easing: 'cubic-bezier(.2,.82,.24,1)' });
+          settle.finished.then(() => { settle = null; paint(dest, clamp(raw, 0, max)); }).catch(function () {});
+        } else paint(dest, clamp(raw, 0, max));
+      };
+      viewport.addEventListener('pointerdown', start);
+      viewport.addEventListener('pointermove', move);
+      viewport.addEventListener('pointerup', end);
+      viewport.addEventListener('pointercancel', end);
+      viewport.addEventListener('lostpointercapture', end);
+      viewport.addEventListener('wheel', e => {
+        const max = maxScroll(), next = clamp(scroll + e.deltaY, 0, max);
+        if (next !== scroll) { paint(-next, next); }
+      }, { passive: true });
+    }
+
+    if (mode === 'zoom') {
+      const box = $('.iz-stage', stage), lens = $('.iz-lens', box), zoomed = $('.iz-lens img', box);
+      let pinned = false;
+      const move = e => {
+        const r = box.getBoundingClientRect(), x = clamp(e.clientX - r.left, 0, r.width), y = clamp(e.clientY - r.top, 0, r.height);
+        const scale = 2.35, lr = { width: lens.offsetWidth, height: lens.offsetHeight };
+        lens.style.left = x + 'px'; lens.style.top = y + 'px';
+        zoomed.style.width = (r.width * scale) + 'px'; zoomed.style.height = (r.height * scale) + 'px';
+        zoomed.style.left = (lr.width / 2 - x * scale) + 'px'; zoomed.style.top = (lr.height / 2 - y * scale) + 'px';
+        box.style.setProperty('--ix', (x / r.width * 100).toFixed(2) + '%');
+        box.style.setProperty('--iy', (y / r.height * 100).toFixed(2) + '%');
+      };
+      box.addEventListener('pointerenter', e => { if (e.pointerType !== 'touch') { move(e); box.classList.add('is-zooming'); } });
+      box.addEventListener('pointermove', e => { move(e); if (e.pointerType !== 'touch') box.classList.add('is-zooming'); });
+      box.addEventListener('pointerleave', () => { if (!pinned) box.classList.remove('is-zooming'); });
+      box.addEventListener('click', e => {
+        if (e.pointerType === 'touch' || e.detail === 0 || window.matchMedia('(pointer: coarse)').matches) {
+          if (e.detail === 0) {
+            const r = box.getBoundingClientRect();
+            move({ clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 });
+          } else move(e);
+          pinned = !pinned; box.classList.toggle('is-zooming', pinned); box.setAttribute('aria-pressed', String(pinned));
+        }
       });
+      box.addEventListener('focus', () => {
+        const r = box.getBoundingClientRect();
+        move({ clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 });
+        box.classList.add('is-zooming');
+      });
+      box.addEventListener('blur', () => { pinned = false; box.setAttribute('aria-pressed', 'false'); box.classList.remove('is-zooming'); });
     }
 
     if (mode === 'ripple') {
@@ -362,27 +548,55 @@ window.MOTION = (function () {
     }
 
     if (mode === 'shared') {
-      const thumbs = $$('.thumb', stage);
-      let active = null;
-      thumbs.forEach(function (t) {
-        t.addEventListener('click', function () {
-          if (active === t) {
-            const a = t.getBoundingClientRect();
-            t.style.transform = ''; t.classList.remove('big');
-            const b = t.getBoundingClientRect();
-            t.animate([{ transform: 'translate(' + (a.left - b.left) + 'px,' + (a.top - b.top) + 'px) scale(' + (a.width / b.width) + ')' }, { transform: 'none' }], { duration: 380, easing: EO });
-            active = null; return;
-          }
-          if (active) active.classList.remove('big'), active.style.transform = '';
-          active = t;
-          const before = t.getBoundingClientRect();
-          t.classList.add('big');
-          const after = t.getBoundingClientRect();
-          t.animate([
-            { transform: 'translate(' + (before.left - after.left) + 'px,' + (before.top - after.top) + 'px) scale(' + (before.width / after.width) + ')' },
-            { transform: 'none' }
-          ], { duration: 420, easing: EO });
-        });
+      const demo = $('.sh-demo', stage), gallery = $('.sh-gallery', demo), detail = $('.sh-detail', demo);
+      const hero = $('.sh-hero', demo), heroFrame = $('.sh-detail-photo', demo), ghost = $('.sh-transition-ghost', demo);
+      const cards = $$('.sh-card', demo), title = $('.sh-detail-copy h3', demo), index = $('.sh-photo-index', demo);
+      let active = -1, busy = false;
+      const images = cards.map(c => c.querySelector('img'));
+      const localRect = el => {
+        const r = el.getBoundingClientRect(), d = demo.getBoundingClientRect();
+        return { left: r.left - d.left, top: r.top - d.top, width: r.width, height: r.height };
+      };
+      const play = (from, to, opening, id) => {
+        if (busy) return;
+        busy = true; demo.classList.add('is-transitioning');
+        const fr = localRect(from), image = images[id];
+        hero.src = image.src; hero.alt = image.alt;
+        title.textContent = cards[id].querySelector('b').textContent;
+        index.textContent = '0' + (id + 1) + ' / 03';
+        if (opening) { gallery.hidden = true; detail.hidden = false; }
+        else { detail.hidden = true; gallery.hidden = false; }
+        const tr = localRect(to);
+        ghost.style.backgroundImage = 'url("' + image.src + '")';
+        ghost.style.left = fr.left + 'px'; ghost.style.top = fr.top + 'px';
+        ghost.style.width = fr.width + 'px'; ghost.style.height = fr.height + 'px';
+        ghost.style.borderRadius = window.getComputedStyle(from).borderRadius;
+        ghost.hidden = false;
+        const heroEl = opening ? hero : to;
+        heroEl.style.opacity = '0';
+        if (!window.ENGINE.motionOn()) {
+          ghost.hidden = true; heroEl.style.opacity = ''; demo.classList.remove('is-transitioning'); busy = false;
+          if (!opening) active = -1;
+          return;
+        }
+        const anim = ghost.animate([
+          { left: fr.left + 'px', top: fr.top + 'px', width: fr.width + 'px', height: fr.height + 'px', borderRadius: window.getComputedStyle(from).borderRadius },
+          { left: tr.left + 'px', top: tr.top + 'px', width: tr.width + 'px', height: tr.height + 'px', borderRadius: window.getComputedStyle(to).borderRadius }
+        ], { duration: 620, easing: 'cubic-bezier(.2,.78,.18,1)', fill: 'forwards' });
+        anim.finished.then(() => {
+          ghost.hidden = true; heroEl.style.opacity = ''; demo.classList.remove('is-transitioning'); busy = false;
+          if (!opening) active = -1;
+        }).catch(() => { ghost.hidden = true; heroEl.style.opacity = ''; demo.classList.remove('is-transitioning'); busy = false; });
+      };
+      cards.forEach((card, id) => card.addEventListener('click', () => {
+        if (active !== -1 || busy) return;
+        active = id; heroFrame.querySelector('.sh-hero').style.opacity = '';
+        play(card.querySelector('.sh-photo'), hero, true, id);
+      }));
+      $('.sh-back', detail).addEventListener('click', () => {
+        if (active < 0 || busy) return;
+        const id = active, card = cards[id];
+        play(hero, card.querySelector('.sh-photo'), false, id);
       });
     }
 
@@ -409,8 +623,13 @@ window.MOTION = (function () {
       return '<div class="cont"><h5>同一个标题不重播</h5><div class="cbody"></div></div>';
     }
     if (mode === 'viewTransition') {
-      return '<div class="vt"><div class="vt-page"><b>A 页</b><p>列表态 · 原生 View Transitions</p></div></div>' +
-        '<div class="navrow"><button type="button" class="mini vt-go">换到 B 页</button><i class="vt-note"></i></div>';
+      return '<div class="vt-demo" data-view="grid">' +
+        '<div class="vt-toolbar"><span><i class="vt-live"></i>作品集</span><small>3 个项目</small></div>' +
+        '<div class="vt-gallery">' + ['雾山居', '山间旅店', '林中别院'].map((name, i) =>
+          '<button type="button" class="vt-card" data-vt-id="' + i + '"><i class="vt-photo vt-photo--' + i + '"><img src="assets/img/' + ['snow-1.jpg', 'snow-2.jpg', 'snow-3.jpg'][i] + '" alt="" draggable="false"><em>0' + (i + 1) + '</em></i><b>' + name + '</b><small>空间 · 自然</small></button>').join('') + '</div>' +
+        '<section class="vt-detail" hidden><div class="vt-detail-hero"><i class="vt-photo vt-photo--0"><img src="assets/img/snow-1.jpg" alt="" draggable="false"><em>01</em></i></div>' +
+        '<div class="vt-info"><small>精选项目 · 2026</small><h4>雾山居</h4><p>让列表中的同一张图连续放大，详情从侧边轻轻进入。</p><button type="button" class="mini vt-back">← 返回作品集</button></div></section>' +
+        '</div><div class="navrow"><i class="vt-note"></i><span class="vt-hint">点任意项目，再返回观察图像如何连续变大</span></div>';
     }
     if (mode === 'matchCut') {
       return '<div class="mc"><i class="mc-a"><b></b><s>镜头 A</s></i><i class="mc-b"><b></b><s>镜头 B</s></i></div>';
@@ -468,17 +687,57 @@ window.MOTION = (function () {
       });
     }
     if (mode === 'viewTransition') {
-      const page = $('.vt-page', stage), note = $('.vt-note', stage);
-      note.textContent = document.startViewTransition ? '本浏览器支持原生 View Transitions' : '走 CSS 回退方案';
-      const swap = function () {
-        const b = $('b', page), p = $('p', page);
-        const isA = b.textContent.indexOf('A') === 0;
-        const write = function () { b.textContent = isA ? 'B 页' : 'A 页'; p.textContent = isA ? '详情态 · 前后两帧由浏览器补间' : '列表态 · 原生 View Transitions'; page.classList.toggle('alt'); };
-        if (document.startViewTransition) document.startViewTransition(write);
-        else if (window.ENGINE.motionOn()) { page.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 130, easing: EI, fill: 'forwards' }).finished.then(function () { write(); page.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: EO, fill: 'none' }); }).catch(function () {}); }
-        else write();
+      const demo = $('.vt-demo', stage), gallery = $('.vt-gallery', stage), detail = $('.vt-detail', stage), hero = $('.vt-detail-hero .vt-photo', stage);
+      const note = $('.vt-note', stage);
+      note.textContent = document.startViewTransition ? 'VIEW TRANSITIONS API' : 'WAAPI 几何回退';
+      let active = 0, busy = false, serial = 0;
+      const cleanNames = () => { $$('.vt-photo', demo).forEach(el => { el.style.viewTransitionName = ''; el.style.visibility = ''; }); };
+      const ghostMorph = (from, update, findTarget) => {
+        const r1 = from.getBoundingClientRect();
+        const ghost = from.cloneNode(true);
+        Object.assign(ghost.style, { position: 'fixed', left: r1.left + 'px', top: r1.top + 'px', width: r1.width + 'px', height: r1.height + 'px', margin: '0', zIndex: '10000', pointerEvents: 'none', transformOrigin: 'top left' });
+        document.body.appendChild(ghost);
+        update();
+        const to = findTarget(), r2 = to.getBoundingClientRect();
+        to.style.visibility = 'hidden';
+        const done = () => { ghost.remove(); to.style.visibility = ''; cleanNames(); busy = false; };
+        if (window.ENGINE.motionOn() && ghost.animate) {
+          const anim = ghost.animate([
+            { left: r1.left + 'px', top: r1.top + 'px', width: r1.width + 'px', height: r1.height + 'px', borderRadius: getComputedStyle(from).borderRadius },
+            { left: r2.left + 'px', top: r2.top + 'px', width: r2.width + 'px', height: r2.height + 'px', borderRadius: getComputedStyle(to).borderRadius }
+          ], { duration: 480, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'both' });
+          anim.finished.then(done, done);
+        } else done();
       };
-      $('.vt-go', stage).addEventListener('click', swap);
+      const change = (toDetail, id) => {
+        if (busy || (toDetail === !detail.hidden)) return;
+        busy = true; active = id == null ? active : id;
+        const from = toDetail ? $('.vt-card[data-vt-id="' + active + '"] .vt-photo', demo) : hero;
+        const token = ++serial;
+        const update = () => {
+          demo.dataset.view = toDetail ? 'detail' : 'grid';
+          gallery.hidden = toDetail; detail.hidden = !toDetail;
+          if (toDetail) {
+            hero.className = 'vt-photo vt-photo--' + active;
+            hero.querySelector('img').src = $('.vt-card[data-vt-id="' + active + '"] .vt-photo img', demo).src;
+            hero.querySelector('em').textContent = '0' + (active + 1);
+            $('.vt-info h4', demo).textContent = ['雾山居', '山间旅店', '林中别院'][active];
+            hero.style.viewTransitionName = 'vt-hero';
+          } else {
+            const target = $('.vt-card[data-vt-id="' + active + '"] .vt-photo', demo);
+            target.style.viewTransitionName = 'vt-hero';
+          }
+        };
+        if (window.ENGINE.motionOn() && document.startViewTransition) {
+          try {
+            from.style.viewTransitionName = 'vt-hero';
+            const transition = document.startViewTransition(update);
+            transition.finished.then(() => { if (serial === token) { cleanNames(); busy = false; } }, () => { if (serial === token) { cleanNames(); busy = false; } });
+          } catch (e) { ghostMorph(from, update, () => toDetail ? hero : $('.vt-card[data-vt-id="' + active + '"] .vt-photo', demo)); }
+        } else ghostMorph(from, update, () => toDetail ? hero : $('.vt-card[data-vt-id="' + active + '"] .vt-photo', demo));
+      };
+      $$('.vt-card', stage).forEach(card => card.addEventListener('click', () => change(true, Number(card.dataset.vtId))));
+      $('.vt-back', stage).addEventListener('click', () => change(false));
     }
     if (mode === 'matchCut') {
       const b = $('.mc-b', stage);
@@ -499,7 +758,11 @@ window.MOTION = (function () {
     if (mode === 'split') return '<div class="tword" data-text="MOTION"></div>';
     if (mode === 'lineMask') return '<div class="lines"><i>把滚动条</i><i>当成时间轴</i><i>来使用</i></div>';
     if (mode === 'kinetic') return '<div class="kinetic"><b>Motion</b><b>is</b><b>meaning</b></div>';
-    if (mode === 'ticker') return '<div class="tick"><i class="dg"></i><i class="dg"></i><i class="dg"></i><i class="dg"></i></div>';
+    if (mode === 'ticker') return '<div class="tick" aria-label="数字从 0000 滚动到 4200" data-l10n="数字从 0000 滚动到 4200" data-l10n-attr="aria-label"><i class="dg"><span class="digit-strip"></span></i><i class="dg"><span class="digit-strip"></span></i><i class="dg"><span class="digit-strip"></span></i><i class="dg"><span class="digit-strip"></span></i></div>';
+    if (mode === 'tabular') return '<div class="num-compare" aria-label="比例数字与等宽数字对比" data-l10n="比例数字与等宽数字对比" data-l10n-attr="aria-label">' +
+      '<div class="num-row"><small data-l10n="比例数字">比例数字</small><b class="num-live proportional">1,111.11</b><i class="num-track"><s></s></i><em data-l10n="字宽变化">字宽变化</em></div>' +
+      '<div class="num-row"><small data-l10n="等宽数字">等宽数字</small><b class="num-live tabular">1,111.11</b><i class="num-track"><s></s></i><em data-l10n="位置稳定">位置稳定</em></div>' +
+      '<small class="num-note" data-l10n="同一数值变化：1111 到 8888">同一数值变化：1,111.11 → 8,888.88</small></div>';
     if (mode === 'countup') return '<div class="cu"><b>0</b><s>次调用</s></div>';
     if (mode === 'glitch') return '<div class="gl" data-text="SYSTEM">SYSTEM</div>';
     if (mode === 'flipWord') return '<div class="fw"><span>精准</span><span>克制</span><span>高效</span></div>';
@@ -563,12 +826,33 @@ window.MOTION = (function () {
       });
     }
     if (mode === 'ticker') {
-      const cols = $$('.tick .dg', stage);
-      cols.forEach(function (c, i) { c.innerHTML = Array.from({ length: 11 }, (_, n) => '<u>' + (n % 10) + '</u>').join(''); });
-      cycle(stage, 3200, function (t) {
-        const v = Math.round(EASE.easeOut(clamp(t / 0.7, 0, 1)) * 4200);
-        String(v).padStart(4, '0').split('').forEach(function (d, i) {
-          if (cols[i]) cols[i].style.transform = 'translateY(' + (-d * 100) + '%)';
+      const cols = $$('.tick .digit-strip', stage);
+      cols.forEach(function (c) { c.innerHTML = Array.from({ length: 10 }, (_, n) => '<span>' + n + '</span>').join(''); c.style.transform = 'translateY(0em)'; });
+      let tickerT0 = null;
+      watch(stage, function (now) {
+        if (tickerT0 === null) tickerT0 = now;
+        const t = (now - tickerT0) % 4800 / 4800;
+        const rise = clamp((t - .1) / .58, 0, 1);
+        const fall = clamp((t - .84) / .16, 0, 1);
+        const p = t < .1 ? 0 : t < .68 ? EASE.easeInOut(rise) : t < .84 ? 1 : 1 - EASE.easeInOut(fall);
+        const v = p * 4200;
+        [1000, 100, 10, 1].forEach(function (place, i) {
+          if (cols[i]) cols[i].style.transform = 'translateY(' + (-((v / place) % 10)).toFixed(3) + 'em)';
+        });
+      });
+    }
+    if (mode === 'tabular') {
+      const values = $$('.num-live', stage);
+      cycle(stage, 3000, function (t) {
+        const p = EASE.easeInOut(clamp(t / .82, 0, 1));
+        const value = Math.round(1111.11 + (8888.88 - 1111.11) * p).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        values.forEach(function (el) {
+          el.textContent = value;
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const width = range.getBoundingClientRect().width;
+          const track = el.closest('.num-row').querySelector('.num-track s');
+          if (track) track.style.width = width.toFixed(1) + 'px';
         });
       });
     }
@@ -636,13 +920,12 @@ window.MOTION = (function () {
     if (mode === 'safe') return '<div class="safe">' +
       [['transform', 1, 'ok'], ['opacity', 1, 'ok'], ['filter', 2, 'warn'], ['clip-path', 2, 'warn'], ['width', 3, 'bad'], ['top / left', 3, 'bad'], ['box-shadow', 3, 'bad'], ['font-size', 3, 'bad']]
         .map(function (x) { return '<i class="' + x[2] + '"><b>' + x[0] + '</b><s>' + '●'.repeat(x[1]) + '</s></i>'; }).join('') + '</div>';
-    /* 令牌：左列是按这个时长跑的条，右列是它引用的真实贝塞尔形状；三档共用同一个 --ease-standard */
-    if (mode === 'token') return '<div class="tokens">' +
-      [['--dur-fast · 120ms', '快：状态确认', 120], ['--dur-base · 240ms', '中：元素进出场', 240],
-       ['--dur-slow · 400ms', '慢：大面积转场', 400]]
-        .map(function (x) { return '<i class="tk" style="--tk:' + x[2] + 'ms"><b>' + x[0] + '</b><s>' + x[1] +
-          '</s><u></u><em aria-hidden="true"><svg viewBox="0 0 22 16"><path class="tk-grid" d="M0 15.5H22M0 .5H22"/>' +
-          '<path class="tk-curve" d="M0 16 C 4.4 3.2, 4.4 0, 22 0"/><circle class="tk-dot" r="1.9" cx="0" cy="16"/></svg></em></i>'; }).join('') + '</div>';
+    /* 同一路程对比三种时长；右侧遥测对这个静态例子没有帮助，因此由 HUD 明确关闭。 */
+    if (mode === 'token') return '<div class="tokens" aria-label="同一段移动距离的三档时长对比">' +
+      [['快', '120ms', 480], ['标准', '240ms', 960], ['慢', '400ms', 1600]]
+        .map(function (x) { return '<div class="tk" style="--tk:' + x[2] + 'ms"><div class="tk-label"><b>' + x[0] +
+          '</b><span>' + x[1] + '</span></div><div class="tk-track"><i></i></div></div>'; }).join('') +
+      '<p class="tk-note">三行走过同样的距离，数字是建议使用的时长。动画统一慢放 4 倍，方便看清快慢差别。</p></div>';
     /* content-visibility：真的挂上 CV + contain-intrinsic-size，滚动时能看见跳过渲染造成的滚动条跳动 */
     if (mode === 'cv') return '<div class="scrolly cvbox" data-mode="cv"><div class="cvlist">' + Array.from({ length: 8 }, function (_, i) {
       return '<i class="cvi' + (i > 2 ? ' cv' : '') + '"><b>' + (i > 2 ? 'content-visibility: auto' : '普通区块') + '</b><s>' + (i > 2 ? '跳过布局与绘制' : '全部参与渲染') + '</s></i>';
@@ -915,7 +1198,13 @@ window.MOTION = (function () {
       return '<div class="scrolly" data-mode="map"><b class="mp-title">字号</b><div class="sflow">' + rows(6) + '</div></div>';
     }
     if (mode === 'snap') {
-      return '<div class="scrolly snap" data-mode="snap"><i class="snr a">面板 1</i><i class="snr b">面板 2</i><i class="snr c">面板 3</i></div>';
+      const months = ['01','02','03','04','05','06','07','08','09','10','11','12'];
+      const days = Array.from({length:31}, (_, i) => String(i + 1).padStart(2, '0'));
+      const years = Array.from({length:9}, (_, i) => String(2022 + i));
+      const wheel = (name, values, selected) => '<div class="wheel-col" data-wheel="' + name + '" role="listbox" tabindex="0" aria-label="' + name + '" data-l10n="' + name + '" data-l10n-attr="aria-label">' +
+        '<div class="wheel-list">' + values.map(v => '<button type="button" class="wheel-item' + (v === selected ? ' is-active' : '') + '" role="option" aria-selected="' + (v === selected) + '">' + v + '</button>').join('') + '</div></div>';
+      return '<div class="scrolly snap ios-wheel" data-mode="snap"><div class="wheel-head"><span data-l10n="日期">日期</span><b class="wheel-date">2026/10/10</b><small data-l10n="上下滑动选择">上下滑动选择</small></div><div class="wheel-cols">' +
+        wheel('月', months, '10') + wheel('日', days, '10') + wheel('年', years, '2026') + '<i class="wheel-focus" aria-hidden="true"></i></div></div>';
     }
     if (mode === 'story') {
       return '<div class="scrolly" data-mode="story"><div class="st-chart"><u></u><u></u><u></u><u></u></div>' +
@@ -1023,6 +1312,66 @@ window.MOTION = (function () {
         });
       });
     }
+    if (mode === 'snap') {
+      const cols = $$('.wheel-col', box), date = $('.wheel-date', box);
+      const read = col => $('.wheel-item.is-active', col)?.textContent || '01';
+      const scrollToValue = (col, value) => {
+        const item = $$('.wheel-item', col).find(el => el.textContent === value);
+        if (item) {
+          const cr = col.getBoundingClientRect(), ir = item.getBoundingClientRect();
+          col.scrollTop += ir.top + ir.height / 2 - (cr.top + cr.height / 2);
+        }
+      };
+      let dayCount = $$('.wheel-item', cols[1]).length;
+      const bindColumn = col => {
+        col.addEventListener('scroll', () => { if (!col._wheelFrame) col._wheelFrame = requestAnimationFrame(() => { col._wheelFrame = 0; align(col); }); }, { passive: true });
+        col.addEventListener('keydown', e => {
+          if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+          const items = $$('.wheel-item', col), active = items.findIndex(item => item.classList.contains('is-active'));
+          const next = items[clamp(active + (e.key === 'ArrowDown' ? 1 : -1), 0, items.length - 1)];
+          if (next) { e.preventDefault(); next.scrollIntoView({ block: 'center', behavior: window.ENGINE.motionOn() ? 'smooth' : 'auto' }); }
+        });
+        $$('.wheel-item', col).forEach(item => item.addEventListener('click', () => item.scrollIntoView({ block: 'center', behavior: window.ENGINE.motionOn() ? 'smooth' : 'auto' })));
+      };
+      const align = col => {
+        const list = $('.wheel-list', col), items = $$('.wheel-item', col);
+        if (!items.length) return;
+        const cr = col.getBoundingClientRect(), center = cr.top + cr.height / 2;
+        let current = items[0], dist = Infinity;
+        items.forEach(item => {
+          const ir = item.getBoundingClientRect(), mid = ir.top + ir.height / 2;
+          const delta = Math.abs(mid - center);
+          if (delta < dist) { current = item; dist = delta; }
+        });
+        items.forEach(item => {
+          const ir = item.getBoundingClientRect(), d = (ir.top + ir.height / 2 - center) / 42;
+          item.classList.toggle('is-active', item === current);
+          item.setAttribute('aria-selected', item === current ? 'true' : 'false');
+          item.style.setProperty('--wheel-distance', clamp(d, -2.5, 2.5).toFixed(2));
+        });
+        if (col === cols[0] || col === cols[2]) {
+          const month = +read(cols[0]), year = +read(cols[2]), maxDay = new Date(year, month, 0).getDate();
+          if (maxDay !== dayCount) {
+            const selectedDay = Math.min(+read(cols[1]), maxDay);
+            dayCount = maxDay;
+            $('.wheel-list', cols[1]).innerHTML = Array.from({ length: maxDay }, (_, i) => {
+              const value = String(i + 1).padStart(2, '0');
+              return '<button type="button" class="wheel-item' + (i + 1 === selectedDay ? ' is-active' : '') + '" role="option" aria-selected="' + (i + 1 === selectedDay) + '">' + value + '</button>';
+            }).join('');
+            bindColumn(cols[1]); scrollToValue(cols[1], String(selectedDay).padStart(2, '0'));
+            requestAnimationFrame(() => align(cols[1]));
+          }
+        }
+        const vals = cols.map(read), y = +vals[2], m = +vals[0], d = +vals[1];
+        if (date) date.textContent = new Intl.DateTimeFormat(document.documentElement.lang === 'en' ? 'en-US' : 'zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(y, m - 1, d));
+      };
+      const initial = cols.map(read);
+      cols.forEach(bindColumn);
+      /* 详情页由 FLIP 插入，首帧列高可能还是 0；等布局稳定后再把默认值放到中线。 */
+      requestAnimationFrame(() => requestAnimationFrame(() => cols.forEach((col, i) => {
+        scrollToValue(col, initial[i]); align(col);
+      })));
+    }
     if (mode === 'driven') {
       items.forEach(function (el) { el.style.willChange = 'transform, opacity'; });
     }
@@ -1047,6 +1396,13 @@ window.MOTION = (function () {
 
 
   /* ================= 7. 指针跟随类 behavior ================= */
+  M.BEHAVIORS.focus = function (stage) {
+    stage.addEventListener('keydown', function (e) {
+      if (e.key === 'Tab') stage.dataset.keyboard = 'true';
+    });
+    stage.addEventListener('pointerdown', function () { delete stage.dataset.keyboard; });
+  };
+
   M.BEHAVIORS.tilt = function (stage, s, term) {
     const card = $('.tilt-target', stage) || $('.obj', stage);
     stage.addEventListener('pointermove', function (e) {

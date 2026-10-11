@@ -101,6 +101,11 @@
         return '<div class="stagein">' + repeat(objHtml(s), s.multi || 1) + '</div>';
     }
   }
+  const STAGE_HTML = new Map();
+  function stageMarkup(term) {
+    if (!STAGE_HTML.has(term.id)) STAGE_HTML.set(term.id, stageHTML(term));
+    return STAGE_HTML.get(term.id);
+  }
 
   /* ---------------- 舞台 CSS ---------------- */
   function stageCSS(t) {
@@ -123,7 +128,7 @@
     if (s.play === 'press') {
       return animCSS(root + '.pressing .stage' + targetSel(s), s.frames, s);
     }
-    if (s.behavior) return window.MOTION.extraCSS(t);
+    if (s.behavior && s.behavior !== 'focus') return window.MOTION.extraCSS(t);
     /* 互补双层的演示（溶解 / 拉焦）：B 层反相位播放 */
     if (s.dissolve || s.rack) {
       const pair = s.dissolve ? ['.diss.a', '.diss.b'] : ['.rack .a', '.rack .b'];
@@ -268,8 +273,9 @@
     /* 卡片：舞台下面直接跟参数条。弹窗：参数条排在慢放/循环之下，别挤在演示和工具条中间 */
     const modeAttr = s.kind === 'compound' && s.mode ? ' data-mode="' + esc(s.mode) + '"' : '';
     /* 徽标只给卡片：详情页的 .stage-tools 里已经有同一件事的完整说法，两处并存就是重复提示 */
-    return '<div class="stage kind-' + (s.kind || 'frames') + '"' + stageAttrs(s) + modeAttr + kb + '>' +
-      (withTools ? '' : drvBadge(s)) + stageHTML(t) + '</div>' +
+    const lazyAttr = withTools ? '' : ' is-lazy data-lazy-stage="1"';
+    return '<div class="stage kind-' + (s.kind || 'frames') + lazyAttr + '"' + stageAttrs(s) + modeAttr + kb + '>' +
+      (withTools ? '' : drvBadge(s)) + (withTools ? stageMarkup(t) : '') + '</div>' +
       compoundReadout +
       (withTools ? '<div class="stage-tools">' + (hint ? '<span class="hint" data-l10n="' + esc(hint) + '">' + esc(hint) + '</span>' : '<span></span>') +
         (canReplay ? '<button class="tool replay" type="button">↻ 重播</button>' : '') + '</div>' + ctl + bar
@@ -289,8 +295,12 @@
   }
   function detailHTML(t) {
     const code = window.DIALECTS ? window.DIALECTS.codeFor(t) : t.code;
-    /* 只有带结构化 frames 的术语能被编译成七种方言；组合范式给的是手写实现 */
-    const live = !window.DIALECTS || window.DIALECTS.compilable(t);
+    const codeStatus = window.DIALECTS ? window.DIALECTS.status(t) : 'translated';
+    const codeCoverage = window.DIALECTS ? window.DIALECTS.coverage() : { total: window.TERMS.length, translated: 0, approximate: 0, manual: window.TERMS.length };
+    const live = codeStatus !== 'manual';
+    const dialectOptions = window.DIALECTS ? window.DIALECTS.list.map(function (d) {
+      return '<option value="' + d.key + '"' + (d.key === window.DIALECTS.current ? ' selected' : '') + '>' + esc(d.label) + '</option>';
+    }).join('') : '';
     const cat = window.CATS.filter(c => c.id === t.cat)[0] || {};
     return '<article class="' + cardCls(t) + ' term--detail t-' + t.id + ' cat-' + t.cat + '" data-id="' + t.id + '" data-cat="' + t.cat +
       '" data-play="' + playOf(t) + '">' +
@@ -301,9 +311,12 @@
       '<div class="pg-copy">' +
       '<blockquote class="callout"><b>' + esc(L('maySay')) + '</b><p>' + esc(t.vague) + '</p></blockquote>' +
       '<p class="pg-def">' + esc(t.def) + '</p>' +
+      (t.cat === 'compound' ? '<p class="editorial-note"><b>' + esc(L('sitePattern')) + '</b> ' + esc(L('sitePatternNote')) + '</p>' : '') +
       '<div class="pg-say"><b class="sw sharp">' + esc(L('sayIt')) + '</b><span>' + esc(t.say) + '</span></div>' +
       (code ? '<div class="codewrap' + (live ? '' : ' is-static') + '">' +
-        (live ? '' : '<span class="code-note">' + esc(L('codeStatic')) + '</span>') +
+        '<label class="code-dialect"><span>' + esc(L('dialect')) + '</span><select class="page-dialect">' + dialectOptions + '</select></label>' +
+        '<span class="code-note">' + esc(L(codeStatus === 'manual' ? 'codeManual' : codeStatus === 'approximate' ? 'codeApprox' : 'codeTranslated')) + '</span>' +
+        '<p class="code-coverage" aria-live="polite">' + esc(codeCoverage.translated + '/' + codeCoverage.total + (window.I18N.lang === 'en' ? ' directly convertible' : ' 条可直接转换') + ' · ' + codeCoverage.approximate + (window.I18N.lang === 'en' ? ' approximate' : ' 条近似') + ' · ' + codeCoverage.manual + (window.I18N.lang === 'en' ? ' manual / unavailable' : ' 条需手动 / 暂不支持') + (window.I18N.lang === 'en' ? ' · counts are not compiler validation' : ' · 覆盖统计不代表编译验证')) + '</p>' +
         '<button class="copy" type="button">复制</button><pre><code>' + esc(code) + '</code></pre></div>' : '') +
       (window.REFS ? window.REFS.panelHTML(t.id) : '') +
       '<div class="foot"><div class="alias">' +
@@ -364,7 +377,8 @@
      翻页时正文按方向横向交接。不支持 VT 的浏览器退回 WAAPI。 */
   const HAS_VT = typeof document.startViewTransition === 'function';
   const VIS_NAME = 'ml-visual';
-  const ML_EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
+  /* 与 style-explorer 参考页相同的 glide 曲线：平顺进场、不额外回弹共享内容 */
+  const ML_EASE = 'cubic-bezier(0.2, 0.8, 0.2, 1)';
   function vt(run, after) {
     let ran = false, settled = false;
     const once = function () { if (ran) return; ran = true; run(); };
@@ -383,6 +397,37 @@
     else document.documentElement.removeAttribute('data-dir');
   }
   function cardVis(card) { return card ? $('.stage', card) : null; }
+  /* WAAPI 回退：不支持 View Transitions 的嵌入式浏览器也保留主视觉的形变感。 */
+  function sharedStageFallback(fromEl, toEl) {
+    if (!motionOn || !fromEl || !toEl || !fromEl.isConnected || !toEl.isConnected) return false;
+    const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+    if (!a.width || !a.height || !b.width || !b.height) return false;
+    const ghost = fromEl.cloneNode(true);
+    Object.assign(ghost.style, { position: 'fixed', left: a.left + 'px', top: a.top + 'px', width: a.width + 'px', height: a.height + 'px', margin: '0', zIndex: '10000', pointerEvents: 'none', transformOrigin: 'top left' });
+    document.body.appendChild(ghost);
+    const oldVisibility = toEl.style.visibility;
+    toEl.style.visibility = 'hidden';
+    if (ghost.animate) {
+      const anim = ghost.animate([
+        { left: a.left + 'px', top: a.top + 'px', width: a.width + 'px', height: a.height + 'px', borderRadius: getComputedStyle(fromEl).borderRadius },
+        { left: b.left + 'px', top: b.top + 'px', width: b.width + 'px', height: b.height + 'px', borderRadius: getComputedStyle(toEl).borderRadius }
+      ], { duration: 480, easing: ML_EASE, fill: 'both' });
+      anim.finished.then(function () { ghost.remove(); toEl.style.visibility = oldVisibility; }, function () { ghost.remove(); toEl.style.visibility = oldVisibility; });
+    } else {
+      ghost.classList.add('ml-shared-stage-ghost');
+      ghost.offsetWidth;
+      Object.assign(ghost.style, { left: b.left + 'px', top: b.top + 'px', width: b.width + 'px', height: b.height + 'px', borderRadius: getComputedStyle(toEl).borderRadius });
+      setTimeout(function () { ghost.remove(); toEl.style.visibility = oldVisibility; }, 520);
+    }
+    return true;
+  }
+  function outgoingPageClone(node) {
+    if (!node || !node.isConnected) return null;
+    const r = node.getBoundingClientRect(), clone = node.cloneNode(true);
+    Object.assign(clone.style, { position: 'fixed', left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', margin: '0', zIndex: '9999', pointerEvents: 'none', overflow: 'hidden' });
+    document.body.appendChild(clone);
+    return clone;
+  }
 
   let lastCard = null, pageBusy = false, pageToken = 0, paintDialect = null, paintTheme = null, favOnly = false;
   let favs = readList('motion-fav');
@@ -423,28 +468,44 @@
 
   function showPage(id) {
     const p = pg();
+    ['.topbar', '#top'].forEach(function (sel) {
+      const background = $(sel); if (!background) return;
+      background.inert = true;
+      background.setAttribute('aria-hidden', 'true');
+    });
     p.hidden = false;
     p.dataset.id = id;
     document.documentElement.classList.add('has-page');
   }
 
   function openDetail(id, src, dir) {
-    const node = detailNode(id); if (!node) return;
     const p = pg();
+    const switchingDetail = !p.hidden && p.dataset.id !== id;
+    const node = detailNode(id); if (!node) return;
+    /* 目标详情先挂入页面但保持隐藏，让 View Transition 的旧快照只包含当前页；
+       目标会在 update 回调里显示，避免新旧两张详情同时进入同一帧。 */
+    if (switchingDetail) node.hidden = true;
     pageToken++; pageBusy = false;
     setDir(dir);
-    /* 只保留当前这一条详情节点：以前是给它加 hidden，节点永久留在 DOM 里，
-       实测翻完 229 条后 DOM 里躺着 229 个 .term--detail、19,851 个元素（干净 4,242） */
-    $$('.term--detail', $('#page-body')).forEach(n => { if (n !== node) n.remove(); });
     const term = TERMS_BY_ID[id], en = window.I18N && window.I18N.lang === 'en';
     $('#page-crumb').textContent = en ? term.en : term.zh;
     document.title = (en ? term.en + ' · ' + term.zh : term.zh + ' · ' + term.en) + ' — ' + L('brand1');
     syncFav(id); syncEdgeNav(id);
     const stage = node.querySelector('.stage');
-    if (src) lastCard = src;
+    const candidateCard = src || (!switchingDetail ? document.querySelector('.term[data-id="' + id + '"]:not(.term--detail)') : null);
+    const originCard = candidateCard && !candidateCard.hidden ? candidateCard : null;
+    if (originCard) lastCard = originCard;
     const open = !p.hidden && p.dataset.id === id;
     const reveal = function () {
       if (!p.hidden && p.dataset.id === id) { p.scrollTop = 0; return; }
+      /* 先在转场的 DOM 更新帧里清理旧详情，旧快照才能保留下来参与交接。 */
+      $$('.term--detail', $('#page-body')).forEach(function (n) {
+        if (n !== node) {
+          pinVisible(n.querySelector('.stage'), false);
+          n.remove();
+        }
+      });
+      node.hidden = false;
       showPage(id);
       pinVisible(stage, true);
       replay(stage);
@@ -454,18 +515,48 @@
       /* 焦点跟进来：不然键盘/读屏用户点开卡片后焦点仍留在被盖住的那一侧 */
       try { p.focus({ preventScroll: true }); } catch (e) {}
     };
-    const cv = (!open && lastCard) ? cardVis(lastCard) : null;
+    const cv = (!open && !switchingDetail && originCard) ? cardVis(originCard) : null;
     if (HAS_VT && motionOn && cv) {
+      /* 不让整页淡入：只在列表舞台与详情舞台之间做共享元素形变。 */
+      p.classList.add('page--morphing');
       cv.style.viewTransitionName = VIS_NAME;
       vt(function () {
+        stage.style.viewTransitionName = VIS_NAME;
         reveal();
+        /* 旧卡片已经进入旧快照；新快照里只保留详情舞台这个同名元素。 */
         cv.style.viewTransitionName = '';
-      }, function () { cv.style.viewTransitionName = ''; setDir(0); });
-    } else {
+      }, function () {
+        stage.style.viewTransitionName = '';
+        setDir(0);
+      });
+    } else if (switchingDetail && HAS_VT && motionOn) {
+      /* 页面已打开时只做方向性页面交接；不再错误地从列表卡片重新放大。 */
+      vt(reveal, function () { setDir(0); });
+    } else if (switchingDetail) {
+      const oldNode = $('.term--detail', $('#page-body'));
+      const outgoing = motionOn ? outgoingPageClone(oldNode) : null;
       reveal();
-      if (!open && motionOn && node.animate) {
-        node.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 320, easing: ML_EASE });
+      if (outgoing) slideSwap(null, node, dir || 1);
+      else slideSwap(null, node, dir || 1);
+      const outClass = dir > 0 ? 'ml-page-out-next' : 'ml-page-out-prev';
+      const inClass = dir > 0 ? 'ml-page-in-next' : 'ml-page-in-prev';
+      if (outgoing) outgoing.classList.add(outClass);
+      node.classList.add(inClass);
+      setTimeout(function () { if (outgoing) outgoing.remove(); node.classList.remove(inClass); }, 500);
+    } else {
+      const morphingFromCard = !open && motionOn && !!cv;
+      if (morphingFromCard) p.classList.add('page--morphing');
+      reveal();
+      if (morphingFromCard && sharedStageFallback(cv, stage)) {
+        /* sharedStageFallback animates the preview geometry into the detail stage */
+      } else if (!open && motionOn && node.animate) {
+        p.classList.remove('page--morphing');
+        node.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 440, easing: ML_EASE });
+      } else if (!open && motionOn) {
+        node.classList.add('ml-page-in-next');
+        setTimeout(function () { node.classList.remove('ml-page-in-next'); }, 500);
       } else if (dir) {
+        p.classList.remove('page--morphing');
         slideSwap(null, node, dir);
       }
       setDir(0);
@@ -484,9 +575,17 @@
       });
       p.hidden = true;
       p.removeAttribute('data-id');
+      p.classList.remove('page--morphing');
       document.documentElement.classList.remove('has-page');
     }
+    ['.topbar', '#top'].forEach(function (sel) {
+      const background = $(sel); if (!background) return;
+      background.inert = false;
+      background.removeAttribute('aria-hidden');
+    });
     if (src) { const cv = cardVis(src); if (cv) cv.style.viewTransitionName = ''; }
+    const returnFocus = src && src.isConnected && !src.hidden ? src : $('#q');
+    if (returnFocus) { try { returnFocus.focus({ preventScroll: true }); } catch (e) {} }
     document.title = L('docTitle');
   }
 
@@ -495,7 +594,7 @@
     if (p.hidden || pageBusy) return;
     pageBusy = true;
     const id = p.dataset.id, tok = ++pageToken;
-    const src = (lastCard && lastCard.isConnected) ? lastCard : document.querySelector('.term[data-id="' + id + '"]:not(.term--detail)');
+    const src = (lastCard && lastCard.isConnected && !lastCard.hidden) ? lastCard : document.querySelector('.term[data-id="' + id + '"]:not(.term--detail):not([hidden])');
     setDir(0);
     const done = function () {
       if (tok !== pageToken) return;
@@ -503,9 +602,17 @@
       hidePage(src);
     };
     const cv = src ? cardVis(src) : null;
-    if (HAS_VT && motionOn && cv) {
-      cv.style.viewTransitionName = VIS_NAME;
-      vt(function () { done(); }, function () { cv.style.viewTransitionName = ''; });
+    const detailStage = $('.term--detail .stage', $('#page-body'));
+    if (HAS_VT && motionOn && cv && detailStage) {
+      detailStage.style.viewTransitionName = VIS_NAME;
+      vt(function () {
+        done();
+        /* 详情已进入旧快照；新快照只把共享名称交给列表卡片。 */
+        cv.style.viewTransitionName = VIS_NAME;
+      }, function () {
+        cv.style.viewTransitionName = '';
+        detailStage.style.viewTransitionName = '';
+      });
     } else {
       done();
     }
@@ -526,7 +633,7 @@
     const next = targetId || siblingId(cur, dir);
     if (!next) return;
     const card = document.querySelector('.term[data-id="' + next + '"]:not(.term--detail)');
-    if (card) card.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+    /* 详情切换时不要滚动后面的词条列表：详情浮层保持当前视口位置即可。 */
     openDetail(next, card, dir);
   }
 
@@ -539,7 +646,7 @@
         { duration: 170, easing: 'cubic-bezier(0.4, 0, 1, 1)' });
     }
     inNode.animate([{ opacity: 0, transform: 'translateX(' + (dir * K) + 'px)' }, { opacity: 1, transform: 'none' }],
-      { duration: 340, delay: 80, easing: ML_EASE, fill: 'backwards' });
+      { duration: 440, delay: 60, easing: ML_EASE, fill: 'backwards' });
   }
 
   /* ---------------- 播放控制 ---------------- */
@@ -646,6 +753,14 @@
       e.target.classList.toggle('in-view', e.isIntersecting);
     });
   }, { rootMargin: '120px 0px', threshold: 0.01 });
+  const stageMountIO = new IntersectionObserver(es => {
+    es.forEach(e => {
+      if (!e.isIntersecting) return;
+      try { mountStage(e.target.closest('.term')); }
+      catch (err) { console.warn('舞台延迟挂载失败：' + (e.target.closest('.term') || {}).dataset.id, err); }
+      stageMountIO.unobserve(e.target);
+    });
+  }, { rootMargin: '700px 0px', threshold: 0.01 });
 
   /* ---------------- 主循环 ---------------- */
   const tickers = new Set();
@@ -809,7 +924,19 @@
   /* ---------------- 挂载 ---------------- */
   function mountStage(term) {
     const stage = $('.stage', term);
+    if (!stage || stage.dataset.mounted === '1') return;
+    stage.innerHTML = stageMarkup(TERMS_BY_ID[term.dataset.id] || term);
+    stage.dataset.mounted = '1';
+    stage.classList.remove('is-lazy');
     const s = term.__demo;
+    if (term.dataset.id === 'hover-zoom') {
+      stage.addEventListener('pointerenter', () => stage.classList.add('is-hovered'));
+      stage.addEventListener('pointerleave', () => stage.classList.remove('is-hovered'));
+      stage.addEventListener('focusin', () => stage.classList.add('is-hovered'));
+      stage.addEventListener('focusout', e => {
+        if (!stage.contains(e.relatedTarget)) stage.classList.remove('is-hovered');
+      });
+    }
     stage._prm = stage._prm || {};
     /* 循环的初始状态跟复选框一致，否则第一次 applyTiming 就按"没勾选"去抄基线 */
     stage._loop = loopOf(s);
@@ -862,7 +989,15 @@
   function build() {
     let cardsMade = 0;
     TERMS_BY_ID = {};
-    window.TERMS.forEach(t => { TERMS_BY_ID[t.id] = t; });
+    window.TERMS.forEach(t => {
+      TERMS_BY_ID[t.id] = t;
+      const sources = window.REFS && window.REFS.sourcesFor ? window.REFS.sourcesFor(t.id) : [];
+      t.contentMeta = {
+        kind: t.cat === 'compound' ? 'site-pattern' : 'motion-concept',
+        sources: sources,
+        sourcesCheckedAt: sources.length ? '2026-09-21' : null
+      };
+    });
     const html = window.CATS.map(c => {
       const items = window.TERMS.filter(t => t.cat === c.id);
       /* 一个舞台写错不该让整站空白：单卡片降级，错误照常抛到控制台 */
@@ -901,7 +1036,8 @@
     $$('.term').forEach(el => {
       const data = TERMS_BY_ID[el.dataset.id];
       el.__demo = (data && data.demo) || {};
-      try { mountStage(el); } catch (err) { console.warn('挂载失败：' + el.dataset.id, err); }
+      const stage = $('.stage', el);
+      if (stage) stageMountIO.observe(stage);
     });
     /* 卡片自身的入场编排：rise-in + 每行错峰（只在 JS 可用时启用前置隐藏） */
     const cardEls = $$('.term:not(.term--detail)');
@@ -924,7 +1060,8 @@
   function indexTerms() {
     $$('.term:not(.term--detail)').forEach(el => {
       const t = TERMS_BY_ID[el.dataset.id];
-      el._idx = (t.en + ' ' + t.zh + ' ' + (t.alias || []).join(' ') + ' ' + t.def + ' ' + t.say + ' ' + t.vague + ' ' + (t.code || '')).toLowerCase();
+      const en = window.EN && window.EN[t.id] ? window.EN[t.id].join(' ') : '';
+      el._idx = (t.en + ' ' + t.zh + ' ' + (t.alias || []).join(' ') + ' ' + t.def + ' ' + t.say + ' ' + t.vague + ' ' + (t.code || '') + ' ' + en).toLowerCase();
     });
   }
   function applyFilter() {
@@ -932,25 +1069,81 @@
     const cat = document.body.dataset.filter || '';
     let shown = 0;
     const catHit = {};
+    const tokens = q.split(/\s+/).filter(Boolean);
+    const matches = [];
     $$('.term:not(.term--detail)').forEach(el => {
-      const ok = (!q || el._idx.indexOf(q) >= 0) && (!cat || el.dataset.cat === cat) &&
+      const ok = (!tokens.length || tokens.every(token => el._idx.indexOf(token) >= 0)) && (!cat || el.dataset.cat === cat) &&
         (!favOnly || favs.indexOf(el.dataset.id) >= 0);
-      el.hidden = !ok;
-      if (ok) { shown++; catHit[el.dataset.cat] = 1; }
+      el.hidden = !!q || !ok;
+      if (ok) {
+        shown++; catHit[el.dataset.cat] = 1;
+        if (q) {
+          const term = TERMS_BY_ID[el.dataset.id];
+          const fields = [term.en, term.zh, (term.alias || []).join(' '), term.def, term.say, term.vague, term.code || ''];
+          const score = tokens.reduce(function (sum, token) {
+            const name = (term.en + ' ' + term.zh).toLowerCase();
+            const alias = (term.alias || []).join(' ').toLowerCase();
+            return sum + (name.indexOf(token) >= 0 ? 12 : 0) + (alias.indexOf(token) >= 0 ? 8 : 0) +
+              (term.say.toLowerCase().indexOf(token) >= 0 ? 5 : 0) + (term.def.toLowerCase().indexOf(token) >= 0 ? 3 : 0) +
+              (fields.join(' ').toLowerCase().indexOf(token) >= 0 ? 1 : 0);
+          }, 0);
+          matches.push({ term: term, score: score });
+        }
+      }
     });
-    $$('.cat').forEach(sec => { sec.hidden = !catHit[sec.dataset.cat]; });
+    $$('.cat').forEach(sec => { sec.hidden = !!q || !catHit[sec.dataset.cat]; });
     $('#hitcount').textContent = (q || cat || favOnly) ? shown + ' / ' + window.TERMS.length : window.TERMS.length + (L('nTerms'));
-    $('#empty').hidden = shown > 0;
+    const panel = $('#search-results');
+    const list = $('#search-result-list');
+    const empty = $('#empty');
+    if (panel && list) {
+      panel.hidden = !q;
+      matches.sort(function (a, b) { return b.score - a.score || a.term.zh.localeCompare(b.term.zh, 'zh-CN'); });
+      const total = matches.length;
+      const visible = matches;
+      const catName = function (id) { const c = window.CATS.find(x => x.id === id); return c ? (window.I18N.lang === 'en' ? c.en || c.name : c.name) : id; };
+      list.innerHTML = visible.map(function (item, i) {
+        const t = item.term;
+        const description = (window.I18N && window.I18N.lang === 'en' && window.EN[t.id] ? window.EN[t.id][0] : t.def)
+          .replace(/`([^`]+)`/g, '$1').replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1');
+        return '<button type="button" class="search-result" data-open-term="' + esc(t.id) + '">' +
+          '<span class="result-index">' + String(i + 1).padStart(2, '0') + '</span>' +
+          '<span class="result-copy"><span class="result-title">' + esc(t.zh) + '<i>' + esc(t.en) + '</i></span>' +
+          '<span class="result-desc">' + esc(description) + '</span></span>' +
+          '<span class="result-meta">' + esc(catName(t.cat)) + '<b aria-hidden="true">↗</b></span></button>';
+      }).join('');
+      const title = window.I18N.lang === 'en'
+        ? total + ' ' + (total === 1 ? 'match' : 'matches')
+        : total + ' 个匹配结果';
+      $('#search-results-title').textContent = title;
+      const filterStatus = $('#search-filter-status');
+      const filterParts = [];
+      if (cat) filterParts.push(window.I18N.t('searchCategoryFilter') + catName(cat));
+      if (favOnly) filterParts.push(window.I18N.t('searchFavoritesFilter'));
+      filterStatus.textContent = filterParts.join(' · ');
+      filterStatus.hidden = !filterParts.length;
+      $('#search-clear-filters').hidden = !filterParts.length;
+    }
+    empty.hidden = shown > 0 || (!q && !cat && !favOnly);
+    if (q && !empty.hidden) empty.textContent = L('searchNone');
   }
 
   /* 详情页导出成一段可以直接贴进需求或提示词的 Markdown */
   function termMarkdown(t) {
-    const code = window.DIALECTS ? window.DIALECTS.codeFor(t) : t.code;
-    return '## ' + t.zh + ' / ' + t.en + '\n\n' +
-      '> **你可能会说：** ' + t.vague + '\n\n' +
-      t.def + '\n\n' +
-      '**说出来：** ' + t.say + '\n' +
-      (code ? '\n```\n' + code + '\n```\n' : '') +
+    const en = window.I18N && window.I18N.lang === 'en';
+    const detail = document.querySelector('.term--detail[data-id="' + t.id + '"]');
+    const stage = detail && detail.querySelector('.stage');
+    const overrides = stage && stage._prm ? stage._prm : {};
+    const copy = en && window.EN[t.id] ? window.EN[t.id] : [t.def, t.vague, t.say];
+    const code = window.DIALECTS ? window.DIALECTS.codeFor(t, overrides) : t.code;
+    const codeStatus = window.DIALECTS ? window.DIALECTS.status(t, overrides) : 'translated';
+    const codeNote = codeStatus === 'manual' ? (en ? 'Selected syntax is unavailable for this motion. The code block is the original source example, not converted code.' : '当前写法无法自动转换；代码块保留的是原始示例，并非目标平台代码。') :
+      codeStatus === 'approximate' ? (en ? 'The selected platform uses an approximate easing curve.' : '所选平台的缓动曲线为近似值。') : '';
+    return '## ' + (en ? t.en + ' / ' + t.zh : t.zh + ' / ' + t.en) + '\n\n' +
+      '> **' + (en ? 'You might say' : '你可能会说') + ':** ' + copy[1] + '\n\n' +
+      copy[0] + '\n\n' +
+      '**' + (en ? 'Say it as' : '说出来') + ':** ' + copy[2] + '\n' +
+      (code ? (codeNote ? '\n> ' + codeNote + '\n' : '') + '\n```\n' + code + '\n```\n' : '') +
       (t.alias && t.alias.length ? '\n**也叫：** ' + t.alias.join('、') + '\n' : '');
   }
   /* 剪贴板统一入口：异步 API 被拒（权限 / 失焦）时降级 execCommand，
@@ -983,34 +1176,74 @@
 
   /* ---------------- 配方（选词成句） ---------------- */
   const RKEY = 'motion-recipe-v1';
-  let recipe = readList(RKEY);
   function L(k) { return window.I18N ? window.I18N.t(k) : ''; }
+  function readRecipe() {
+    let raw = [];
+    try { raw = JSON.parse(localStorage.getItem(RKEY) || '[]'); } catch (e) {}
+    if (!Array.isArray(raw)) return [];
+    return raw.map(function (item) {
+      const step = typeof item === 'string' ? { id: item } : item;
+      if (!step || typeof step.id !== 'string' || !(window.TERMS || []).some(t => t.id === step.id)) return null;
+      return {
+        id: step.id,
+        target: typeof step.target === 'string' ? step.target : '',
+        trigger: ['enter', 'click', 'hover', 'scroll', 'state', 'loop'].indexOf(step.trigger) >= 0 ? step.trigger : 'enter',
+        relation: step.relation === 'parallel' ? 'parallel' : 'after'
+      };
+    }).filter(Boolean);
+  }
+  let recipe = readRecipe();
   function saveRecipe() { try { localStorage.setItem(RKEY, JSON.stringify(recipe)); } catch (e) {} }
   function renderRecipe() {
     const box = $('#recipe');
     box.hidden = !recipe.length;
     $('#recipe-count').textContent = recipe.length;
     const en = window.I18N && window.I18N.lang === 'en';
-    $('#recipe-chips').innerHTML = recipe.map(id => {
-      const t = window.TERMS.find(x => x.id === id);
-      return '<span class="rchip">' + esc(t ? (t.en + (en ? '' : ' / ' + t.zh)) : id) + '<button data-rm="' + esc(id) + '" aria-label="移除" data-l10n="移除" data-l10n-attr="aria-label">×</button></span>';
+    $('#recipe-chips').innerHTML = recipe.map(step => {
+      const t = TERMS_BY_ID[step.id];
+      return '<span class="rchip">' + esc(t ? (t.en + (en ? '' : ' / ' + t.zh)) : step.id) + '</span>';
     }).join('');
-    const text = recipe.map(id => {
-      const t = window.TERMS.find(x => x.id === id);
-      if (!t) return '';
-      const e = window.EN[id];
-      return en && e ? e[2] : t.say;
-    }).filter(Boolean);
-    $('#recipe-out').value = text.length ? L('recPrefix') + '\n- ' + text.join('\n- ') + '\n\n' + L('recSuffix') : '';
+    const triggers = { enter: 'triggerEnter', click: 'triggerClick', hover: 'triggerHover', scroll: 'triggerScroll', state: 'triggerState', loop: 'triggerLoop' };
+    $('#recipe-steps').innerHTML = recipe.map((step, i) => {
+      const t = TERMS_BY_ID[step.id], copy = en && window.EN[step.id] ? window.EN[step.id] : null;
+      const name = en ? t.en : t.zh;
+      const target = step.target || (en ? 'Target element' : '目标元素');
+      return '<article class="recipe-step" data-step-index="' + i + '">' +
+        '<div class="recipe-step-top"><span class="recipe-step-no">' + String(i + 1).padStart(2, '0') + '</span><b>' + esc(name) + '</b>' +
+        '<button type="button" class="recipe-step-move" data-move-step="-1" aria-label="' + esc(L('moveUp')) + '"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+        '<button type="button" class="recipe-step-move" data-move-step="1" aria-label="' + esc(L('moveDown')) + '"' + (i === recipe.length - 1 ? ' disabled' : '') + '>↓</button>' +
+        '<button type="button" class="recipe-step-remove" data-rm="' + esc(step.id) + '" aria-label="' + esc(L('removeStep')) + '">×</button></div>' +
+        '<div class="recipe-step-fields"><label><span>' + esc(L('recipeTarget')) + '</span><input type="text" data-recipe-field="target" value="' + esc(target) + '" maxlength="80"></label>' +
+        '<label><span>' + esc(L('recipeTrigger')) + '</span><select data-recipe-field="trigger">' + Object.keys(triggers).map(k => '<option value="' + k + '"' + (step.trigger === k ? ' selected' : '') + '>' + esc(L(triggers[k])) + '</option>').join('') + '</select></label>' +
+        '<label><span>' + esc(L('recipeOrder')) + '</span><select data-recipe-field="relation"><option value="after"' + (step.relation === 'after' ? ' selected' : '') + '>' + esc(L('recipeAfter')) + '</option><option value="parallel"' + (step.relation === 'parallel' ? ' selected' : '') + '>' + esc(L('recipeParallel')) + '</option></select></label></div></article>';
+    }).join('');
+    const text = recipe.map((step, i) => {
+      const t = TERMS_BY_ID[step.id], copy = en && window.EN[step.id] ? window.EN[step.id] : null;
+      const say = copy ? copy[2] : t.say;
+      const target = step.target || (en ? 'Target element' : '目标元素');
+      const trigger = L(triggers[step.trigger]);
+      const relation = i === 0 ? '' : step.relation === 'parallel' ? (en ? ' (in parallel with previous step)' : '（与上一步并行）') : (en ? ' (after previous step)' : '（接在上一步之后）');
+      const sep = en ? '; ' : '；';
+      return (i + 1) + '. ' + (en ? 'Target: ' : '对象：') + target + sep + (en ? 'Trigger: ' : '触发：') + trigger + sep + (en ? 'Effect: ' : '效果：') + say + relation;
+    });
+    $('#recipe-out').value = text.length ? L('recPrefix') + '\n' + text.join('\n') + '\n\n' + L('recSuffix') : '';
     $$('.add').forEach(b => {
-      const on = recipe.indexOf(b.dataset.add) >= 0;
+      const on = recipe.some(step => step.id === b.dataset.add);
       b.classList.toggle('on', on);
       b.textContent = on ? L('added') : L('add');
     });
   }
   function toggleRecipe(id) {
-    const i = recipe.indexOf(id);
-    if (i >= 0) recipe.splice(i, 1); else recipe.push(id);
+    const i = recipe.findIndex(step => step.id === id);
+    if (i >= 0) recipe.splice(i, 1);
+    else {
+      const term = TERMS_BY_ID[id], demo = term && term.demo || {}, evidence = term ? (term.say + ' ' + term.def) : '';
+      const trigger = demo.play === 'hover' || /悬停|指针|鼠标|光标/.test(evidence) ? 'hover' :
+        demo.play === 'press' || demo.kind === 'list' || demo.kind === 'drag' || /点击|按下|长按|拖拽/.test(evidence) ? 'click' :
+        demo.kind === 'scroll' || /滚动/.test(evidence) ? 'scroll' :
+        demo.loop || /循环|持续/.test(evidence) ? 'loop' : 'enter';
+      recipe.push({ id: id, target: '', trigger: trigger, relation: 'after' });
+    }
     saveRecipe(); renderRecipe();
   }
 
@@ -1100,7 +1333,7 @@
       const D = window.DIALECTS; if (!D || !$('#dialect-list')) return;
       const btn = $('#dialect-btn'), list = $('#dialect-list'), menu = $('#dialect-menu');
       const paint = function () {
-        list.innerHTML = '<p class="menu-hd">' + esc(L('dialectHd')) + '</p>' + D.list.map(d =>
+        list.innerHTML = '<p class="menu-hd" role="presentation">' + esc(L('dialectHd')) + '</p>' + D.list.map(d =>
           '<button type="button" role="option" class="menu-item' + (d.key === D.current ? ' on' : '') +
           '" data-k="' + d.key + '" aria-selected="' + (d.key === D.current) + '"><span>' + d.label + '</span>' +
           '<svg class="tick" width="15" height="15" viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 10.6 8.2 14 15.5 6.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></button>').join('');
@@ -1109,6 +1342,11 @@
       const open = function (on) {
         menu.classList.toggle('open', on);
         btn.setAttribute('aria-expanded', String(on));
+        list.hidden = !on;
+        if (on) {
+          const selected = list.querySelector('.menu-item.on');
+          if (selected) selected.focus();
+        }
       };
       paint();
       paintDialect = paint;
@@ -1118,8 +1356,23 @@
         D.set(it.dataset.k); paint(); open(false);
         if (window.I18N) window.I18N.refreshTerms();
       });
+      list.addEventListener('keydown', function (e) {
+        const items = [].slice.call(list.querySelectorAll('.menu-item'));
+        const i = items.indexOf(document.activeElement);
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault(); if (items.length) items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1) + items.length) % items.length].focus();
+        } else if (e.key === 'Home') { e.preventDefault(); if (items[0]) items[0].focus(); }
+        else if (e.key === 'End') { e.preventDefault(); if (items.length) items[items.length - 1].focus(); }
+        else if (e.key === 'Escape') { e.preventDefault(); open(false); btn.focus(); }
+        else if (e.key === 'Tab') open(false);
+      });
+      btn.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
+          if (!menu.classList.contains('open')) { e.preventDefault(); open(true); }
+        }
+      });
       document.addEventListener('click', function (e) { if (!e.target.closest('#dialect-menu')) open(false); });
-      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') open(false); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menu.classList.contains('open')) { open(false); btn.focus(); } });
     }
 
     /* 主题下拉：每套配色带一个色样（底/字/强调三格）。
@@ -1132,12 +1385,13 @@
       const open = function (on) {
         menu.classList.toggle('open', on);
         btn.setAttribute('aria-expanded', String(on));
+        list.hidden = !on;
         if (on) { const c = list.querySelector('.menu-item.on') || items()[0]; if (c) c.focus(); }
       };
       paintTheme = function () {
         const cur = document.documentElement.dataset.theme;
         const en = window.I18N && window.I18N.lang === 'en';
-        list.innerHTML = '<p class="menu-hd">' + esc(L('themeHd')) + '</p>' + THEMES.map(t =>
+        list.innerHTML = '<p class="menu-hd" role="presentation">' + esc(L('themeHd')) + '</p>' + THEMES.map(t =>
           '<button type="button" role="menuitemradio" aria-checked="' + (t.k === cur) + '" class="menu-item' +
           (t.k === cur ? ' on' : '') + '" data-t="' + t.k + '">' +
           '<span class="tsw" data-theme="' + t.k + '" aria-hidden="true"><i></i><i></i><i></i></span>' +
@@ -1162,8 +1416,8 @@
       btn.addEventListener('keydown', function (e) {
         if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); open(true); }
       });
-      document.addEventListener('click', function (e) { if (!e.target.closest('#theme-menu')) menu.classList.remove('open'); });
-      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') menu.classList.remove('open'); });
+      document.addEventListener('click', function (e) { if (!e.target.closest('#theme-menu')) open(false); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && menu.classList.contains('open')) { open(false); btn.focus(); } });
     }
 
     /* 滚动进度条 + 侧栏跟随当前分类 */
@@ -1188,11 +1442,109 @@
       $$('.cat').forEach(s => spy.observe(s));
     }
 
+    /* 最近搜索仅保存在本机；输入停顿后记录，避免每个字符都留下历史。 */
+    const SEARCH_HISTORY_KEY = 'motion-search-history-v1';
+    const historyPanel = $('#search-history'), historyList = $('#search-history-list');
+    let searchHistory = readList(SEARCH_HISTORY_KEY).map(x => x.trim()).filter(Boolean).slice(0, 8);
+    const historyText = key => window.I18N ? window.I18N.t(key) : key;
+    function saveSearchHistory() {
+      try { localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(searchHistory)); } catch (e) {}
+    }
+    function renderSearchHistory(show) {
+      if (!historyPanel) return;
+      historyList.innerHTML = searchHistory.map(query =>
+        '<li><button class="search-history-query" type="button" data-search-query="' + esc(query) + '">' + esc(query) + '</button>' +
+        '<button class="search-history-remove" type="button" data-remove-query="' + esc(query) + '" aria-label="' + esc(historyText('removeSearchHistory')) + '">×</button></li>'
+      ).join('');
+      historyPanel.hidden = !(show && searchHistory.length && !$('#q').value.trim());
+    }
+    function recordSearchQuery(value) {
+      const query = String(value || '').trim().slice(0, 80);
+      if (!query) return;
+      searchHistory = [query].concat(searchHistory.filter(x => x.toLocaleLowerCase() !== query.toLocaleLowerCase())).slice(0, 8);
+      saveSearchHistory();
+      renderSearchHistory(false);
+    }
+    let searchHistoryTimer = 0;
+    $('#q').addEventListener('focus', () => renderSearchHistory(true));
+    $('#q').addEventListener('focusout', e => {
+      if (historyPanel.contains(e.relatedTarget)) return;
+      setTimeout(() => {
+        if (document.activeElement !== $('#q') && !historyPanel.contains(document.activeElement)) historyPanel.hidden = true;
+      }, 0);
+    });
+    historyPanel.addEventListener('click', e => {
+      const remove = e.target.closest('[data-remove-query]');
+      if (remove) {
+        searchHistory = searchHistory.filter(x => x !== remove.dataset.removeQuery);
+        saveSearchHistory();
+        renderSearchHistory(true);
+        $('#q').focus();
+        return;
+      }
+      const query = e.target.closest('[data-search-query]');
+      if (query) {
+        $('#q').value = query.dataset.searchQuery;
+        recordSearchQuery(query.dataset.searchQuery);
+        document.body.dataset.searchActive = '1';
+        historyPanel.hidden = true;
+        applyFilter();
+        requestAnimationFrame(() => $('#content').scrollIntoView({ behavior: motionOn ? 'smooth' : 'auto', block: 'start' }));
+        $('#q').focus();
+      }
+    });
+    $('#clear-search-history').addEventListener('click', () => {
+      searchHistory = [];
+      saveSearchHistory();
+      renderSearchHistory(false);
+      $('#q').focus();
+    });
+    historyPanel.addEventListener('keydown', e => {
+      const buttons = $$('.search-history-query, .search-history-remove', historyPanel);
+      const at = buttons.indexOf(document.activeElement);
+      if (e.key === 'Escape') { e.preventDefault(); historyPanel.hidden = true; $('#q').focus(); }
+      else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const next = e.key === 'ArrowDown' ? (at + 1) % buttons.length : (at <= 0 ? buttons.length - 1 : at - 1);
+        if (buttons.length) buttons[next].focus();
+      }
+    });
+    $('#q').addEventListener('keydown', e => {
+      if (e.key === 'ArrowDown' && !$('#q').value.trim() && !historyPanel.hidden) {
+        const first = $('.search-history-query', historyPanel);
+        if (first) { e.preventDefault(); first.focus(); }
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        clearTimeout(searchHistoryTimer);
+        recordSearchQuery(e.currentTarget.value);
+        if (e.currentTarget.value.trim()) {
+          document.body.dataset.searchActive = '1';
+          applyFilter();
+          $('#content').scrollIntoView({ behavior: motionOn ? 'smooth' : 'auto', block: 'start' });
+        }
+      }
+      if (e.key === 'Escape') {
+        if (!historyPanel.hidden && !e.target.value) { historyPanel.hidden = true; return; }
+        clearTimeout(searchHistoryTimer);
+        e.target.value = ''; delete document.body.dataset.searchActive; applyFilter(); renderSearchHistory(true);
+      }
+    });
+    document.addEventListener('click', e => { if (!e.target.closest('.search')) historyPanel.hidden = true; });
+
     /* 输入合帧：每个按键只排一次过滤。不能只用「未决标志」判断——
        标签页被节流时 rAF 可能迟迟不来，标志卡死会让输入永久失灵，
        所以带 250ms 超时自愈 */
     let qRaf = 0, qAt = 0;
     $('#q').addEventListener('input', function () {
+      const active = !!this.value.trim();
+      clearTimeout(searchHistoryTimer);
+      if (active) searchHistoryTimer = setTimeout(() => recordSearchQuery(this.value), 700);
+      else renderSearchHistory(true);
+      if (active && document.body.dataset.searchActive !== '1') {
+        document.body.dataset.searchActive = '1';
+        requestAnimationFrame(function () { $('#content').scrollIntoView({ behavior: motionOn ? 'smooth' : 'auto', block: 'start' }); });
+      } else if (!active) delete document.body.dataset.searchActive;
       if (qRaf) {
         if (performance.now() - qAt < 250) return;
         cancelAnimationFrame(qRaf);
@@ -1200,11 +1552,47 @@
       qAt = performance.now();
       qRaf = requestAnimationFrame(function () { qRaf = 0; applyFilter(); });
     });
-    $('#q').addEventListener('keydown', e => { if (e.key === 'Escape') { e.target.value = ''; applyFilter(); } });
     document.addEventListener('keydown', e => {
       if (e.key === '/' && document.activeElement !== $('#q')) { e.preventDefault(); $('#q').focus(); }
     });
-    $('#clear').addEventListener('click', () => { $('#q').value = ''; document.body.dataset.filter = ''; $$('#nav a').forEach(a => a.classList.remove('on')); applyFilter(); });
+    $('#clear').addEventListener('click', () => { clearTimeout(searchHistoryTimer); $('#q').value = ''; delete document.body.dataset.searchActive; document.body.dataset.filter = ''; $$('#nav a').forEach(a => a.classList.remove('on')); applyFilter(); renderSearchHistory(true); $('#q').focus(); });
+    $('#search-reset').addEventListener('click', function () {
+      clearTimeout(searchHistoryTimer); $('#q').value = ''; delete document.body.dataset.searchActive; applyFilter(); $('#q').focus(); renderSearchHistory(true);
+    });
+    $('#search-clear-filters').addEventListener('click', function () {
+      document.body.dataset.filter = '';
+      favOnly = false;
+      $('#fav-filter').setAttribute('aria-pressed', 'false');
+      $$('#nav a').forEach(a => a.classList.remove('on'));
+      applyFilter();
+    });
+    $('#scene-shortcuts').addEventListener('click', function (e) {
+      const shortcut = e.target.closest('[data-scenario-query]');
+      if (!shortcut) return;
+      $('#q').value = shortcut.dataset.scenarioQuery;
+      $('#q').dispatchEvent(new Event('input', { bubbles: true }));
+      $('#q').focus();
+    });
+    $('#search-result-list').addEventListener('click', function (e) {
+      const item = e.target.closest('[data-open-term]'); if (!item) return;
+      clearTimeout(searchHistoryTimer); recordSearchQuery($('#q').value); historyPanel.hidden = true;
+      openDetail(item.dataset.openTerm, null, 0);
+    });
+    $('#recipe-steps').addEventListener('change', function (e) {
+      const field = e.target.closest('[data-recipe-field]'), row = e.target.closest('[data-step-index]');
+      if (!field || !row || !recipe[row.dataset.stepIndex]) return;
+      recipe[row.dataset.stepIndex][field.dataset.recipeField] = field.value;
+      saveRecipe(); renderRecipe();
+    });
+    $('#recipe-steps').addEventListener('click', function (e) {
+      const move = e.target.closest('[data-move-step]'), row = e.target.closest('[data-step-index]');
+      if (!move || !row) return;
+      e.preventDefault();
+      const from = +row.dataset.stepIndex, to = from + +move.dataset.moveStep;
+      if (to < 0 || to >= recipe.length) return;
+      const step = recipe.splice(from, 1)[0]; recipe.splice(to, 0, step);
+      saveRecipe(); renderRecipe();
+    });
     $('#nav').addEventListener('click', e => {
       const a = e.target.closest('a'); if (!a) return;
       const on = document.body.dataset.filter === a.dataset.cat;
@@ -1292,12 +1680,28 @@
       replay(stage);
     });
     $('#page-body').addEventListener('change', function (e) {
+      const select = e.target.closest('.page-dialect'); if (!select || !window.DIALECTS) return;
+      window.DIALECTS.set(select.value);
+      if (paintDialect) paintDialect();
+      if (window.I18N) window.I18N.refreshTerms();
+    });
+    $('#page-body').addEventListener('change', function (e) {
       const c = e.target.closest('[data-loop]'); if (!c) return;
       const node = c.closest('.term--detail'), stage = node.querySelector('.stage');
       setLoop(stage, c.checked);
       replay(stage);
       /* 勾选/取消循环会改这条曲线的形状（一次性斜坡 ⇄ 三角波），面板必须跟着重建 */
       if (window.HUD) window.HUD.rebuild(node, node.dataset.id);
+    });
+    $('#page-body').addEventListener('input', function (e) {
+      if (!e.target.matches('.pctl input')) return;
+      const node = e.target.closest('.term--detail');
+      if (!node) return;
+      const term = TERMS_BY_ID[node.dataset.id], stage = $('.stage', node);
+      const code = $('code', node);
+      if (term && stage && code && window.DIALECTS) {
+        code.textContent = window.DIALECTS.codeFor(term, stage._prm || {});
+      }
     });
     window.addEventListener('resize', redrawCurves);
   }
@@ -1308,5 +1712,5 @@
   if (document.readyState === 'complete') boot();
   else document.addEventListener('DOMContentLoaded', boot);
 
-  window.ENGINE = { replay: replay, pinVisible: pinVisible, isVisible: s => visible.get(s), $: $, $$: $$, esc: esc, motionOn: () => motionOn, onMotion: f => { motionHooks.add(f); }, tickers: tickers, io: io, briefOf: briefOf, openDetail: openDetail, closeDetail: closeDetail, onLang: function () { if (paintDialect) paintDialect(); syncCrumb(); if (window.HUD) window.HUD.repaintBtn(); } };
+  window.ENGINE = { replay: replay, pinVisible: pinVisible, isVisible: s => visible.get(s), $: $, $$: $$, esc: esc, motionOn: () => motionOn, onMotion: f => { motionHooks.add(f); }, tickers: tickers, io: io, briefOf: briefOf, openDetail: openDetail, closeDetail: closeDetail, onLang: function () { if (paintDialect) paintDialect(); syncCrumb(); applyFilter(); renderRecipe(); if (window.HUD) window.HUD.repaintBtn(); } };
 })();

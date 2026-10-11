@@ -243,6 +243,27 @@
   .term--detail .pg-visual:has(.gz-readout) > .stage-tools { grid-row: 3; }
   .term--detail .pg-visual:has(.gz-readout) > .dt-ctl,
   .term--detail .pg-visual:has(.gz-readout) > .pctl { grid-column: 1; }
+
+  /* 窄屏遥测栏改成紧凑横排，演示主体仍是视觉焦点。 */
+  .term--detail.hud-on .hud {
+    display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    align-items: center; gap: 8px 16px; padding: 12px 16px;
+    border-top: 1px solid var(--line-soft); border-left: 0;
+  }
+  .term--detail.hud-on .hud-head,
+  .term--detail.hud-on .hud-chart,
+  .term--detail.hud-on .hud-cap,
+  .term--detail.hud-on .hud-legend,
+  .term--detail.hud-on .hud-verdict { grid-column: 1 / -1; }
+  .term--detail.hud-on .hud-head { margin-bottom: 1px; }
+  .term--detail.hud-on .hud-f.hi { grid-column: 1; }
+  .term--detail.hud-on .hud-f.hi var { font-size: 28px; }
+  .term--detail.hud-on .hud-row { grid-column: 2; gap: 12px; }
+  .term--detail.hud-on .hud-row .hud-f { min-width: 0; }
+  .term--detail.hud-on .hud-row .hud-f.sm { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .term--detail.hud-on .hud-chart { height: 86px; margin: 0; }
+  .term--detail.hud-on .hud-cap { margin-top: -5px; }
+  .term--detail.hud-on .hud-verdict { margin: 0; }
 }
 
 /* 手机上让接触表承担“看清 24 帧”的任务：4 列比压成 6 列更容易辨认主体与编号。 */

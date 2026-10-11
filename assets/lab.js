@@ -1,5 +1,5 @@
 /* ============================================================
-   lab.js —— 缓动实验室：拖控制点、比时长、导出四种框架的写法
+   lab.js —— 缓动实验室：拖控制点、比时长、导出多平台代码示例
    ============================================================ */
 (function () {
   'use strict';
@@ -156,36 +156,53 @@
   const labT = function (k) { return window.I18N ? window.I18N.t(k) : ''; };
   /* 函数曲线（无法用 cubic-bezier 表达的）在 GSAP 里有现成的同名 ease */
   const GSAP_NAME = {
-    linear: 'none', easeIn: 'power2.in', easeOut: 'power2.out', easeInOut: 'power2.inOut',
-    easeOutExpo: 'expo.out', easeOutBack: 'back.out(1.7)', easeInBack: 'back.in(1.7)',
-    easeOutElastic: 'elastic.out(1, 0.4)', easeOutBounce: 'bounce.out', easeOutCirc: 'power2.out',
+    linear: 'none', easeIn: 'power3.in', easeOut: 'power3.out', easeInOut: 'power3.inOut',
+    easeInSine: 'sine.in', easeOutSine: 'sine.out', easeInOutSine: 'sine.inOut',
+    easeOutQuad: 'power1.out', easeOutQuart: 'power4.out', easeOutQuint: 'power5.out',
+    easeInExpo: 'expo.in', easeOutExpo: 'expo.out', easeInOutExpo: 'expo.inOut',
+    easeOutBack: 'back.out(1.7)', easeInBack: 'back.in(1.7)', easeInOutBack: 'back.inOut(1.7)',
+    easeOutElastic: 'elastic.out(1, 0.4)', easeInElastic: 'elastic.in(1, 0.4)',
+    easeOutBounce: 'bounce.out', easeInBounce: 'bounce.in', easeOutCirc: 'circ.out',
     emphasized: 'power4.out', material: 'power2.inOut', snappy: 'power4.inOut', steps6: 'steps(6)'
   };
   function cssStr() {
-    return state.draggable ? state.css : '/* ' + state.label + ' 无法用 CSS 曲线表达，需 JS 驱动 */';
+    if (/^(linear|cubic-bezier\(|steps\()/.test(state.css)) return state.css;
+    /* Preserve non-Bézier curves as a sampled CSS easing instead of inserting a
+       comment in the easing slot (which made the generated declaration invalid). */
+    const samples = [];
+    for (let i = 0; i <= 32; i++) samples.push((+state.fn(i / 32).toFixed(4)) + (i === 0 || i === 32 ? '' : ' ' + (i / 32 * 100).toFixed(3) + '%'));
+    return 'linear(' + samples.join(', ') + ')';
   }
   function snippets() {
     const e = cssStr(), d = state.dur + 'ms', dist = state.dist + 'px';
+    const from = { x: 'none', y: 'none', scale: 'scale(0.55)', rotate: 'rotate(-90deg)', combo: 'none' }[state.prop];
     const move = { x: 'translateX(' + dist + ')', y: 'translateY(' + dist + ')', scale: 'scale(1.1)', rotate: 'rotate(90deg)', combo: 'translateX(' + dist + ') rotate(6deg)' }[state.prop];
     const prop = { x: 'x: ' + state.dist, y: 'y: ' + state.dist, scale: 'scale: 1.1', rotate: 'rotation: 90', combo: 'x: ' + state.dist + ', rotation: 6' }[state.prop];
     const fProp = { x: 'x: ' + state.dist, y: 'y: ' + state.dist, scale: 'scale: 1.1', rotate: 'rotate: 90', combo: 'x: ' + state.dist + ', rotate: 6' }[state.prop];
     /* 之前不可拖曲线在这里会拼出「easing 里塞注释」的非法代码、GSAP 恒为 expo.out、
        Framer 拿着上一次可拖曲线的残留控制点 —— 按曲线类型分开导出 */
     const gsapEase = state.draggable
-      ? 'CustomEase.create("lab", "' + state.pts.map(v => (+v).toFixed(2)).join(',') + '") /* CustomEase 插件，GSAP 3.13+ 免费 */'
+      ? 'CustomEase.create("lab", "M0,0 C' + state.pts.map(v => (+v).toFixed(3)).join(',') + ' 1,1") /* 先注册 GSAP CustomEase 插件 */'
       : '"' + (GSAP_NAME[state.key] || 'power2.out') + '"';
-    const waapiEase = state.draggable
-      ? 'easing: "' + state.css + '", '
-      : '';
-    const waapiNote = state.draggable ? '' : '\n// ' + state.label + ' 无法用 CSS easing 字符串表达：把曲线采样成一串关键帧，或改用 GSAP';
-    const framerNote = state.draggable ? '' : '\n// ' + state.label + ' 表达不了：可用 spring({ stiffness, damping }) 近似，或自定义 easing 函数';
+    const waapiEase = 'easing: "' + e + '", ';
+    const waapiNote = state.draggable ? '' : '\n// CSS linear() uses a 33-point approximation of ' + state.label + '.';
+    const framerEase = state.draggable ? '[' + state.pts.map(v => (+v).toFixed(3)).join(', ') + ']' : '"' + (state.key === 'linear' ? 'linear' : state.key === 'easeIn' ? 'easeIn' : state.key === 'easeInOut' ? 'easeInOut' : 'easeOut') + '"';
+    const framerNote = state.draggable ? '' : '\n// Framer Motion uses its nearest named easing for ' + state.label + '; it may not match the preview exactly.';
+    const twEase = state.draggable
+      ? 'ease-[cubic-bezier(' + state.pts.map(v => (+v).toFixed(3)).join(',') + ')]'
+      : state.key === 'linear' ? 'ease-linear'
+        : /^steps\(/.test(state.css) ? 'ease-[' + state.css + ']'
+          : (state.key === 'easeIn' ? 'ease-in' : state.key === 'easeInOut' ? 'ease-in-out' : 'ease-out');
+    const swiftCurve = state.key === 'linear' ? 'curveLinear' : state.key === 'easeIn' ? 'curveEaseIn' : state.key === 'easeInOut' ? 'curveEaseInOut' : 'curveEaseOut';
     return {
-      'CSS transition': '.el {\n  transition: transform ' + d + ' ' + e + ';\n}\n.el.is-in { transform: ' + move + '; }',
+      'CSS transition': '.el {\n  transform: ' + from + ';\n  transition: transform ' + d + ' ' + e + ';\n}\n.el.is-in { transform: ' + move + '; }',
       'CSS @keyframes': '@keyframes go {\n  to { transform: ' + move + '; }\n}\n.el {\n  animation: go ' + d + ' ' + e + ' both;\n}',
       'Web Animations API': 'el.animate(\n  [{ transform: "none" }, { transform: "' + move + '" }],\n  { duration: ' + state.dur + ', ' + waapiEase + 'fill: "both" }\n);' + waapiNote,
       'GSAP': 'gsap.to(".el", {\n  ' + prop + ',\n  duration: ' + (state.dur / 1000).toFixed(2) + ',\n  ease: ' + gsapEase + '\n});',
-      'Framer Motion': 'motion.div\n  animate={{ ' + fProp + ' }}\n  transition={{ duration: ' + (state.dur / 1000).toFixed(2) + (state.draggable ? ', ease: [' + state.pts.join(', ') + ']' : '') + ' }} />' + framerNote,
-      'Swift / iOS': 'UIView.animate(withDuration: ' + (state.dur / 1000).toFixed(2) + ',\n  delay: 0,\n  usingSpringWithDamping: 0.72,\n  initialSpringVelocity: 0,\n  options: [], animations: { /* ' + state.label + ' */ })'
+      'Framer Motion': '<motion.div\n  animate={{ ' + fProp + ' }}\n  transition={{ duration: ' + (state.dur / 1000).toFixed(2) + ', ease: ' + framerEase + ' }} />' + framerNote,
+      'Swift / iOS': 'view.transform = ' + (state.prop === 'scale' ? '.identity.scaledBy(x: 0.55, y: 0.55)' : state.prop === 'rotate' ? '.identity.rotated(by: -.pi / 2)' : state.prop === 'combo' ? '.identity.rotated(by: -.pi / 30)' : '.identity') + '\nUIView.animate(withDuration: ' + (state.dur / 1000).toFixed(2) + ',\n  delay: 0,\n  options: [.' + swiftCurve + '], animations: {\n    view.transform = ' + (state.prop === 'rotate' ? '.identity.rotated(by: .pi / 2)' : state.prop === 'scale' ? '.identity.scaledBy(x: 1.1, y: 1.1)' : state.prop === 'y' ? '.identity.translatedBy(x: 0, y: ' + state.dist + ')' : state.prop === 'combo' ? '.identity.translatedBy(x: ' + state.dist + ', y: 0).rotated(by: .pi / 30)' : '.identity.translatedBy(x: ' + state.dist + ', y: 0)') + '\n  })' + (state.key === 'linear' ? '' : '\n// UIKit uses a named curve; this approximates the selected Bezier or sampled easing.'),
+      'Compose': 'val spec = tween<Float>(\n  durationMillis = ' + state.dur + ',\n  easing = ' + (state.draggable ? 'CubicBezierEasing(' + state.pts.map(v => (+v).toFixed(2) + 'f').join(', ') + ')' : state.key === 'linear' ? 'LinearEasing' : state.key === 'easeIn' ? 'FastOutLinearInEasing' : state.key === 'easeInOut' ? 'FastOutSlowInEasing' : 'LinearOutSlowInEasing') + '\n)\nvar visible by remember { mutableStateOf(false) }\nLaunchedEffect(Unit) { visible = true }\nval progress by animateFloatAsState(targetValue = if (visible) 1f else 0f, animationSpec = spec, label = "motion")\nModifier.graphicsLayer {\n  ' + (state.prop === 'y' ? 'translationY = progress * ' + state.dist + 'f' : state.prop === 'scale' ? 'scaleX = 0.55f + progress * 0.55f\n  scaleY = 0.55f + progress * 0.55f' : state.prop === 'rotate' ? 'rotationZ = -90f + progress * 180f' : state.prop === 'combo' ? 'translationX = progress * ' + state.dist + 'f\n  rotationZ = -6f + progress * 12f' : 'translationX = progress * ' + state.dist + 'f') + '\n}' + (state.draggable ? '' : '\n// This uses the nearest built-in easing; the custom function may differ from the preview.'),
+      'Tailwind': '<!-- Start: initial state; toggle to the end state to trigger transition -->\nclass="transition-[transform,opacity] duration-[' + state.dur + 'ms] ' + twEase + ' ' + (state.prop === 'y' ? 'translate-y-0' : state.prop === 'scale' ? 'scale-[0.55]' : state.prop === 'rotate' ? 'rotate-[-90deg]' : 'translate-x-0') + (state.prop === 'combo' ? ' rotate-[-6deg]' : '') + '"\n<!-- End -->\nclass="transition-[transform,opacity] duration-[' + state.dur + 'ms] ' + twEase + ' ' + (state.prop === 'y' ? 'translate-y-[' + dist + ']' : state.prop === 'scale' ? 'scale-[1.1]' : state.prop === 'rotate' ? 'rotate-[90deg]' : 'translate-x-[' + dist + ']') + (state.prop === 'combo' ? ' rotate-[6deg]' : '') + '"' + (state.key === 'linear' || state.draggable || /^steps\(/.test(state.css) ? '' : '\n<!-- Tailwind uses the nearest named easing; it does not reproduce the preview curve. -->')
     };
   }
   let tab = 'CSS transition';

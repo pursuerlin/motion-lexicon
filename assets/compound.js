@@ -31,8 +31,8 @@
 
   window.CATS.push({
     id: 'compound', name: '组合范式', en: 'Compound Patterns',
-    tagline: '单个术语只是零件。当指针、滚动与点击共同驱动一整屏时，需要一个词把编排说清楚。',
-    taglineEn: 'One term is a part. When pointer, scroll and tap drive a whole screen together, you need a word for the choreography.'
+    tagline: '把指针、滚动与点击组合成可描述的编排案例；这些名称用于检索与沟通，并非统一的行业标准术语。',
+    taglineEn: 'These choreography examples combine pointer, scroll and tap. Their descriptive names help communicate the pattern; they are not standardized industry terms.'
   });
 
   window.TERMS.push(
@@ -330,7 +330,7 @@
       vague: '鼠标一靠近，按钮就被吸过去',
       say: '指针进入半径 R 内按 (1−d/R) 衰减拉拽按钮，位移走弹簧插值，离开力场回弹归位',
       def: '把指针引力场做成一个衰减函数：距离越近拉力越大，按钮被吸向指针；离开力场后弹簧归零。关键是吸附量必须乘衰减系数而不是常量——否则力场边界处会跳变。适合主 CTA 与关闭按钮，一吸一放之间按钮就有了实体感。',
-      code: 'const pull = d < R ? 1 - d / R : 0;      /* 衰减：边界不跳变 */\ntx = dx * .42 * pull;\nx += (tx - x) * .18;                     /* 弹簧跟随 */',
+      code: 'const pull = d < R ? 1 - d / R : 0;      /* 衰减：边界不跳变 */\ntx = dx * .58 * pull;\nx += (tx - x) * .18;                     /* 弹簧跟随 */',
       demo: { kind: 'compound', mode: 'magnetic', hint: '靠近中间的按钮' }
     },
     {
@@ -395,6 +395,54 @@
       def: '相机在环外的画廊：每张照片 rotateY(i×45°) translateZ(R) 围成一圈，只有正对相机的一张是全亮全尺寸，其余按角度差衰减亮度与透明度。点击側卡时按最短路径把目标角转到 0°——不写任何补间，只改一个焦点变量。',
       code: 'const want = ((-i * 45 % 360) + 360) % 360;\nconst cur = ((rot % 360) + 360) % 360;\nlet d = want - cur; if (d > 180) d -= 360; if (d < -180) d += 360;\nrotGoal = rot + d;                       /* 最短路径 */',
       demo: { kind: 'compound', mode: 'ring3d', hint: '拖动旋转 · 点击对焦' }
+    },
+    {
+      id: 'page-curl', en: 'Page curl transition', zh: '翻页卷曲转场', cat: 'compound',
+      alias: ['翻页', '卷页', 'page turn'], vague: '像翻书一样把下一页翻出来',
+      say: '拖住右下页角向左翻开；翻开后拖左下页角向右翻回。松手后按进度完成或回弹',
+      def: '页面绕着固定边缘翻转，背面与下一页同时出现，像纸张被掀起。拖动距离控制翻页进度，松手后用短暂缓动完成或回弹。适合相册、故事和内容切页。',
+      code: 'const progress = clamp((startX - pointerX) / pageWidth, 0, 1);\npage.style.transform = `rotateY(${-progress * 180}deg)`;',
+      demo: { kind: 'compound', mode: 'pagecurl', hint: '右下角向左翻开，左下角向右翻回；松手完成或回弹' }
+    },
+    {
+      id: 'dynamic-island', en: 'Dynamic Island transition', zh: '灵动岛展开转场', cat: 'compound',
+      alias: ['灵动岛', 'Live Activity', '实时活动'], vague: '通知缩在胶囊里，点一下再展开成控制面板',
+      say: '同一块胶囊容器从提醒态平滑扩展为实时活动，内容随状态接续出现',
+      def: '用一个持续存在的胶囊承接通知和实时活动：收起时只露出关键信息，展开后在同一位置扩展出状态、进度与操作。关键是形状和内容都沿同一容器连续变化，不是弹出另一张卡片。',
+      code: '.island { transition: width .42s cubic-bezier(.2,.8,.2,1), height .42s; }\n.island.is-open { width: 236px; height: 112px; }',
+      demo: { kind: 'compound', mode: 'island', hint: '点胶囊展开实时活动，再收起' }
+    },
+    {
+      id: 'scratch-reveal', en: 'Scratch to reveal', zh: '刮开显影', cat: 'compound',
+      alias: ['刮刮卡', '擦除揭示', 'scratch card'], vague: '用手指擦开表层，下面的图慢慢露出来',
+      say: 'Canvas 覆层随指针擦除，刮开面积过半后自动清除剩余表层',
+      def: '在答案或图片上盖一层可擦除的表面，用户拖动时逐段露出底图。擦除面积达到阈值后清掉剩余覆盖层，让结果完整显现；触屏与鼠标使用同一套手势。',
+      code: 'ctx.globalCompositeOperation = "destination-out";\nctx.lineWidth = 28; ctx.lineCap = "round";\nctx.stroke();',
+      demo: { kind: 'compound', mode: 'scratch', hint: '拖动手指或鼠标，刮开表层' }
+    },
+    {
+      id: 'morphing-dot-sphere', en: 'Morphing dot sphere', zh: '粒子球体变形', cat: 'compound',
+      alias: ['点阵球', '粒子球', '3D morphing sphere'], vague: '一颗点组成的球，拖动能转，点一下还能变形',
+      say: '球面采样点投影到画布，拖动改变视角，点击在球体与心形点阵间平滑插值',
+      def: '将粒子按球面分布并用透视投影绘制；拖动旋转球体，点击让点阵平滑变形成心形，再点一次回到球体。它适合作为视觉主角或品牌过场，点数和帧率应控制在设备可承受范围内。',
+      code: 'const p = lerp(spherePoint, heartPoint, morph);\nconst scale = cameraDistance / (cameraDistance + p.z);',
+      demo: { kind: 'compound', mode: 'dotsphere', hint: '拖动旋转 · 点击点阵切换形状' }
+    },
+    {
+      id: 'path-weave', en: 'Dual-path ribbon weave', zh: '双路牵丝织形', cat: 'compound',
+      alias: ['双路径编织', '双线牵丝', 'ribbon weave'], vague: '两条线从两边长出来，在中间交织成一个形状',
+      say: '两条路径分别描绘并在交叉处错层，光点沿路径移动，最终共同组成图形',
+      def: '两条独立路径按各自进度描绘，在交叉处用遮挡与层级表现“上下穿过”，让线条编织成一个整体。它适合标志、连接关系和片尾汇聚；如果只让两条线同时亮起，就只是交叉线，不是编织。',
+      code: 'path.style.strokeDasharray = pathLength;\npath.style.strokeDashoffset = pathLength * (1 - progress);\n// 交叉处留出底层间隙，再绘制上层路径',
+      demo: { kind: 'compound', mode: 'pathweave', hint: '看双路交织 · 点按钮重播', readout: false }
+    },
+    {
+      id: 'target-acquisition', en: 'Target scan & acquire', zh: '目标扫描与锁定', cat: 'compound',
+      alias: ['准星锁定', '扫描捕获', 'target lock'], vague: '扫过一遍，找到目标后把它框起来',
+      say: '扫描线扫过视野，发现目标后准星对齐，并保持清楚的锁定状态',
+      def: '把“扫描 → 命中 → 锁定”做成一段有结果的反馈：扫描线经过视野，目标被框选，随后出现稳定的锁定标记。可用于地图定位、媒体库搜索、图表数据点提示、AR 指引等需要“找到并确认某个对象”的界面；普通页面装饰不需要这套雷达效果。',
+      code: 'state = "scanning";\nif (scanHits(target)) state = "locked";\nshowReticle(target); // 锁定后保持可见',
+      demo: { kind: 'compound', mode: 'scanlock', hint: '点“重新扫描”，看它如何找到并标记目标' }
     }
   );
 
@@ -429,7 +477,7 @@
           '<i class="gz-cross"></i><span class="gz-ray"><u></u></span><i class="gz-target"></i>' +
         '</div>' +
         '<i class="gz-body" aria-hidden="true">' +
-          '<b class="gz-eye"><s class="gz-pupil"></s></b><b class="gz-eye"><s class="gz-pupil"></s></b>' +
+          '<s class="gz-hair"></s><b class="gz-eye"><s class="gz-pupil"></s></b><b class="gz-eye"><s class="gz-pupil"></s></b><u class="gz-mouth"></u>' +
         '</i>' +
         '<span class="cp-cap">gaze ray vs target</span>' +
       '</div>';
@@ -576,17 +624,24 @@
         }) + '</div></div>';
     },
     thememorph: function () {
-      return '<div class="scrolly cp cp-tm"><i class="tm-pin"><b class="tm-hd">第一章</b>' +
+      return '<div class="scrolly cp cp-tm"><i class="tm-pin"><article class="tm-card">' +
+        '<span class="tm-kicker">FIELD NOTES <i>·</i> 2025</span><b class="tm-hd">第一章</b>' +
+        '<p class="tm-copy">光线落下的地方，<br>故事开始有了颜色。</p>' +
         '<u class="tm-sw"><k class="a"></k><k class="b"></k><k class="c"></k></u>' +
-        '<s class="tm-hex">#F3EDF7</s><em class="tm-dots">' + rep(4, function (i) { return '<b></b>'; }) + '</em></i>' + FLOW.thememorph + '</div>';
+        '<s class="tm-hex">#F3EDF7</s><em class="tm-dots">' + rep(4, function (i) { return '<b></b>'; }) + '</em>' +
+        '<small class="tm-foot">SCROLL TO TURN THE PAGE</small></article></i>' + FLOW.thememorph + '</div>';
     },
     ring: function () {
-      return '<div class="scrolly cp cp-rg"><i class="rg-pin">' +
-        '<svg viewBox="0 0 76 76"><circle class="rg-bg" cx="38" cy="38" r="32"/><circle class="rg-fg" cx="38" cy="38" r="32"/></svg>' +
-        '<b class="rg-v">0%</b></i>' + FLOW.ring + '</div>';
+      return '<div class="scrolly cp cp-rg"><i class="rg-pin"><article class="rg-cover">' +
+        '<span class="rg-kicker">A SMALL READING JOURNAL <i>·</i> 01</span>' +
+        '<h3>让阅读，<em>有迹可循</em></h3><p>向下读，进度环会陪着章节一起向前。</p>' +
+        '<div class="rg-meter"><svg viewBox="0 0 76 76"><circle class="rg-bg" cx="38" cy="38" r="32"/><circle class="rg-fg" cx="38" cy="38" r="32"/></svg>' +
+        '<b class="rg-v">0%</b></div><span class="rg-scroll">SCROLL TO CONTINUE <i>↓</i></span></article></i>' + FLOW.ring + '</div>';
     },
     fab: function () {
-      return '<div class="cp cp-fab"><div class="fb-page">' + rep(4, function (i) { return '<b class="fb-row"><s></s><u></u></b>'; }) + '</div>' +
+      const items = ['拆解参考动效', '整理项目素材', '导出交互稿', '同步设计反馈'];
+      return '<div class="cp cp-fab"><div class="fb-page"><header class="fb-head"><span>MY SPACE <i>·</i> TODAY</span><b>今日清单</b></header><div class="fb-list">' +
+        rep(4, function (i) { return '<b class="fb-row"><s>0' + (i + 1) + '</s><u>' + items[i] + '</u><em>' + ['03', '02', '01', '↗'][i] + '</em></b>'; }) + '</div></div>' +
         '<i class="fb-scrim"></i>' +
         '<i class="fb"><b class="fb-plus">+</b>' +
         '<s class="fb-rows">' + rep(3, function (i) { return '<u>' + ['新建提醒', '分享给我', '加入清单'][i] + '</u>'; }) + '</s></i>' +
@@ -601,11 +656,11 @@
         '<u class="tb-ok">✓</u></i><span class="cp-cap">同一个节点形变，不换 DOM</span></div>';
     },
     compare: function () {
-      return '<div class="cp cp-cp" data-wipe="50" role="group" aria-label="前后画面对比">' +
-        '<i class="cp-after">' + im('city-1-graded.jpg', '调整后的夜景照片') + '<b class="cp-grade" aria-hidden="true">COLOR GRADE<br><small>亮部提起 · 阴影收紧</small></b></i>' +
-        '<i class="cp-before">' + im('city-1.jpg', '原始夜景照片') + '<b class="cp-raw" aria-hidden="true">RAW FRAME<br><small>未校色 · 原始对比度</small></b></i>' +
+      return '<div class="cp cp-cp" data-wipe="50" role="group" aria-label="前后画面对比" data-l10n="前后画面对比" data-l10n-attr="aria-label">' +
+        '<i class="cp-after">' + im('city-1-graded.jpg', '调色后的夜景照片') + '<b class="cp-tag after-tag" aria-hidden="true" data-l10n="AFTER · 调色后">AFTER · 调色后</b></i>' +
+        '<i class="cp-before">' + im('city-1.jpg', '未经调色的夜景照片') + '<b class="cp-tag before-tag" aria-hidden="true" data-l10n="BEFORE · 原图">BEFORE · 原图</b></i>' +
         '<b class="cp-line" aria-hidden="true"><s class="cp-hd" role="slider" tabindex="0" aria-orientation="horizontal" aria-label="对比滑块" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-valuetext="50% 原图"></s></b>' +
-        '<span class="cp-cap" aria-live="off">wipe 50%</span></div>';
+        '<span class="cp-cap" aria-live="off">拖动比较 · 50%</span></div>';
     },
     linemask: function () {
       return '<div class="scrolly cp cp-lm"><i class="lm-pin">' +
@@ -631,8 +686,10 @@
         '<s class="lb-trail"></s><b class="lb-drop"></b></i><span class="cp-cap">spring + stretch</span></div>';
     },
     chart: function () {
-      return '<div class="scrolly cp cp-cb"><i class="cb-pin"><b class="cb-box">' +
+      return '<div class="scrolly cp cp-cb"><i class="cb-pin"><b class="cb-head"><span>WEEKLY REVENUE <i>·</i> 2025</span><strong>营收趋势 <em>滚动生长</em></strong></b><b class="cb-box">' +
         '<svg viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true">' +
+        '<path class="cb-ghost-area" d="M8 108 L8 92 56 78 104 86 152 50 200 60 248 24 292 38 L292 108 Z"/>' +
+        '<path class="cb-ghost-line" d="M8 92 L56 78 104 86 152 50 200 60 248 24 292 38"/>' +
         '<path class="cb-area" d="M8 108 L8 92 56 78 104 86 152 50 200 60 248 24 292 38 L292 108 Z"/>' +
         '<path class="cb-line" d="M8 92 L56 78 104 86 152 50 200 60 248 24 292 38"/>' +
         '</svg><u class="cb-bars">' + rep(7, function (i) { return '<s style="--i:' + i + '"></s>'; }) + '</u>' +
@@ -674,13 +731,13 @@
         '<i class="tn-space">' + rep(7, function (i) {
           return '<b class="tn-c" data-i="' + i + '">' + im(SET[i]) + '</b>';
         }) + '</i>' +
-        '<footer class="cp-sub">scale = d / (d + z − cam) · 越近越大，过身出画</footer>' +
+        '<footer class="cp-sub">越近的照片越大；经过视点后从画面消失</footer>' +
         '</div>' + FLOW.tunnel + '</div>';
     },
     /* ---- 33. 磁吸按钮：引力场随距离衰减 ---- */
     magnetic: function () {
       return '<div class="cp cp-mg"><i class="mg-ring" aria-hidden="true"></i>' +
-        '<b class="mg-btn">抓我</b><span class="cp-cap">spring 回弹</span></div>';
+        '<b class="mg-btn">抓我</b><span class="cp-cap">靠近就吸过来 · 移开后回弹</span></div>';
     },
     /* ---- 34. 指针倾斜卡：rotateX/rotateY + 跟随光斑 ---- */
     tilt: function () {
@@ -740,6 +797,34 @@
       return '<div class="cp cp-cv"><i class="cv-stage">' +
         rep(7, function (i) { return '<b class="cv-c">' + im(P[i]) + '</b>'; }) +
         '</i><span class="cp-cap">off = i − focus · 点击换焦点</span></div>';
+    },
+    pagecurl: function () {
+      return '<div class="cp cp-pagecurl"><div class="pc-book"><div class="pc-left"><span>FIELD NOTES · 00</span><b>山行<br>手札</b><small>沿着山路，收集光与风。</small><i>SPRING / 2025</i></div><div class="pc-under"><span>FIELD NOTES · 02</span><b>山间来信</b><small>风从松林经过，故事翻到下一页。</small><i>02 — 04</i></div>' +
+        '<div class="pc-page"><div class="pc-paper"><span>FIELD NOTES · 01</span><b>把时间<br>留给风景</b><small>晨雾散开之前，山谷只听见溪水和鸟鸣。</small><i>拖住右下页角，向左翻页 →</i></div><div class="pc-back"><span>FIELD NOTES · 01 · BACK</span><b>风穿过<br>松针之间</b><small>翻过这一页，下一段旅程正要开始。</small><i>向右拖动，翻回上一页 ←</i></div><button type="button" class="pc-corner" aria-label="拖动右下页角翻到下一页"></button></div><i class="pc-spine" aria-hidden="true"></i><button type="button" class="pc-toggle" aria-pressed="false">翻到下一页 <span>→</span></button></div><span class="cp-cap">拖动右下页角翻页 · 右上按钮切换</span></div>';
+    },
+    island: function () {
+      return '<div class="cp cp-island"><div class="di-phone"><div class="di-status"><span>9:41</span><span>●●● ▰</span></div>' +
+        '<div class="di-island" role="group" aria-label="音乐实时活动示例" data-l10n="音乐实时活动示例" data-l10n-attr="aria-label"><button type="button" class="di-compact" aria-expanded="false" aria-label="展开正在播放的实时活动" data-l10n="展开正在播放的实时活动" data-l10n-attr="aria-label"><i class="di-cover">♫</i><b data-l10n="正在播放">正在播放</b><span class="di-wave"><i></i><i></i><i></i><i></i></span></button>' +
+        '<div class="di-expanded" aria-hidden="true"><div class="di-expanded-head"><span class="di-art">♫</span><span class="di-track"><b data-di-track>Golden Hour</b><small data-di-artist>JVKE · 今日歌单</small></span><button type="button" class="di-collapse" aria-label="收起实时活动">⌃</button></div><i class="di-progress"><s></s></i><span class="di-controls"><button type="button" class="di-prev" aria-label="上一首">|◀</button><button type="button" class="di-play" aria-label="暂停" aria-pressed="true">Ⅱ</button><button type="button" class="di-next" aria-label="下一首">▶|</button></span></div></div>' +
+        '<div class="di-home"><i></i></div></div><span class="cp-cap">点顶部胶囊，查看实时活动</span></div>';
+    },
+    pathweave: function () {
+      return '<div class="cp cp-pathweave"><div class="pw-heading"><small>FORM STUDY / 02</small><b>两条路径，织成一个整体</b><span>DUAL STRANDS · SHARED FORM</span></div>' +
+        '<svg class="pw-svg" viewBox="0 0 640 280" role="img" aria-label="两条彩色带状路径在交叉处一上一下，编织成连续的环形">' +
+        '<path class="pw-guide" d="M54 140 C140 20 232 20 320 140 S500 260 586 140"/><path class="pw-guide" d="M54 140 C140 260 232 260 320 140 S500 20 586 140"/>' +
+        '<path class="pw-shadow pw-a" d="M54 140 C140 20 232 20 320 140 S500 260 586 140"/><path class="pw-under" d="M54 140 C140 20 232 20 320 140 S500 260 586 140"/><path class="pw-glint pw-a" d="M54 140 C140 20 232 20 320 140 S500 260 586 140"/>' +
+        '<path class="pw-cut" d="M54 140 C140 260 232 260 320 140 S500 20 586 140"/><path class="pw-shadow pw-b" d="M54 140 C140 260 232 260 320 140 S500 20 586 140"/><path class="pw-over" d="M54 140 C140 260 232 260 320 140 S500 20 586 140"/><path class="pw-glint pw-b" d="M54 140 C140 260 232 260 320 140 S500 20 586 140"/>' +
+        '<circle class="pw-node pw-node-a" r="5"><animateMotion dur="3.4s" repeatCount="indefinite" path="M54 140 C140 20 232 20 320 140 S500 260 586 140"/></circle><circle class="pw-node pw-node-b" r="4"><animateMotion dur="3.4s" begin="-1.7s" repeatCount="indefinite" path="M54 140 C140 260 232 260 320 140 S500 20 586 140"/></circle></svg>' +
+        '<div class="pw-foot"><span><i></i> STRAND A</span><span><i></i> STRAND B</span><button type="button" class="pw-replay">重新织一次 <b>↗</b></button></div></div>';
+    },
+    scanlock: function () {
+      return '<div class="cp cp-scanlock is-locked"><div class="sl-top"><span><small>SIGNAL / 03</small><b class="sl-heading" aria-live="polite">已找到目标</b></span><span class="sl-status"><i></i><b class="sl-state-scan">SCANNING</b><b class="sl-state-found">TARGET FOUND</b><b class="sl-state-locked">LOCKED</b></span></div><div class="sl-field"><i class="sl-scan"></i><i class="sl-grid"></i><div class="sl-target"><span class="sl-bracket"></span><i class="sl-cross"></i><b>OBJECT 08</b><small>38° 14′ N　120° 06′ E</small></div><div class="sl-lock"><i>✓</i><span><b>目标已锁定</b><small>TRACKING STABLE</small></span></div><span class="sl-axis sl-axis-x">X / 08</span><span class="sl-axis sl-axis-y">SCAN AREA</span></div><div class="sl-steps"><span><i>01</i>扫描</span><b></b><span><i>02</i>命中</span><b></b><span class="active"><i>03</i>锁定</span></div><button type="button" class="sl-replay">重新扫描 <span>↻</span></button></div>';
+    },
+    scratch: function () {
+      return '<div class="cp cp-scratch"><div class="sr-card"><img src="assets/img/snow-2.jpg" alt="雾林中的小屋" draggable="false"><div class="sr-copy"><small>今日的惊喜</small><b>把小小的<br>好天气收下</b><span>SCRATCH TO REVEAL</span></div><canvas class="sr-foil" aria-label="可擦除的雾面覆盖层"></canvas><button type="button" class="sr-reset">再来一次</button></div><span class="cp-cap">按住拖动，擦开雾面</span></div>';
+    },
+    dotsphere: function () {
+      return '<div class="cp cp-dotsphere"><canvas class="ds-canvas" aria-label="可旋转的点阵球；轻点可变成心形"></canvas><div class="ds-title"><small>FORM / 01</small><b>点阵球 <em>正在汇聚</em></b></div><button type="button" class="ds-toggle" aria-pressed="false">变成心形 <span>↗</span></button><span class="cp-cap">拖动旋转 · 轻点球体或按按钮变形</span></div>';
     },
     scramble: function () {
       return '<div class="cp cp-sc"><b class="sc-txt" data-t="MOTION LEXICON">MOTION LEXICON</b>' +
@@ -806,8 +891,20 @@
     const outSmooth = readout && $('[data-gz-out="smooth"]', readout);
     const outRange = readout && $('[data-gz-out="range"]', readout);
     const p = { x: 0, y: 0, live: 0 };
+    const aim = { x: .5, y: .5, live: 0 };
     let cx = 0, cy = 0, nextBlink = 2200, blinkEnd = 0;
     pointerNorm(stage, stage, p);
+    /* 头像会盖住场地的一部分，监听场地本身会在鼠标经过脸时漏掉坐标。
+       从舞台捕获事件，再把视口坐标换算成场地内坐标；准心因此始终落在真实指针下。 */
+    stage.addEventListener('pointermove', function (e) {
+      if (!field) return;
+      const r = field.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      aim.x = clamp((e.clientX - r.left) / r.width, 0, 1);
+      aim.y = clamp((e.clientY - r.top) / r.height, 0, 1);
+      aim.live = 1;
+    });
+    stage.addEventListener('pointerleave', function () { aim.live = 0; });
     watch(stage, function (now) {
       let tx = p.x, ty = p.y;
       if (!p.live) { tx = Math.cos(now / 1700) * .55; ty = Math.sin(now / 1150) * .3; }
@@ -818,15 +915,15 @@
       });
       if (head) head.style.transform = 'translate(' + (cx * 3.5).toFixed(2) + 'px,' + (cy * 2.5).toFixed(2) + 'px)';
       if (field) {
-        field.style.setProperty('--gx', ((p.live ? p.x : cx) * 50 + 50).toFixed(2) + '%');
-        field.style.setProperty('--gy', ((p.live ? p.y : cy) * 50 + 50).toFixed(2) + '%');
+        field.style.setProperty('--gx', ((aim.live ? aim.x : .5) * 100).toFixed(2) + '%');
+        field.style.setProperty('--gy', ((aim.live ? aim.y : .5) * 100).toFixed(2) + '%');
         /* 射线只报角度：起点在场地中心，末端离目标环还差多少，就是这一帧的滞后 */
         field.style.setProperty('--ray', (Math.atan2(cy, cx) * 180 / Math.PI).toFixed(2) + 'deg');
         field.classList.toggle('is-live', !!p.live);
       }
       if (target) {
-        target.style.setProperty('--tx', (p.live ? p.x : cx).toFixed(3));
-        target.style.setProperty('--ty', (p.live ? p.y : cy).toFixed(3));
+        target.style.setProperty('--tx', (aim.live ? aim.x : .5).toFixed(3));
+        target.style.setProperty('--ty', (aim.live ? aim.y : .5).toFixed(3));
       }
       if (readout) {
         /* 主读数讲「眼睛此刻真的看向哪」，用和 RANGE 同一把尺（px）；目标另起一行。
@@ -1128,7 +1225,8 @@
       const W = stage.clientWidth || 200, H = stage.clientHeight || 140;
       let ax = tx, ay = ty;
       pos.forEach(function (d, i) {
-        const dc = P(stage, 'dc', .28);
+        /* 后面的节点跟得更慢，链条才会拉开；统一 lerp 会把整串粒子挤成一个点。 */
+        const dc = Math.max(.035, P(stage, 'dc', .28) * Math.pow(.78, i));
         d.x = lerp(d.x, ax, dc); d.y = lerp(d.y, ay, dc);
         ax = d.x; ay = d.y;
         const s = 1 - i / dots.length * .74;
@@ -1321,12 +1419,13 @@
       const pct = Math.round(x * 100);
       if (hd) {
         hd.setAttribute('aria-valuenow', String(pct));
-        hd.setAttribute('aria-valuetext', pct + '% 原图');
+        hd.setAttribute('aria-valuetext', pct + '% ' + (window.I18N && window.I18N.lang === 'en' ? 'original' : '原图'));
       }
       wrap.dataset.wipe = String(Math.round(x * 100));
+      wrap.style.setProperty('--wipe', (x * 100).toFixed(1) + '%');
       before.style.clipPath = 'inset(0 ' + ((1 - x) * 100).toFixed(1) + '% 0 0)';
       line.style.left = (x * 100).toFixed(1) + '%';
-      if (cap) cap.textContent = 'wipe ' + pct + '%';
+      if (cap) cap.textContent = (window.I18N && window.I18N.lang === 'en' ? 'Drag to compare · ' : '拖动比较 · ') + pct + '%';
     };
     const from = function (e) {
       const r = wrap.getBoundingClientRect();
@@ -1334,6 +1433,7 @@
     };
     wrap.addEventListener('pointerdown', function (e) {
       if (e.button != null && e.button !== 0) return;
+      e.preventDefault();
       drag = true;
       if (wrap.setPointerCapture) { try { wrap.setPointerCapture(e.pointerId); } catch (err) {} }
       from(e);
@@ -1359,7 +1459,7 @@
         const t = clamp((p - i * gap) / .34, 0, 1), e = 1 - Math.pow(1 - t, 3);
         /* 首行保留一小截“露头”，让静止首帧也能读出这里有文字，
            滚动后仍按行依次从蒙版升起，不会变成一块空白画布。 */
-        const lead = i === 0 ? .7 : 0;
+        const lead = i === 0 ? .82 : 0;
         const eased = lead + (1 - lead) * e;
         el.style.transform = 'translateY(' + ((1 - eased) * 100).toFixed(2) + '%)';
         el.style.opacity = String(.12 + eased * .88);
@@ -1621,12 +1721,13 @@
     const btn = $('.mg-btn', stage);
     let tx = 0, ty = 0, x = 0, y = 0;
     stage.addEventListener('pointermove', function (e) {
-      const r = btn.getBoundingClientRect();
-      if (!r.width) return;
-      const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      const host = btn.parentElement.getBoundingClientRect();
+      if (!host.width || !host.height) return;
+      /* 以未变换的容器中心为原点，不能拿正在移动的按钮自身做基准，否则会追着自己跑 */
+      const dx = e.clientX - (host.left + host.width / 2), dy = e.clientY - (host.top + host.height / 2);
       const d = Math.hypot(dx, dy), R = P(stage, 'r', 88);
       const pull = d < R ? 1 - d / R : 0;      /* 衰减：力场边界不跳变 */
-      tx = dx * .42 * pull; ty = dy * .42 * pull;
+      tx = dx * .58 * pull; ty = dy * .58 * pull;
     });
     stage.addEventListener('pointerleave', function () { tx = ty = 0; });
     watch(stage, function () {
@@ -1860,6 +1961,259 @@
     paint();
   }
 
+  function pageCurl(stage) {
+    const page = $('.pc-page', stage), book = $('.pc-book', stage), corner = $('.pc-corner', stage), toggle = $('.pc-toggle', stage);
+    if (!page || !book || !corner || !toggle) return;
+    const caption = $('.cp-cap', stage);
+    const maxAngle = 176;
+    let p = 0, start = 0, origin = 0, dragging = false, animation = null;
+    const angle = value => 'rotateY(' + (-clamp(value, 0, 1) * maxAngle) + 'deg)';
+    const readProgress = () => {
+      const transform = getComputedStyle(page).transform;
+      if (!transform || transform === 'none') return p;
+      const matrix = transform.match(/^matrix3d\((.+)\)$/);
+      if (!matrix) return p;
+      const values = matrix[1].split(',').map(Number);
+      if (values.length !== 16 || values.some(value => !Number.isFinite(value))) return p;
+      const degrees = Math.atan2(values[8], values[0]) * 180 / Math.PI;
+      return clamp(-degrees / maxAngle, 0, 1);
+    };
+    const paint = v => {
+      p = clamp(v, 0, 1); page.style.setProperty('--turn', p); page.style.transform = angle(p);
+      toggle.setAttribute('aria-pressed', p > .5 ? 'true' : 'false');
+      toggle.innerHTML = p > .5 ? '翻回上一页 <span>←</span>' : '翻到下一页 <span>→</span>';
+      corner.setAttribute('aria-label', p > .5 ? '拖动左下页角翻回上一页' : '拖动右下页角翻到下一页');
+      page.classList.toggle('is-flipped', p > .5);
+      if (caption) caption.textContent = p > .5 ? '拖动左下页角翻回 · 右上按钮切换' : '拖动右下页角翻页 · 右上按钮切换';
+    };
+    const interrupt = () => {
+      const current = readProgress();
+      if (animation) {
+        const previous = animation;
+        animation = null; previous.onfinish = null; previous.oncancel = null; previous.cancel();
+      }
+      page.classList.remove('is-animating'); paint(current);
+      return current;
+    };
+    const settle = target => {
+      const from = interrupt();
+      target = target ? 1 : 0;
+      if (!window.ENGINE.motionOn() || Math.abs(target - from) < .002) { paint(target); return; }
+      page.classList.add('is-animating');
+      const effect = page.animate([{ transform: angle(from) }, { transform: angle(target) }], {
+        duration: Math.max(180, 680 * Math.abs(target - from)), easing: E.EO, fill: 'forwards'
+      });
+      animation = effect;
+      effect.onfinish = () => {
+        if (animation !== effect) return;
+        animation = null; effect.onfinish = null; effect.oncancel = null;
+        paint(target); effect.cancel(); page.classList.remove('is-animating');
+      };
+      effect.oncancel = () => { if (animation === effect) animation = null; };
+    };
+    corner.addEventListener('pointerdown', e => {
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+      origin = interrupt(); dragging = true; start = e.clientX;
+      if (corner.setPointerCapture) corner.setPointerCapture(e.pointerId);
+      page.classList.add('is-turning'); e.preventDefault();
+    });
+    corner.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      /* Use the untransformed layout width: the visible bounding box collapses
+         as the leaf turns edge-on and would make later drags jump. */
+      const width = Math.max(80, page.offsetWidth * .88);
+      /* 两个方向都以页片的横向行程计进度：向左增加，向右减少。 */
+      paint(origin + (start - e.clientX) / width);
+    });
+    const release = () => {
+      if (!dragging) return; dragging = false; page.classList.remove('is-turning');
+      const moved = Math.abs(p - origin) > .1;
+      settle(moved ? (p > origin ? 1 : 0) : (origin > .5 ? 1 : 0));
+    };
+    corner.addEventListener('pointerup', release); corner.addEventListener('pointercancel', release);
+    corner.addEventListener('lostpointercapture', release);
+    corner.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); settle(readProgress() > .5 ? 0 : 1); } });
+    toggle.addEventListener('click', () => settle(readProgress() > .5 ? 0 : 1));
+    paint(0);
+  }
+
+  function dynamicIsland(stage) {
+    const island = $('.di-island', stage), progress = $('.di-progress s', stage);
+    if (!island || !progress) return;
+    const compact = $('.di-compact', island), compactStatus = $('.di-compact b', island), expandedPanel = $('.di-expanded', island);
+    const play = $('.di-play', island), track = $('[data-di-track]', island), artist = $('[data-di-artist]', island);
+    const songs = [['Golden Hour', 'JVKE · 今日歌单'], ['Sunset Lover', 'Petit Biscuit · 今日歌单'], ['Daylight', 'David Kushner · 今日歌单']];
+    let expanded = false, playing = true, elapsed = 0, last = 0, songIndex = 0, collapseTimer = 0;
+    const setExpanded = value => {
+      window.clearTimeout(collapseTimer);
+      expanded = value;
+      if (value) {
+        island.classList.remove('is-collapsing');
+        island.classList.add('is-expanded');
+        expandedPanel.setAttribute('aria-hidden', 'false');
+      } else {
+        /* 先淡出播放器内容，再缩回胶囊；内容不会被外壳挤压穿过边缘。 */
+        island.classList.add('is-collapsing');
+        expandedPanel.setAttribute('aria-hidden', 'true');
+        collapseTimer = window.setTimeout(() => {
+          island.classList.remove('is-expanded', 'is-collapsing');
+        }, 150);
+      }
+      compact.setAttribute('aria-expanded', value ? 'true' : 'false');
+      compact.setAttribute('aria-label', (value ? '收起' : '展开') + (playing ? '正在播放' : '已暂停') + '的实时活动');
+    };
+    const paintPlayer = () => {
+      const song = songs[songIndex];
+      track.textContent = song[0]; artist.textContent = song[1];
+      compactStatus.textContent = playing ? '正在播放' : '已暂停';
+      play.textContent = playing ? 'Ⅱ' : '▶';
+      play.setAttribute('aria-label', playing ? '暂停' : '继续播放');
+      play.setAttribute('aria-pressed', playing ? 'true' : 'false');
+      compact.setAttribute('aria-label', (expanded ? '收起' : '展开') + (playing ? '正在播放' : '已暂停') + '的实时活动');
+      island.classList.toggle('is-paused', !playing);
+      progress.style.width = (elapsed / 18000 * 100).toFixed(1) + '%';
+    };
+    compact.addEventListener('click', () => setExpanded(!expanded));
+    $('.di-collapse', island).addEventListener('click', () => setExpanded(false));
+    play.addEventListener('click', () => { playing = !playing; paintPlayer(); });
+    $('.di-next', island).addEventListener('click', () => { songIndex = (songIndex + 1) % songs.length; elapsed = 0; paintPlayer(); });
+    $('.di-prev', island).addEventListener('click', () => { songIndex = (songIndex + songs.length - 1) % songs.length; elapsed = 0; paintPlayer(); });
+    paintPlayer();
+    watch(stage, now => {
+      if (!last) last = now;
+      const dt = Math.min(80, now - last); last = now;
+      if (playing) {
+        elapsed = (elapsed + dt) % 18000;
+        progress.style.width = (elapsed / 18000 * 100).toFixed(1) + '%';
+      }
+    });
+  }
+
+  function replayVectorDemo(stage, selector, duration = 3600) {
+    const demo = $(selector, stage), button = $('button', demo);
+    if (!demo || !button) return;
+    button.addEventListener('click', () => {
+      demo.classList.remove('is-replaying');
+      void demo.offsetWidth;
+      demo.classList.add('is-replaying');
+      window.setTimeout(() => demo.classList.remove('is-replaying'), duration);
+    });
+  }
+
+  function pathWeave(stage) { replayVectorDemo(stage, '.cp-pathweave', 2600); }
+  function scanLock(stage) {
+    const demo = $('.cp-scanlock', stage), button = $('.sl-replay', stage), heading = $('.sl-heading', stage);
+    if (!demo || !button) return;
+    let timer = 0;
+    button.addEventListener('click', () => {
+      window.clearTimeout(timer);
+      demo.classList.remove('is-replaying');
+      demo.classList.remove('is-locked');
+      $$('.sl-steps span', demo).forEach(step => step.classList.remove('active'));
+      heading.textContent = '正在扫描视野';
+      void demo.offsetWidth;
+      demo.classList.add('is-replaying');
+      button.disabled = true;
+      button.textContent = '正在扫描…';
+      timer = window.setTimeout(() => {
+        demo.classList.remove('is-replaying');
+        demo.classList.add('is-locked');
+        heading.textContent = '已找到目标';
+        $$('.sl-steps span', demo).forEach((step, index) => step.classList.toggle('active', index === 2));
+        button.disabled = false;
+        button.innerHTML = '重新扫描 <span>↻</span>';
+      }, 4800);
+    });
+  }
+
+  function scratchReveal(stage) {
+    const canvas = $('.sr-foil', stage), card = $('.sr-card', stage), reset = $('.sr-reset', stage);
+    if (!canvas || !card) return;
+    const ctx = canvas.getContext('2d'); let drawing = false, points = 0, done = false;
+    const clearedRatio = () => {
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let clear = 0, total = 0, step = 8;
+      for (let y = 3; y < canvas.height; y += step) for (let x = 3; x < canvas.width; x += step) {
+        if (data[(y * canvas.width + x) * 4 + 3] < 16) clear++;
+        total++;
+      }
+      return total ? clear / total : 0;
+    };
+    const resize = () => {
+      const r = card.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
+      canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
+      canvas.style.width = r.width + 'px'; canvas.style.height = r.height + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.globalCompositeOperation = 'source-over'; const g = ctx.createLinearGradient(0, 0, r.width, r.height);
+      g.addColorStop(0, '#ddd6c9'); g.addColorStop(.48, '#f8f4eb'); g.addColorStop(1, '#c7bdab');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, r.width, r.height); ctx.fillStyle = '#807767'; ctx.font = '600 11px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('擦开雾面，看看里面', r.width / 2, r.height / 2); ctx.globalCompositeOperation = 'destination-out';
+    };
+    const erase = e => {
+      if (!drawing || done) return; const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+      ctx.beginPath(); ctx.arc(x, y, 19, 0, Math.PI * 2); ctx.fill(); points++;
+      if (points % 8 === 0 && clearedRatio() > .46) { done = true; canvas.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 420, fill: 'forwards', easing: E.EO }).onfinish = () => { canvas.style.opacity = '0'; card.classList.add('is-revealed'); }; }
+    };
+    canvas.addEventListener('pointerdown', e => { drawing = true; canvas.setPointerCapture(e.pointerId); erase(e); });
+    canvas.addEventListener('pointermove', erase);
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(n => canvas.addEventListener(n, () => { drawing = false; }));
+    reset.addEventListener('click', () => {
+      /* 已完成的 WAAPI fill:forwards 会压住 inline opacity=1；先取消动画，再重画整张雾面。 */
+      canvas.getAnimations().forEach(a => a.cancel());
+      done = false; points = 0; drawing = false; card.classList.remove('is-revealed');
+      canvas.style.opacity = '1'; resize();
+    });
+    new ResizeObserver(resize).observe(card); resize();
+  }
+
+  function dotSphere(stage) {
+    const canvas = $('.ds-canvas', stage), btn = $('.ds-toggle', stage);
+    if (!canvas || !btn) return;
+    const ctx = canvas.getContext('2d'), n = 260, points = [];
+    for (let i = 0; i < n; i++) { const y = 1 - (i / (n - 1)) * 2, r = Math.sqrt(1 - y * y), a = Math.PI * (3 - Math.sqrt(5)) * i; points.push({ x: Math.cos(a) * r, y, z: Math.sin(a) * r }); }
+    const title = $('.ds-title b', stage);
+    let rot = 0, tilt = -.12, target = 0, morph = 0, dragging = false, lx = 0, ly = 0, downX = 0, downY = 0, moved = false, w = 0, h = 0;
+    const toggle = () => {
+      target = target ? 0 : 1;
+      stage.classList.toggle('is-heart', !!target);
+      btn.setAttribute('aria-pressed', target ? 'true' : 'false');
+      btn.innerHTML = target ? '变回点阵球 <span>↙</span>' : '变成心形 <span>↗</span>';
+        if (title) title.innerHTML = target ? '心形 <em>正在成形</em>' : '点阵球 <em>正在汇聚</em>';
+    };
+    const fit = () => { const r = canvas.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1); w = r.width; h = r.height; canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+    new ResizeObserver(fit).observe(canvas); fit();
+    canvas.addEventListener('pointerdown', e => {
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+      dragging = true; moved = false; downX = lx = e.clientX; downY = ly = e.clientY; canvas.setPointerCapture(e.pointerId);
+    });
+    canvas.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const dx = e.clientX - lx, dy = e.clientY - ly;
+      if (Math.hypot(e.clientX - downX, e.clientY - downY) > 7) moved = true;
+      rot += dx * .009; tilt = clamp(tilt + dy * .006, -1.1, 1.1); lx = e.clientX; ly = e.clientY;
+    });
+    canvas.addEventListener('pointerup', () => { if (!dragging) return; dragging = false; if (!moved) toggle(); });
+    canvas.addEventListener('pointercancel', () => { dragging = false; });
+    btn.addEventListener('click', toggle);
+    watch(stage, () => {
+      const motionOn = window.ENGINE.motionOn();
+      morph += (target - morph) * (motionOn ? .045 : 1);
+      if (title && Math.abs(target - morph) < .012) title.innerHTML = target ? '心形 <em>已成形</em>' : '点阵球 <em>已就位</em>';
+      if (!dragging && motionOn) rot += .0025;
+      ctx.clearRect(0, 0, w, h);
+      const cx = w * .5, cy = h * .52, radius = Math.min(w, h) * .33, ca = Math.cos(rot), sa = Math.sin(rot), ct = Math.cos(tilt), st = Math.sin(tilt), draw = [];
+      points.forEach((q, i) => {
+        /* 同一组点铺满心形内部，而非只勾出一条稀疏轮廓；采样分布均匀且与球体同尺度。 */
+        const t = i / n * Math.PI * 2, fill = .16 + .84 * Math.sqrt(((i * 73) % n) / n);
+        const hx = Math.pow(Math.sin(t), 3) * .9 * fill;
+        const hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) / 17 * .9 * fill;
+        const x = q.x * (1 - morph) + hx * morph, y = q.y * (1 - morph) + hy * morph, z = q.z * (1 - morph) + q.z * .22 * morph;
+        const rx = x * ca - z * sa, rz = x * sa + z * ca, ry = y * ct - rz * st, depth = y * st + rz * ct, scale = 1 / (1.45 - depth * .28);
+        draw.push({ x: cx + rx * radius * scale, y: cy + ry * radius * scale, r: 1.1 + (depth + 1) * .9, z: depth, i: i });
+      });
+      draw.sort((a, b) => a.z - b.z).forEach(p => { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = 'rgba(220,82,36,' + (.35 + (p.z + 1) * .28) + ')'; ctx.fill(); });
+    });
+  }
+
   const RUN = {
     gaze: gaze, pinned: pinned, stack: stackCards, dio: diorama, orbit: orbit,
     bloom: bloom, vortex: vortex, float: floatGrow, helix: helix, glow: luminous,
@@ -1871,7 +2225,9 @@
     linemask: lineMask, vspeed: velocitySkew, pglow: proximityGlow, liquid: liquidFollow,
     chart: chartBuild, preview: previewFollow, throw: throwDismiss, scramble: scrambleDecode,
     rail: rail, tunnel: tunnel, magnetic: magnetic, tilt: tiltCard, odometer: odometer,
-    confetti: confetti, tabs: smoothTabs, coverflow: coverflow, cylinder: cylinder, ring3d: ringGallery
+    confetti: confetti, tabs: smoothTabs, coverflow: coverflow, cylinder: cylinder, ring3d: ringGallery,
+    pagecurl: pageCurl, island: dynamicIsland, scratch: scratchReveal, dotsphere: dotSphere,
+    pathweave: pathWeave, scanlock: scanLock
   };
 
   function watch(el, fn) {
@@ -1936,7 +2292,7 @@
     helix: ['drag', '拖拽'], glow: ['pointer', '指针'], spotlight: ['pointer', '指针'], trail: ['pointer', '指针'],
     fan: ['hover', '悬停'], peel: ['hover', '悬停'], hscroll: ['scroll', '滚动'], frames: ['scroll', '滚动'],
     twocol: ['scroll', '滚动'], thememorph: ['scroll', '滚动'], ring: ['scroll', '滚动'], fab: ['tap', '点击'],
-    tristate: ['tap', '点击'], compare: ['drag', '拖拽'],
+    tristate: ['tap', '点击'], compare: ['drag', '拖拽'], pagecurl: ['drag', '拖拽'], island: ['tap', '点击'], scratch: ['drag', '拖拽'], dotsphere: ['drag', '拖拽'], pathweave: ['tap', '重播'], scanlock: ['tap', '重播'],
     linemask: ['scroll', '滚动'], vspeed: ['scroll', '滚动'], pglow: ['pointer', '指针'], liquid: ['pointer', '指针'],
     chart: ['scroll', '滚动'], preview: ['hover', '悬停'], throw: ['drag', '拖拽'], scramble: ['tap', '点击'],
     rail: ['scroll', '滚动'], tunnel: ['scroll', '滚动'], magnetic: ['pointer', '指针'], tilt: ['pointer', '指针'], odometer: ['tap', '点击'], confetti: ['tap', '点击'], tabs: ['tap', '点击'], coverflow: ['tap', '点击'], cylinder: ['drag', '拖拽'], ring3d: ['drag', '拖拽']

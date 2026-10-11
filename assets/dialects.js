@@ -8,33 +8,33 @@
   'use strict';
 
   const EASE_NAMES = [
-    { re: /^linear$/, gsap: 'none', tw: 'ease-linear', ios: '.linear' },
-    { re: /cubic-bezier\(\s*0?\.16,\s*1,\s*0?\.3,\s*1\s*\)/, gsap: 'expo.out', tw: 'ease-out', ios: '.easeOut' },
-    { re: /cubic-bezier\(\s*0?\.33,\s*1,\s*0?\.68,\s*1\s*\)/, gsap: 'power3.out', tw: 'ease-out', ios: '.easeOut' },
-    { re: /cubic-bezier\(\s*0?\.32,\s*0,\s*0?\.67,\s*0\s*\)/, gsap: 'power3.in', tw: 'ease-in', ios: '.easeIn' },
-    { re: /cubic-bezier\(\s*0?\.65,\s*0,\s*0?\.35,\s*1\s*\)/, gsap: 'power3.inOut', tw: 'ease-in-out', ios: '.easeInOut' },
-    { re: /cubic-bezier\(\s*0?\.34,\s*1\.56,\s*0?\.64,\s*1\s*\)/, gsap: 'back.out(1.7)', tw: 'ease-out', ios: '.easeOut' },
-    { re: /cubic-bezier\(\s*0?\.22,\s*1,\s*0?\.36,\s*1\s*\)/, gsap: 'expo.out', tw: 'ease-out', ios: '.easeOut' },
-    { re: /cubic-bezier\(\s*0?\.76,\s*0,\s*0?\.24,\s*1\s*\)/, gsap: 'power4.inOut', tw: 'ease-in-out', ios: '.easeInOut' },
-    { re: /cubic-bezier\(\s*0?\.83,\s*0,\s*0?\.17,\s*1\s*\)/, gsap: 'expo.inOut', tw: 'ease-in-out', ios: '.easeInOut' },
-    { re: /cubic-bezier\(\s*0?\.37,\s*0,\s*0?\.63,\s*1\s*\)/, gsap: 'sine.inOut', tw: 'ease-in-out', ios: '.easeInOut' },
-    { re: /cubic-bezier\(\s*0?\.2,\s*0,\s*0,\s*1\s*\)/, gsap: 'power4.out', tw: 'ease-out', ios: '.easeOut' },
-    { re: /ease-out/, gsap: 'power2.out', tw: 'ease-out', ios: '.easeOut' },
-    { re: /ease-in-out/, gsap: 'power2.inOut', tw: 'ease-in-out', ios: '.easeInOut' },
-    { re: /ease-in/, gsap: 'power2.in', tw: 'ease-in', ios: '.easeIn' },
-    { re: /steps\((\d+)\)/, gsap: 'steps', tw: 'ease-linear', ios: '.linear' }
+    { re: /^linear$/, gsap: 'none', tw: 'ease-linear', ios: 'curveLinear', framer: 'linear' },
+    { re: /cubic-bezier\(\s*0?\.16,\s*1,\s*0?\.3,\s*1\s*\)/, gsap: 'expo.out', tw: 'ease-out', ios: 'curveEaseOut', framer: 'easeOut' },
+    { re: /cubic-bezier\(\s*0?\.33,\s*1,\s*0?\.68,\s*1\s*\)/, gsap: 'power3.out', tw: 'ease-out', ios: 'curveEaseOut', framer: 'easeOut' },
+    { re: /cubic-bezier\(\s*0?\.32,\s*0,\s*0?\.67,\s*0\s*\)/, gsap: 'power3.in', tw: 'ease-in', ios: 'curveEaseIn', framer: 'easeIn' },
+    { re: /cubic-bezier\(\s*0?\.65,\s*0,\s*0?\.35,\s*1\s*\)/, gsap: 'power3.inOut', tw: 'ease-in-out', ios: 'curveEaseInOut', framer: 'easeInOut' },
+    { re: /cubic-bezier\(\s*0?\.34,\s*1\.56,\s*0?\.64,\s*1\s*\)/, gsap: 'back.out(1.7)', tw: 'ease-out', ios: 'curveEaseOut', framer: 'easeOut' },
+    { re: /cubic-bezier\(\s*0?\.22,\s*1,\s*0?\.36,\s*1\s*\)/, gsap: 'expo.out', tw: 'ease-out', ios: 'curveEaseOut', framer: 'easeOut' },
+    { re: /cubic-bezier\(\s*0?\.76,\s*0,\s*0?\.24,\s*1\s*\)/, gsap: 'power4.inOut', tw: 'ease-in-out', ios: 'curveEaseInOut', framer: 'easeInOut' },
+    { re: /cubic-bezier\(\s*0?\.83,\s*0,\s*0?\.17,\s*1\s*\)/, gsap: 'expo.inOut', tw: 'ease-in-out', ios: 'curveEaseInOut', framer: 'easeInOut' },
+    { re: /cubic-bezier\(\s*0?\.37,\s*0,\s*0?\.63,\s*1\s*\)/, gsap: 'sine.inOut', tw: 'ease-in-out', ios: 'curveEaseInOut', framer: 'easeInOut' },
+    { re: /cubic-bezier\(\s*0?\.2,\s*0,\s*0,\s*1\s*\)/, gsap: 'power4.out', tw: 'ease-out', ios: 'curveEaseOut', framer: 'easeOut' },
+    { re: /ease-out/, gsap: 'power2.out', tw: 'ease-out', ios: 'curveEaseOut', framer: 'easeOut' },
+    { re: /ease-in-out/, gsap: 'power2.inOut', tw: 'ease-in-out', ios: 'curveEaseInOut', framer: 'easeInOut' },
+    { re: /ease-in/, gsap: 'power2.in', tw: 'ease-in', ios: 'curveEaseIn', framer: 'easeIn' },
+    { re: /steps\((\d+)\)/, gsap: 'steps', tw: 'ease-linear', ios: 'curveLinear', framer: 'linear' }
   ];
 
   function easeInfo(css) {
     for (let i = 0; i < EASE_NAMES.length; i++) {
       const e = EASE_NAMES[i];
-      if (e.re.test(css || '')) return { gsap: e.gsap, tw: e.tw, ios: e.ios, steps: (css.match(/steps\((\d+)\)/) || [])[1] };
+      if (e.re.test(css || '')) return { gsap: e.gsap, tw: e.tw, ios: e.ios, framer: e.framer, steps: (css.match(/steps\((\d+)\)/) || [])[1] };
     }
-    return { gsap: 'power2.out', tw: 'ease-out', ios: '.easeOut' };
+    return { gsap: 'power2.out', tw: 'ease-out', ios: 'curveEaseOut', framer: 'easeOut' };
   }
   function bezierArr(css) {
     const m = /cubic-bezier\(([^)]+)\)/.exec(css || '');
-    return m ? m[1].split(',').map(function (v) { return (+v).toFixed(2); }) : null;
+    return m ? m[1].split(',').map(function (v) { return (+v).toFixed(3); }) : null;
   }
   function ms(v) { const n = parseFloat(v); return /ms/.test(v) ? n : n * 1000; }
 
@@ -49,7 +49,7 @@
   }
   function parseTransform(t) {
     const r = { x: 0, y: 0, sx: 1, sy: 1, rot: 0, skew: 0 };
-    if (!t || t === 'none') return r;
+    if (!t || t === 'none') { r.unsupported = ''; return r; }
     let s = String(t), guard = 0, m;
     const take = function (re, fn) {
       while (guard++ < 12 && (m = re.exec(s))) { fn(+m[1], m[2] != null ? +m[2] : null); s = s.slice(0, m.index) + s.slice(m.index + m[0].length); }
@@ -65,6 +65,7 @@
     take(/scale\(\s*(-?[\d.]+)(?:\s*,\s*(-?[\d.]+))?\s*\)/, function (a, b) { r.sx = a; r.sy = b == null ? a : b; });
     take(/rotate\(\s*(-?[\d.]+)deg\s*\)/, function (v) { r.rot += v; });
     take(/skewX\(\s*(-?[\d.]+)deg\s*\)/, function (v) { r.skew += v; });
+    r.unsupported = s.trim();
     return r;
   }
   function readState(str) {
@@ -73,11 +74,12 @@
       x: t.x, y: t.y, sx: t.sx, sy: t.sy, rot: t.rot, skew: t.skew,
       opacity: d.opacity != null ? +d.opacity : 1,
       blur: (d.filter || '').indexOf('blur') >= 0 ? +(/blur\(\s*([\d.]+)px/.exec(d.filter) || [0, 0])[1] : 0,
+      unsupportedTransform: t.unsupported,
       raw: d
     };
   }
   /* 从术语里取出可编译的时间轴 */
-  function specOf(term) {
+  function specOf(term, overrides) {
     const d = term.demo || {};
     const src = d.kind === 'two' ? d.a : d;
     if (!src.frames || !src.frames.length) {
@@ -96,11 +98,15 @@
     }
     const from = readState(src.frames[0][1]);
     const to = readState(src.frames[src.frames.length - 1][1]);
-    return {
+    const spec = {
       from: from, to: to, dur: ms(src.d || '520ms'), ease: src.e || 'cubic-bezier(0.16,1,0.3,1)',
       stagger: src.st && src.multi ? Math.abs(src.st) : (src.st && src.st < 0 ? 0 : src.st),
       multi: src.multi, loop: !!src.loop, alt: !!src.alt, frames: src.frames
     };
+    overrides = overrides || {};
+    if (Number.isFinite(+overrides.dur) && +overrides.dur > 0) spec.dur = +overrides.dur;
+    if (Number.isFinite(+overrides.st) && +overrides.st >= 0) spec.stagger = +overrides.st;
+    return spec;
   }
 
   const num = function (v) { return (Math.round(v * 1000) / 1000).toString(); };
@@ -145,6 +151,34 @@
       Math.abs(a.opacity - b.opacity) < .01 && a.blur === b.blur;
   }
 
+  function translated(term, spec, platform) {
+    if (!spec) return false;
+    /* Framer has a real spring API with the source stiffness/damping/mass values.
+       The other spring branches are only rough demos, so do not label them converted. */
+    if (spec.spring) return platform === 'framer';
+    if (spec.kindOnly) return false;
+    if (platform === 'css') return true;
+    if (spec.frames.length > 2 && (platform === 'swift' || platform === 'compose' || platform === 'tailwind')) return false;
+    if (spec.stagger && (platform === 'framer' || platform === 'tailwind' || platform === 'swift' || platform === 'compose')) return false;
+    if (spec.loop && (platform === 'tailwind' || platform === 'compose')) return false;
+    const states = spec.frames.map(function (f) { return readState(f[1]); });
+    if (states.some(function (s) { return !!s.unsupportedTransform; })) return false;
+    const allowed = platform === 'waapi' || platform === 'framer'
+      ? ['transform', 'opacity', 'filter']
+      : platform === 'gsap' ? ['transform', 'opacity', 'filter']
+      : platform === 'swift' || platform === 'compose'
+        ? ['transform', 'opacity']
+        : platform === 'tailwind' ? ['transform', 'opacity'] : [];
+    if (states.some(function (s) { return Object.keys(s.raw).some(function (key) { return allowed.indexOf(key) < 0; }); })) return false;
+    if ((platform === 'swift' || platform === 'compose') && states.some(function (s) { return Math.abs(s.skew) > .01 || s.blur > 0; })) return false;
+    if (platform === 'compose' && spec.frames.length > 2) return false;
+    return true;
+  }
+
+  function manualCode(term, platform) {
+    return term.code || '/* No source snippet is available for this concept. */';
+  }
+
   const OUT = {
     css: function (term, spec) {
       if (!spec) return term.code;
@@ -181,6 +215,7 @@
       };
       const opt = { duration: Math.round(spec.dur), easing: spec.ease, fill: 'both' };
       if (spec.loop) opt.iterations = Infinity;
+      if (spec.loop && spec.alt) opt.direction = 'alternate';
       const opts = jsOpts(opt);
       /* 多关键帧术语输出完整帧序列：压成 from/to 两帧会把 shake / toast-in
          这类「讲故事」的中间过程全部抹掉，首尾一样时甚至等于没有动画 */
@@ -270,7 +305,7 @@
     framer: function (term, spec) {
       if (!spec) return term.code;
       if (spec.spring) {
-        return '<motion.div\n  animate={{ x: 0, opacity: 1 }}\n  transition={{ type: "spring", stiffness: ' + spec.spring[0] +
+        return '<motion.div\n  initial={{ x: 24, opacity: 0 }}\n  animate={{ x: 0, opacity: 1 }}\n  transition={{ type: "spring", stiffness: ' + spec.spring[0] +
           ', damping: ' + spec.spring[1] + ', mass: ' + spec.spring[2] + ' }}\n/>';
       }
       if (spec.kindOnly) return '<motion.div animate={{ x: 120 }} transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }} />';
@@ -278,7 +313,8 @@
       const ser = function (v) {
         return Array.isArray(v) ? '[' + v.join(', ') + ']' : typeof v === 'string' ? '"' + v + '"' : String(v);
       };
-      const tr = { duration: +(spec.dur / 1000).toFixed(2), ease: bz ? bz.map(Number) : 'easeOut' };
+      const easing = easeInfo(spec.ease);
+      const tr = { duration: +(spec.dur / 1000).toFixed(3), ease: bz ? bz.map(Number) : (easing.gsap === 'steps' ? 'steps(' + (easing.steps || 1) + ')' : easing.framer || 'easeOut') };
       if (spec.loop) { tr.repeat = Infinity; if (spec.alt) tr.repeatType = 'reverse'; }
       /* 多关键帧：Framer Motion 的关键帧就是每属性一个数组，配 times 对齐原始偏移 */
       if (spec.frames.length > 2) {
@@ -313,6 +349,10 @@
       if (d.rot) pair('rotate', spec.from.rot, spec.to.rot);
       if (spec.from.skew || spec.to.skew) pair('skewX', spec.from.skew, spec.to.skew);
       if (d.o) pair('opacity', spec.from.opacity, spec.to.opacity);
+      if (Math.abs(d.blur) > 0.01) {
+        ini.push('filter: "blur(' + num(spec.from.blur) + 'px)"');
+        ani2.push('filter: "blur(' + num(spec.to.blur) + 'px)"');
+      }
       /* 首尾相同（shake 这类循环）压成两态等于空动画，交回手写实现 */
       if (!ani2.length) return term.code;
       return '<motion.div\n  initial={{ ' + ini.join(', ') + ' }}\n  animate={{ ' + ani2.join(', ') + ' }}\n  transition={{ ' +
@@ -333,9 +373,17 @@
       if (d.sx !== 1) tf.push('CGAffineTransform(scaleX: ' + num(d.sx) + ', y: ' + num(d.sy) + ')');
       if (d.rot) tf.push('CGAffineTransform(rotationAngle: ' + num(d.rot * Math.PI / 180) + ')');
       const combo = tf.length ? tf.join(' * ') : '.identity';
-      return 'view.alpha = ' + num(spec.from.opacity) + '\nview.transform = ' + (tf.length ? combo : '.identity') + '\n' +
-        'UIView.animate(withDuration: ' + num(spec.dur / 1000) + ', delay: 0,\n  options: [' + e.ios.replace('.', '') + (spec.loop ? ', .repeat' : '') + (spec.alt ? ', .autoreverse' : '') + ']) {\n' +
-        '  view.alpha = ' + num(spec.to.opacity) + '\n  view.transform = .identity\n}';
+      const transform = function (st) {
+        const ops = [];
+        if (st.x || st.y) ops.push('.translatedBy(x: ' + num(st.x) + ', y: ' + num(st.y) + ')');
+        if (st.sx !== 1 || st.sy !== 1) ops.push('.scaledBy(x: ' + num(st.sx) + ', y: ' + num(st.sy) + ')');
+        if (st.rot) ops.push('.rotated(by: ' + num(st.rot * Math.PI / 180) + ')');
+        return '.identity' + ops.join('');
+      };
+      const options = ['.' + e.ios].concat(spec.loop ? ['.repeat'] : [], spec.loop && spec.alt ? ['.autoreverse'] : []);
+      return 'view.alpha = ' + num(spec.from.opacity) + '\nview.transform = ' + transform(spec.from) + '\n' +
+        'UIView.animate(withDuration: ' + num(spec.dur / 1000) + ', delay: 0,\n  options: [' + options.join(', ') + ']) {\n' +
+        '  view.alpha = ' + num(spec.to.opacity) + '\n  view.transform = ' + transform(spec.to) + '\n}';
     },
     compose: function (term, spec) {
       if (!spec) return term.code;
@@ -355,7 +403,7 @@
       if (Math.abs(spec.from.sx - spec.to.sx) > 0.01 || Math.abs(spec.from.sy - spec.to.sy) > 0.01) {
         lines.push('val sc by animateFloatAsState(if (show) ' + num(spec.to.sx) + 'f else ' + num(spec.from.sx) + 'f, spec)');
         if (Math.abs(spec.from.sx - spec.from.sy) < 0.01 && Math.abs(spec.to.sx - spec.to.sy) < 0.01) {
-          gl.push('scaleX = scaleY = sc');
+          gl.push('scaleX = sc'); gl.push('scaleY = sc');
         } else {
           gl.push('scaleX = sc');
           lines.push('val scy by animateFloatAsState(if (show) ' + num(spec.to.sy) + 'f else ' + num(spec.from.sy) + 'f, spec)');
@@ -364,8 +412,14 @@
       }
       lines.push('val al by animateFloatAsState(if (show) ' + num(spec.to.opacity) + 'f else ' + num(spec.from.opacity) + 'f, spec)');
       gl.unshift('alpha = al');
-      const specLine = 'val spec = ' + (bz ? 'tween<' + 'Float' + '>(' + Math.round(spec.dur) + ', easing = CubicBezierEasing(' + bz.join('f, ') + 'f))' : 'tween<Float>(' + Math.round(spec.dur) + ', easing = FastOutSlowInEasing)');
-      return lines.join('\n') + '\n' + specLine + '\n\nModifier\n  .graphicsLayer { ' + gl.join('; ') + ' }\n' +
+      if (Math.abs(spec.from.rot - spec.to.rot) > .01) {
+        lines.push('val rz by animateFloatAsState(if (show) ' + num(spec.to.rot) + 'f else ' + num(spec.from.rot) + 'f, spec)');
+        gl.push('rotationZ = rz');
+      }
+      const easing = easeInfo(spec.ease);
+      const easingCode = bz ? 'CubicBezierEasing(' + bz.join('f, ') + 'f)' : easing.gsap === 'steps' ? 'snap()' : spec.ease === 'linear' ? 'LinearEasing' : 'FastOutSlowInEasing';
+      const specLine = 'val spec = tween<Float>(durationMillis = ' + Math.round(spec.dur) + ', easing = ' + easingCode + ')';
+      return specLine + '\n' + lines.join('\n') + '\n\nModifier\n  .graphicsLayer { ' + gl.join('; ') + ' }\n' +
         (spec.stagger ? '// 逐项延迟：LaunchedEffect + delay(i * ' + spec.stagger + 'ms)，或 LazyColumn 里按 index 起始偏移' : '');
     },
     tailwind: function (term, spec) {
@@ -374,15 +428,22 @@
       const e = easeInfo(spec.ease), d = delta(spec);
       /* Tailwind 的 duration 刻度只有 75/100/150/200/300/500/700/1000，
          四舍五入到 50ms 会产出 duration-420 这种静默无效的类，用任意值写法才可靠 */
-      const cls = ['transition', 'duration-[' + Math.round(spec.dur) + 'ms]',
+      const cls = ['transition-[transform,opacity]', 'duration-[' + Math.round(spec.dur) + 'ms]',
         e.gsap === 'steps' ? 'ease-[steps(' + (e.steps || 1) + ')]' : e.tw];
-      if (d.o) cls.push('opacity-' + Math.round(spec.from.opacity * 100));
-      if (d.y) cls.push('translate-y-' + (Math.abs(spec.from.y) <= 8 ? '2' : Math.abs(spec.from.y) <= 16 ? '4' : '8'));
-      if (d.x) cls.push('translate-x-' + (Math.abs(spec.from.x) <= 8 ? '2' : Math.abs(spec.from.x) <= 16 ? '4' : '8'));
-      if (d.sx !== 1) cls.push('scale-' + Math.round(spec.from.sx * 100));
-      const to = ['opacity-100', 'translate-y-0', 'translate-x-0', 'scale-100'];
-      return '<!-- 起始 -->\nclass="' + cls.join(' ') + '"\n<!-- 目标 -->\nclass="' + to.join(' ') + '"\n' +
-        (spec.stagger ? '<!-- 逐项：style="--i:{n}" + [animation-delay:calc(var(--i)*' + spec.stagger + 'ms)] -->' : '');
+      const transformClasses = function (st) {
+        const out = [];
+        if (st.x) out.push((st.x < 0 ? '-' : '') + 'translate-x-[' + Math.abs(st.x) + 'px]');
+        if (st.y) out.push((st.y < 0 ? '-' : '') + 'translate-y-[' + Math.abs(st.y) + 'px]');
+        if (st.sx !== 1) out.push('scale-x-[' + st.sx + ']');
+        if (st.sy !== 1) out.push('scale-y-[' + st.sy + ']');
+        if (st.rot) out.push('rotate-[' + st.rot + 'deg]');
+        return out;
+      };
+      const start = cls.concat(transformClasses(spec.from));
+      const end = ['transition-[transform,opacity]', 'duration-[' + Math.round(spec.dur) + 'ms]', e.tw].concat(transformClasses(spec.to));
+      if (Math.abs(spec.from.opacity - 1) > .01) start.push('opacity-[' + spec.from.opacity + ']');
+      if (Math.abs(spec.to.opacity - 1) > .01) end.push('opacity-[' + spec.to.opacity + ']');
+      return '<!-- Start -->\nclass="' + start.join(' ') + '"\n<!-- End -->\nclass="' + end.join(' ') + '"';
     }
   };
 
@@ -398,22 +459,48 @@
 
   let current = 'css';
   const cache = {};
-  function codeFor(term) {
-    const key = term.id + '|' + current;
+  function codeFor(term, overrides) {
+    const stamp = JSON.stringify(overrides || {});
+    const key = term.id + '|' + current + '|' + stamp;
     if (cache[key] != null) return cache[key];
-    const spec = specOf(term);
-    let out = '';
-    try { out = (OUT[current] || OUT.css)(term, spec) || term.code || ''; }
-    catch (e) { out = term.code || ''; }
-    if (!out) out = '/* 该条目描述的是约定与判据，没有对应的补间代码 */';
+    const spec = specOf(term, overrides);
+    const platform = current;
+    const canTranslate = translated(term, spec, platform);
+    let out = canTranslate ? ((OUT[platform] || OUT.css)(term, spec) || '') : manualCode(term, platform);
+    if (!out) out = '/* This concept has no code example yet. */';
     cache[key] = out;
     return out;
+  }
+
+  function status(term, overrides) {
+    const spec = specOf(term, overrides);
+    if (!translated(term, spec, current)) return 'manual';
+    if (spec.spring && current === 'framer') return 'translated';
+    if (current === 'css' || current === 'waapi') return 'translated';
+    if (current === 'gsap' && (spec.ease === 'linear' || /^steps\(/.test(spec.ease))) return 'translated';
+    if (current === 'swift' && spec.ease === 'linear') return 'translated';
+    if (current === 'framer' && (bezierArr(spec.ease) || /^linear$/.test(spec.ease))) return 'translated';
+    if (current === 'compose' && (bezierArr(spec.ease) || /^linear$/.test(spec.ease))) return 'translated';
+    if (current === 'tailwind' && (/^linear$/.test(spec.ease) || /^steps\(/.test(spec.ease))) return 'translated';
+    return 'approximate';
+  }
+
+  function coverage(platform) {
+    const previous = current;
+    if (platform && LIST.some(function (item) { return item.key === platform; })) current = platform;
+    const result = { total: (window.TERMS || []).length, translated: 0, approximate: 0, manual: 0 };
+    try {
+      (window.TERMS || []).forEach(function (term) { result[status(term)]++; });
+    } finally { current = previous; }
+    return result;
   }
 
   window.DIALECTS = {
     list: LIST,
     get current() { return current; },
     codeFor: codeFor,
+    status: status,
+    coverage: coverage,
     set: function (k) { current = k; },
     compilable: function (term) { return !!specOf(term); }
   };

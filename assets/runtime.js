@@ -44,8 +44,8 @@
     {
       id: 'preserve-3d', en: 'transform-style: preserve-3d', zh: '保留 3D 上下文', cat: 'runtime',
       alias: ['flat', '3D 嵌套', '渲染上下文'],
-      vague: '为什么我的子元素转起来是扁的', say: '父层缺 transform-style: preserve-3d，子层被拍平了',
-      def: '默认值 flat 会把子元素投影到父元素平面上，3D 关系当场失效。做立方体、卡片堆叠、嵌套翻转时这是第一行要检查的属性。',
+      vague: '为什么卡片一转，就像叠成一张纸？', say: '父级旋转时，里面的卡片被压成同一层了',
+      def: '父级带着子元素旋转时，flat 会把子元素压到同一个平面；改用 preserve-3d，前后距离才会保留下来。下方两组会同时转动，可以直接比较它们的层次变化。',
       code: '.parent { transform-style: preserve-3d; }  /* 否则子元素被压平 */',
       demo: { kind: 'nest' }
     },
@@ -1101,10 +1101,10 @@
     nest: function () {
       const cell = function (cls, label) {
         return '<i class="ab-cell"><span class="ns-scene"><b class="ns-parent ' + cls + '">' +
-          '<s style="--z:-46px">远 -46</s><s style="--z:0px">中 0</s><s style="--z:46px">近 +46</s>' +
+          '<s style="--z:-46px">后面</s><s style="--z:0px">中间</s><s style="--z:46px">前面</s>' +
           '</b></span><u>' + label + '</u></i>';
       };
-      return '<div class="ab2 ns-ab">' + cell('flat3d', 'flat：三块同一平面') + cell('keep3d', 'preserve-3d：各有深度') + '</div>';
+      return '<div class="ab2 ns-ab">' + cell('flat3d', '层次被压平') + cell('keep3d', '前后距离保留') + '</div>';
     },
     scrub: function () {
       return '<div class="sc"><i class="sc-obj"></i><input type="range" min="0" max="1" step="0.005" value="0"><span class="sc-val"></span></div>';

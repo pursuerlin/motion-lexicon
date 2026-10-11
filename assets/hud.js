@@ -394,7 +394,7 @@
     var panel = document.createElement('div');
     panel.className = 'hud';
     panel.innerHTML =
-      '<div class="hud-head"><b><i class="hud-dot"></i>LIVE READOUT</b><span>' + L('实测', 'MEASURED') + '</span></div>' +
+      '<div class="hud-head"><b><i class="hud-dot"></i>LIVE READOUT</b><span>' + L('实时测量', 'REAL-TIME') + '</span></div>' +
       '<div class="hud-f hud-hi"><s>' + chan.label + '</s><var data-out="v">' + chan.fmt(read()) + '</var></div>' +
       (multi ? '' : '<div class="hud-row">' +
         '<div class="hud-f sm"><s>EASED</s><var data-out="e">0.000</var></div>' +
@@ -638,16 +638,19 @@
      把「字一个个出现」读成 OPACITY 50%。 */
   function bestKey(r) {
     var m = bestOf(r, ['tx', 'ty', 'sc', 'tilt']);
-    if (worth(m)) return m;
+    m.el = r.el;
+    if (worth(m, r.el)) return m;
     var t = bestOf(r, ['dash', 'bgp', 'clip', 'sz']);
-    if (worth(t)) return t;
-    return bestOf(r, ['op']);
+    t.el = r.el;
+    if (worth(t, r.el)) return t;
+    var o = bestOf(r, ['op']); o.el = r.el; return o;
   }
   /* 该不该装仪表：位移不到 24px、缩放不到 0.05、透明度不到 0.2 的就不是运动，
      画出来只是一条抖动的直线，比没有更糟 */
-  function worth(x) {
+  function worth(x, el) {
     var k = x.key, raw = x.raw;
-    if (k === 'tx' || k === 'ty') return raw >= 14;
+    el = el || x.el;
+    if (k === 'tx' || k === 'ty') return raw >= (el && el.classList && el.classList.contains('mg-btn') ? 6 : 14);
     if (k === 'tilt') return raw >= 4;
     if (k === 'dash') return raw >= 0.15;      /* dash 现在是 0..1 的进度，不是像素 */
     if (k === 'bgp') return raw >= 20;
@@ -670,7 +673,8 @@
     ['.j-a', 'TRANSLATE X'],               /* jank 顺滑轨 */
     ['.j-b', 'TRANSLATE X'],               /* jank 卡顿轨：两条线的差别就是这条术语 */
     ['svg path', 'STROKE DRAWN'],          /* line-drawing：画到百分之几十，屏幕上原本没有这个数 */
-    ['.rpanel', 'TRANSLATE X']             /* rubber-band：阻尼是非线性的，拉出去几像素、什么时候变硬，得量 */
+    ['.rpanel', 'TRANSLATE X'],            /* rubber-band：阻尼是非线性的，拉出去几像素、什么时候变硬，得量 */
+    ['.mg-btn', 'TRANSLATE X']              /* magnetic hover：读按钮实际被拉动的距离 */
   ];
   function declaredActors(stage) {
     var out = [];
@@ -711,6 +715,7 @@
       return m > 8 ? Math.max(0, Math.min(1, scBox.scrollTop / m)) : -1;
     }
     var scrollMode = sprog() >= 0;
+    var reboundMode = term.id === 'rubber-band';
     var declared = declaredActors(stage);
     var acts = declared;
     if (!acts.length) { node.dataset.telemetry = 'n/a'; return null; }
@@ -736,11 +741,11 @@
     var panel = document.createElement('div');
     panel.className = 'hud hud-traced';
     panel.innerHTML =
-      '<div class="hud-head"><b><i class="hud-dot"></i>LIVE READOUT</b><span data-out="mode">' + L('探测中', 'probing') + '</span></div>' +
+      '<div class="hud-head"><b><i class="hud-dot"></i>LIVE READOUT</b><span data-out="mode">' + L('拖动后记录', 'drag to record') + '</span></div>' +
       '<div class="hud-f hud-hi"><s data-out="lbl">—</s><var data-out="v">—</var></div>' +
       '<div class="hud-row"><div class="hud-f sm"><s>' + (scrollMode ? L('进度', 'PROGRESS') : 'T') +
       '</s><var data-out="t">0<u>' + (scrollMode ? '%' : '/2.4s') + '</u></var></div>' +
-      '<div class="hud-f sm"><s>' + (scrollMode ? L('滚到', 'reached') : L('周期', 'cycle')) +
+      '<div class="hud-f sm"><s>' + (scrollMode ? L('滚到', 'reached') : L(reboundMode ? '回弹' : '周期', reboundMode ? 'RETURN' : 'cycle')) +
       '</s><var data-out="cyc">…</var></div></div>' +
       '<svg class="hud-chart" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true">' +
       '<line class="hud-ax" x1="' + PL + '" y1="' + (H - PB) + '" x2="' + (W - 4) + '" y2="' + (H - PB) + '"/>' +
@@ -754,7 +759,8 @@
       (scrollMode ? '100%' : '2.4s') + '</text></svg>' +
       '<div class="hud-cap"><span data-out="cap1">' + L('先看谁在动', 'finding the mover') + '</span><span>' +
       (scrollMode ? L('来回滚一遍', 'scroll once') : L('不可拖帧', 'no scrub')) + '</span></div>' +
-      '<div class="hud-verdict"><span data-out="rec-t">' + L('正在量这一条演示', 'measuring this demo') + '</span></div>';
+      '<div class="hud-verdict"><span data-out="rec-t">' + L(reboundMode ? '拖一下再松手，我会记录位移和回弹' : '正在量这一条演示',
+        reboundMode ? 'drag and release to record its return' : 'measuring this demo') + '</span></div>';
     var bar = document.createElement('div');
     bar.className = 'hud-formula';
     bar.innerHTML = '<span class="hud-tag">' + L('说明', 'note') + '</span><span>' +
@@ -859,11 +865,23 @@
       var vs = pts.map(function (p) { return p[1]; });
       var range = (Math.max.apply(null, vs) - Math.min.apply(null, vs)) || 1;
       var left = false;
-      for (var i = 1; i < pts.length; i++) {
-        if (Math.abs(pts[i][1] - pts[0][1]) > range * 0.25) left = true;
-        if (left && Math.abs(pts[i][1] - pts[0][1]) <= range * 0.03) { cyc = pts[i][0] * REC_MS; break; }
+      if (reboundMode) {
+        /* 橡皮筋不是循环动画：拖动开始时录制可能已经有少量位移，
+           因此以中性位置 0 为回弹目标，检查位移峰值之后是否回到原点。 */
+        var peak = 0, peakAt = 0;
+        for (var ri = 0; ri < pts.length; ri++) {
+          if (Math.abs(pts[ri][1]) > peak) { peak = Math.abs(pts[ri][1]); peakAt = ri; }
+        }
+        if (peak >= 14) for (var rj = peakAt + 1; rj < pts.length; rj++) {
+          if (Math.abs(pts[rj][1]) <= Math.max(2, peak * 0.1)) { cyc = pts[rj][0] * REC_MS; break; }
+        }
+      } else {
+        for (var i = 1; i < pts.length; i++) {
+          if (Math.abs(pts[i][1] - pts[0][1]) > range * 0.25) left = true;
+          if (left && Math.abs(pts[i][1] - pts[0][1]) <= range * 0.03) { cyc = pts[i][0] * REC_MS; break; }
+        }
       }
-      out.mode.textContent = L('实测', 'MEASURED');
+      out.mode.textContent = L('已记录', 'RECORDED');
       out.cap1.textContent = (best.name || LABEL[bkey]) + ' × ' + (scrollMode ? L('滚动进度', 'SCROLL') : 'TIME') +
         (runs.length > 1 ? ' · ' + L('各自归一化', 'normalised') : '');
       if (scrollMode) {
@@ -873,8 +891,9 @@
       } else {
         out.cyc.textContent = cyc ? (cyc / 1000).toFixed(2) + 's' : L('未检出', 'none');
         out.rec.textContent = L('录了 2.4 秒', '2.4s recorded') + (cyc ?
-          L(' · 一个周期 ' + (cyc / 1000).toFixed(2) + ' 秒', ' · cycle ' + (cyc / 1000).toFixed(2) + 's') :
-          L('（没回到起点，可能只播一次）', ' (never returned)'));
+          L(reboundMode ? ' · 回到起点 ' + (cyc / 1000).toFixed(2) + ' 秒' : ' · 一个周期 ' + (cyc / 1000).toFixed(2) + ' 秒',
+            reboundMode ? ' · returned in ' + (cyc / 1000).toFixed(2) + 's' : ' · cycle ' + (cyc / 1000).toFixed(2) + 's') :
+          L(reboundMode ? ' · 未回到起点' : '（没回到起点，可能只播一次）', reboundMode ? ' · did not return' : ' (never returned)'));
       }
       if (cyc && !scrollMode) { out.cline.setAttribute('x1', X(cyc / REC_MS)); out.cline.setAttribute('x2', X(cyc / REC_MS)); }
       /* 这里不再判「量出来值不值得留」：面板已经挂在屏上了，
@@ -897,10 +916,11 @@
       [].slice.call(panel.querySelectorAll('.hud-meas')).slice(1).forEach(function (n) { n.remove(); });
       out.line.setAttribute('points', '');
       out.legend.innerHTML = '';
-      out.mode.textContent = L('探测中', 'probing');
+      out.mode.textContent = L('拖动后记录', 'drag to record');
       out.cap1.textContent = L('先看谁在动', 'finding the mover');
       out.rec.textContent = scrollMode ? L('在这块里滚一下，我就把它画出来', 'scroll inside it to draw the curve')
-        : L('正在量这一条演示', 'measuring this demo');
+        : L(reboundMode ? '拖一下再松手，我会记录位移和回弹' : '点一下 / 拖一下，我就把它画出来',
+          reboundMode ? 'drag and release to record its return' : 'click or drag it and I will draw the curve');
       out.lbl.textContent = '—'; out.v.textContent = '—';
     }
 
@@ -957,8 +977,9 @@
             var ready = false;
             for (var q = 0; q < find.length; q++) if (worth(bestKey(find[q]))) { ready = true; break; }
             if (!ready || stableFrames < 8) {
-              if (acc < (inputish ? 14000 : 4000)) {
-                out.rec.textContent = L('点一下 / 拖一下，我就把它画出来', 'click or drag it and I will draw it');
+              if (reboundMode || acc < (inputish ? 14000 : 4000)) {
+                out.rec.textContent = L(reboundMode ? '拖一下再松手，我会记录位移和回弹' : '点一下 / 拖一下，我就把它画出来',
+                  reboundMode ? 'drag and release to record its return' : 'click or drag it and I will draw it');
                 return;
               }
               giveUp(); return;
@@ -1073,10 +1094,30 @@
     if (!node) return;
     var term = (window.TERMS || []).filter(function (t) { return t.id === id; })[0];
     if (!term) return strip(node);
+    /* 有些视觉组合的价值在路径、构图与层级上，无法产生可信的数值轨迹。
+       让术语显式关闭泛用读数，避免为了套仪表而缩窄主画面、制造无意义的数字。 */
+    if (term.demo && term.demo.readout === false) {
+      stripPanel(node);
+      node._hudId = id;
+      node._clocks = null;
+      node._traced = null;
+      node.dataset.telemetry = 'off';
+      return;
+    }
     /* 缓动与曲线已经有顶部的 Easing Lab；详情页再放一块读数面板会重复
        同一条曲线，而且它无法可靠反映自定义曲线、重播和慢放后的真实状态。
        这一类详情页明确关闭遥测，避免显示看似精确但不可信的数字。 */
-    if (term.cat === 'easing') {
+    if (term.cat === 'easing' || term.id === 'easing-token') {
+      stripPanel(node);
+      node._hudId = id;
+      node._clocks = null;
+      node._traced = null;
+      node.dataset.telemetry = 'off';
+      return;
+    }
+    /* 磁吸按钮的重点是「靠近被吸引、离开会回弹」；通用遥测只会留下旧的位移/周期曲线，
+       容易被误读成按钮状态。这个术语保留完整舞台，让吸附本身成为说明。 */
+    if (term.id === 'magnetic-button') {
       stripPanel(node);
       node._hudId = id;
       node._clocks = null;

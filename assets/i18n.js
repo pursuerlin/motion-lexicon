@@ -14,12 +14,13 @@
       brand2: 'MOTION LEXICON', search: '搜术语、中文说法或代码：easing / 错峰 / 视差 / will-change …',
       clear: '清空', dark: '亮色', light: '暗色', motionOn: '动效 开', motionOff: '动效 关', recipe: '配方',
       h1a: '让 AI 实现动画的最大障碍', h1b: '不是技术，', h1c: '是词不达意', h1d: '。',
-      lede: '你脑子里有画面，却说不出它的名字，于是写出「让它动起来更自然一点」这种谁都接不住的描述。这里整理了一套 Web 动效的专业词汇：从缓动曲线、错峰节奏、遮罩揭示，到滚动叙事、容器变换、物理弹簧——每个词都带可交互实演、含糊说法到专业说法的对照，以及七种框架的可运行代码。一个准确的词，胜过一整段形容词。',
+      lede: '你脑子里有画面，却说不出它的名字，于是写出「让它动起来更自然一点」这种谁都接不住的描述。这里整理了一套 Web 动效词汇：从缓动曲线、错峰节奏、遮罩揭示，到滚动叙事、容器变换与物理弹簧。你可以通过交互演示建立直觉，再把含糊描述改成专业术语；代码示例会按目标平台标明可转换范围。一个准确的词，胜过一整段形容词。',
       how1: '每个术语都能看', how1s: '舞台里的动效就是它本人，右上角可重播',
       how2: '每个术语都能用', how2s: '「脑子里的说法 → 说出来的说法」直接照抄进需求或提示词',
       how3: '点「+ 加入配方」', how3s: '把术语攒成一段完整描述，底部一键复制给 AI',
+      browseTerms: '浏览全部术语',
       terms: '术语', cats: '分类', kinds: '实演类型',
-      axis: '同一件事有七种分类轴：缓动曲线 · 时长时序 · 入场出场 · 变换 · 状态转场 · 滚动 · 性能。先定轴，再挑词。',
+      axis: '可按缓动、时序、入场出场、变换、状态转场、滚动和性能浏览，也可以直接搜索具体场景。',
       labHd: '缓动实验室', labEn: 'Easing Lab',
       themeCap: '主题', themeHd: '五套调色板，默认跟随系统的深浅色偏好',
       labP: '先感觉，再命名：拖控制点改曲线，看右侧同一条曲线的真实运动，最后把代码原样复制走。',
@@ -38,20 +39,33 @@
       nTerms: '个术语', dialect: '代码写法', count: '个分类',
       backTo: '术语图鉴', copyMd: '复制为 Markdown', copiedMd: '已复制', maySay: '你可能会说',
       fav: '收藏', docTitle: '动效词汇表 · 把“那个感觉”说成专业术语',
-      dialectHd: '同一条动效 · 七种框架写法',
-      codeStatic: '这段是手写实现，不参与方言编译（单条补间才能自动翻译）'
+      dialectHd: '多平台代码示例',
+      codeStatic: '这段是手写实现，不参与方言编译（单条补间才能自动翻译）',
+      codeManual: '当前动效无法自动转换为所选写法。下方是原始示例，请勿直接当作该平台代码复制。',
+      codeApprox: '目标平台的缓动曲线是近似写法，可能与预览略有差异。',
+      codeTranslated: '已转换为所选平台写法；复制前请核对项目依赖与目标环境。',
+      searchResults: '搜索结果', searchOne: '个匹配结果', searchNone: '没有匹配的术语。试试关键词、别名或简短描述。',
+      searchClear: '清除搜索', resultOpen: '打开术语', searchName: '按术语、别名、说明或代码搜索',
+      recentSearches: '最近搜索', clearSearchHistory: '清空记录', removeSearchHistory: '删除这条搜索记录', searchHistoryLocal: '记录仅保存在此设备',
+      searchClearFilters: '清除筛选', searchCategoryFilter: '分类：', searchFavoritesFilter: '仅看收藏',
+      recipeTarget: '作用对象', recipeTrigger: '触发方式', recipeOrder: '执行顺序', recipeAfter: '接在上一步之后', recipeParallel: '与上一步并行',
+      triggerEnter: '进入视口时', triggerClick: '点击时', triggerHover: '悬停时', triggerScroll: '滚动驱动', triggerState: '状态切换时', triggerLoop: '持续循环',
+      moveUp: '上移这一步', moveDown: '下移这一步', removeStep: '移除这一步', recipeSteps: '配方步骤',
+      sitePattern: '本站组合案例。', sitePatternNote: '名称用于描述与检索，不代表行业标准命名。',
+      scenarioLabel: '按场景找', scenarioButtons: '按钮反馈', scenarioTransitions: '页面转场', scenarioScroll: '滚动叙事', scenarioLoading: '加载状态', scenarioDrag: '拖拽手势'
     },
     en: {
       brand1: 'Motion Lexicon',
       brand2: '动效词汇表', search: 'Search terms, phrasing or code: easing / stagger / parallax / will-change …',
       clear: 'Clear', dark: 'Dark', light: 'Light', motionOn: 'Motion on', motionOff: 'Motion off', recipe: 'Recipe',
       h1a: 'The biggest blocker when AI builds animation', h1b: 'is not the tech,', h1c: 'it is not knowing the words', h1d: '.',
-      lede: 'You can see the motion but cannot name it, so the brief turns into “make it feel more natural” — a question nobody can answer. This is a working vocabulary for web animation: once you own the words, one term replaces a paragraph of hedging, and both people and models understand it instantly.',
+      lede: 'You can see the motion but cannot name it, so the brief turns into “make it feel more natural” — a question nobody can answer. This is a working vocabulary for web animation, from easing and stagger to masks, scroll stories and spring physics. Use the demos to build intuition and replace vague requests with precise terms; code examples state which parts can be converted for each platform.',
       how1: 'Every term is on screen', how1s: 'The stage plays that exact motion; replay it from the top-right',
       how2: 'Every term is usable', how2s: 'Copy the “you think → say it as” pair straight into a brief or prompt',
       how3: 'Hit “+ add to recipe”', how3s: 'Collect terms into one full spec, then copy it to the AI from the dock',
+      browseTerms: 'Browse all terms',
       terms: 'terms', cats: 'groups', kinds: 'live demo types',
-      axis: 'Seven axes describe the same motion: easing · timing · enter/exit · transform · transitions · scroll · performance. Pick the axis, then the word.',
+      axis: 'Browse by easing, timing, entrance, transform, state, scroll or performance — or search for the situation you have in mind.',
       labHd: 'Easing Lab', labEn: '缓动实验室',
       themeCap: 'Theme', themeHd: 'Five palettes; the default follows your system light/dark setting',
       labP: 'Feel it first, name it second: drag the control points, watch the real motion, copy the code out.',
@@ -70,8 +84,21 @@
       nTerms: 'terms', dialect: 'Dialect', count: 'groups',
       backTo: 'Glossary', copyMd: 'Copy as Markdown', copiedMd: 'Copied', maySay: 'You might say',
       fav: 'Saved', docTitle: 'Motion Lexicon · say the feeling in proper terms',
-      dialectHd: 'One motion · seven framework syntaxes',
-      codeStatic: 'Hand-written implementation — not machine-translated across dialects (only single tweens are)'
+      dialectHd: 'Platform code examples',
+      codeStatic: 'Hand-written implementation — not machine-translated across dialects (only single tweens are)',
+      codeManual: 'This motion cannot be translated to the selected format. The source example below is not converted code.',
+      codeApprox: 'This platform uses an approximate easing curve; it may differ slightly from the preview.',
+      codeTranslated: 'Converted to the selected syntax. Check project dependencies and target support before copying.',
+      searchResults: 'Search results', searchOne: 'matches',
+      searchNone: 'No matching terms. Try a keyword, alias, or short description.',
+      searchClear: 'Clear search', resultOpen: 'Open term', searchName: 'Search by term, alias, description, or code',
+      recentSearches: 'Recent searches', clearSearchHistory: 'Clear history', removeSearchHistory: 'Remove this search', searchHistoryLocal: 'Saved only on this device',
+      searchClearFilters: 'Clear filters', searchCategoryFilter: 'Category: ', searchFavoritesFilter: 'Favorites only',
+      recipeTarget: 'Target', recipeTrigger: 'Trigger', recipeOrder: 'Order', recipeAfter: 'After previous step', recipeParallel: 'In parallel with previous step',
+      triggerEnter: 'When it enters view', triggerClick: 'On click', triggerHover: 'On hover', triggerScroll: 'Scroll-driven', triggerState: 'On state change', triggerLoop: 'Continuous loop',
+      moveUp: 'Move this step up', moveDown: 'Move this step down', removeStep: 'Remove this step', recipeSteps: 'Recipe steps',
+      sitePattern: 'Site-curated pattern.', sitePatternNote: 'This descriptive name helps communicate the choreography; it is not an industry-standard term.',
+      scenarioLabel: 'Find by situation', scenarioButtons: 'Button feedback', scenarioTransitions: 'Page transitions', scenarioScroll: 'Scroll stories', scenarioLoading: 'Loading states', scenarioDrag: 'Drag gestures'
     }
   };
 
@@ -91,7 +118,7 @@
     principles: ['Principles', 'Rules Disney set in the 1930s that still govern UI motion.'],
     perf: ['Performance', 'Drop one frame and every carefully tuned curve looks cheap.'],
     runtime: ['3D & Runtime', 'When CSS tweens are not enough: shaders, canvas, bones, state machines, render loops.'],
-    compound: ['Compound Patterns', 'One term is a part. When pointer, scroll and tap drive a whole screen, you need a word for the choreography.']
+    compound: ['Compound Patterns', 'These choreography examples combine pointer, scroll and tap. Their descriptive names help communicate the pattern; they are not standardized industry terms.']
   };
 
   /* ---------- 短标签：中文原文就是 key ----------
@@ -101,6 +128,13 @@
   const LABEL = {
     /* 卡片控制条 */
     '时长': 'Duration', '错峰': 'Stagger', '主排速度': 'Primary speed', '次排速度': 'Secondary speed',
+    '同一数值变化：1111 到 8888': 'The same value changes from 1111 to 8888',
+    '本站借鉴部分动效概念并独立实现；插画与完整作品未直接搬运': 'Some motion concepts informed this site; the illustrations and full works were independently created.',
+    '音乐实时活动示例': 'Music live activity example',
+    '正在播放': 'Now playing', '已暂停': 'Paused', '暂停': 'Pause', '继续播放': 'Resume',
+    '收起正在播放的实时活动': 'Collapse live activity', '展开正在播放的实时活动': 'Expand live activity',
+    '收起已暂停的实时活动': 'Collapse paused activity', '展开已暂停的实时活动': 'Expand paused activity',
+    '日期': 'Date', '上下滑动选择': 'Scroll to select', '月': 'Month', '日': 'Day', '年': 'Year',
     '位移': 'Move', '倾斜': 'Tilt', '偏转': 'Deflect', '光圈': 'Aperture', '力场半径': 'Field radius',
     '半径': 'Radius', '发射率': 'Emission rate', '圈数': 'Loops', '圈速': 'Orbit speed',
     '处理时长': 'Work time', '大小': 'Size', '实例数': 'Instances', '尺寸': 'Size', '层距': 'Layer gap',
@@ -160,6 +194,14 @@
     '抓住方块拖，松手看惯性': 'Grab the block; release to feel the inertia',
     '抓住最上面那张甩出去': 'Grab the top card and throw it',
     '拖动分割线': 'Drag the divider',
+    '比例数字与等宽数字对比': 'Proportional vs tabular numbers',
+    '前后画面对比': 'Before and after comparison',
+    '比例数字': 'Proportional digits', '等宽数字': 'Tabular digits',
+    '字宽变化': 'Width shifts', '位置稳定': 'Stable alignment',
+    '数字从 0000 滚动到 4200': 'Digits roll from 0000 to 4200',
+    '悬停或聚焦图片可放大': 'Hover or focus to zoom',
+    'AFTER · 调色后': 'AFTER · Graded', 'BEFORE · 原图': 'BEFORE · Original',
+    '拖动比较 · 50%': 'Drag to compare · 50%',
     '拖动列表项换序': 'Drag rows to reorder them',
     '拖动旋转 · 点击对焦': 'Drag to rotate, tap to focus',
     '拖动滑杆逐帧看': 'Drag the scrubber frame by frame',
@@ -324,7 +366,7 @@
     '视线跟随实时读数': 'Gaze readout',
     '指针决定目标方向；松开后，视线回到低频游走。': 'The pointer sets the target; release it and the gaze drifts on its own.',
     '收藏这个术语': 'Bookmark this term', '上一条 / 下一条': 'Previous / Next',
-    '搜索动效术语': 'Search motion terms', '缓动曲线预览': 'Easing curve preview',
+    '搜索动效术语': 'Search motion terms', '最近搜索': 'Recent searches', '按场景浏览': 'Browse by situation', '链接最近核验：2026-09-21': 'Links last checked: 2026-09-21', '缓动曲线预览': 'Easing curve preview',
     '没有匹配的术语。换个说法试试，比如「弹」「糊」「跟手」「掉帧」。':
       'No matches. Try another word — bounce, blur, follow, jank.',
     '同一条动效，切换成 CSS / WAAPI / GSAP / Framer / Swift / Compose / Tailwind 的写法':
@@ -415,14 +457,14 @@
     'crossfade': ['Old content fades out while new fades in. Safest and dullest transition: it carries no spatial information, so avoid it for directional navigation.', 'blend the two screens', 'crossfade 250ms with a 50% overlap'],
     'continuity': ['Shared elements keep their identity across states — same title, same image, same position — and only the difference animates. The core trick for reducing disorientation.', 'do not let stuff teleport', 'keep shared elements continuous, animate only the diff'],
     'morph': ['One shape continuously becomes another. Requires matching point counts (or flubber / MorphSVGPlugin to reconcile them).', 'the circle turns into a play button', 'SVG path morph with matched anchors'],
-    'shared-element': ['The same element is carried between screens — position, size and radius all move together. Turns a jump into a descent.', 'the thumbnail flies into the detail', 'shared element transition between list and detail'],
-    'layout-animation': ['Interpolates size and position when layout changes. Provided by frameworks (Framer layout), by native View Transitions, or by hand with FLIP.', 'adding an item should not shove the page', 'enable layout animation on this list'],
-    'flip': ['First-Last-Invert-Play: record the start box, jump to the end box, invert the delta with a transform and play it back to zero. Transform-only, so it holds 60fps.', 'smooth reordering', 'FLIP: measure, invert, play'],
+    'shared-element': ['A thumbnail grows into the main image, then returns to its original place when you go back. The image keeps its identity while its position, size and corners change.', 'the list image should grow into the detail image', 'shared element transition between list and detail'],
+    'layout-animation': ['When content is added, removed or resized, nearby items move smoothly into their new places.', 'adding an item should make room smoothly', 'layout animation with FLIP or a browser transition'],
+    'flip': ['FLIP records an item before and after a layout change, then animates it smoothly from its old spot to its new one. It can reduce layout work, but does not guarantee a frame rate by itself.', 'cards should glide into their new places', 'FLIP: measure before and after, invert, then play'],
     'accordion': ['A group of mutually exclusive panels: height tweens while the chevron rotates. Remember scroll position after collapse — that is the accessibility line.', 'expand one row at a time', 'accordion with exclusive open plus height tween'],
     'direction-aware': ['The animation direction follows navigation direction, mirrored for back. Ignoring it collapses the mental model of the stack.', 'going back should slide the other way', 'forward slides in from the right, back mirrors it'],
-    'view-transition': ['A native browser capability: it snapshots DOM updates into before/after frames and interpolates them, across pages. Removes all the manual shared-element measuring.', 'can page changes be smooth by default', 'wrap the update in document.startViewTransition()'],
-    'tab-indicator': ['The selection marker slides between tabs instead of teleporting, expressing distance with translate + scaleX — more coherent than cross-fading tabs.', 'the underline should slide', 'indicator translateX + scaleX follows the active tab'],
-    'smooth-reorder': ['Reflow animation for sorting and filtering: survivors FLIP into their new cells, removals shrink away, additions cross-fade in. All three together read as one pool of content.', 'filtering should not repaint the page', 'exit, then FLIP survivors, then enter'],
+    'view-transition': ['The browser connects matching parts of the old and new page, so a shared image can keep moving while the rest of the new content appears.', 'the image should continue moving into the new page', 'document.startViewTransition() with matching view-transition-name values'],
+    'tab-indicator': ['The underline or pill slides under the selected option and adjusts its width to fit.', 'the underline should slide to the selected option', 'move and resize one shared indicator'],
+    'smooth-reorder': ['After filtering, items that stay glide into place, removed items fade away, and matching items appear where they belong.', 'filtering should keep the remaining items moving smoothly', 'fade out removals, move remaining items, fade in arrivals at their final positions'],
     'expand-collapse-btn': ['An element grows in place instead of navigating away. Width must animate too, or the text reflows first and fades second — two visible jumps.', 'expand inside the row', 'expand in place, animating height and padding together'],
     'scroll-reveal': ['Entrance plays when the element enters the viewport. It must play once (or reverse deliberately); repeating on every scroll looks cheap immediately.', 'animate it when I scroll to it', 'reveal at 20% visibility, once'],
     'scroll-driven': ['Scroll progress is the timeline: scroll and it advances, reverse and it rewinds. Native via animation-timeline: scroll()/view(), or IntersectionObserver plus progress mapping.', 'it should follow my scroll, not trigger once', 'animation-timeline: view()'],
@@ -590,7 +632,11 @@
     'odometer-counter': ['Build each digit as a vertical 0–9 strip and roll it with translateY. The craft is the rhythm: low digits roll first, higher digits follow with a per-place 55ms delay, and each lands with a slight overshoot — numbers gain a mechanical “ka-chunk”. Use it for counters, prices and leaderboards.', 'the number rolls up like an odometer', 'odometer roll: translateY(−n·10%) per strip, per-digit delay 55ms, overshoot bezier settle'],
     'confetti-burst': ['Treat each piece as a rigid-body particle: random lateral velocity, launched upward then pulled by gravity each frame, spinning around its own axis, removed the moment it leaves the container. Colors come from the theme palette (never a raw rainbow) and 20–30 pieces is the sweet spot — more reads cheap.', 'click and it throws a handful of confetti', 'confetti burst: vy += g per frame, translate + rotate, recycle on exit'],
     'smooth-tabs': ['Move the selected state off the individual tabs and onto one shared indicator: it measures the target item’s offsetLeft/offsetWidth and slides over. Re-measure on mount and on resize — skip the remeasure and the indicator parks at a stale position. This is layout animation in its smallest, most useful form.', 'the underline slides to the tab I click', 'smooth tabs: indicator slides to offsetLeft/offsetWidth, content cross-fades'],
-    'coverflow-carousel': ['The whole carousel is a pure function of the index offset: off = i − focus drives lateral offset, Z recession and Y rotation in one transform, so switching focus changes a single number. Opacity and stacking order decay with |off| so far cards fade naturally. Album walls and image galleries all come from this pattern.', 'the middle one is biggest and straight, the sides tilt away', 'coverflow: translateX(44%·off) translateZ(−120·|off|) rotateY(−34°·off)']
+    'coverflow-carousel': ['The whole carousel is a pure function of the index offset: off = i − focus drives lateral offset, Z recession and Y rotation in one transform, so switching focus changes a single number. Opacity and stacking order decay with |off| so far cards fade naturally. Album walls and image galleries all come from this pattern.', 'the middle one is biggest and straight, the sides tilt away', 'coverflow: translateX(44%·off) translateZ(−120·|off|) rotateY(−34°·off)'],
+    'page-curl': ['A page rotates around a fixed book spine, revealing its reverse and the next sheet underneath. Drag distance drives the turn; on release, a short easing finishes the page or returns it. Useful for albums, stories and editorial transitions.', 'turn the next page like a book', 'page curl: drag progress rotates around the spine; release completes past threshold or springs back'],
+    'dynamic-island': ['A persistent capsule grows into a live activity in place. Keep the alert, artwork, progress and controls inside one shape so the transition feels continuous instead of opening a separate panel.', 'tap the little capsule to expand the live activity', 'dynamic island: one persistent capsule morphs between compact alert and expanded live activity'],
+    'scratch-reveal': ['Cover a picture or answer with an erasable surface. Pointer or touch movement clears the cover in strokes; once enough has been scratched away, fade the remainder to reveal the result.', 'rub the surface and reveal what is underneath', 'scratch to reveal: destination-out canvas strokes with threshold-based auto reveal'],
+    'morphing-dot-sphere': ['Project a sampled point cloud from a sphere onto a 2D canvas. Drag to rotate it, then interpolate the same points into a heart and back. Keep the particle count and frame rate bounded for smooth rendering on mobile.', 'a sphere made of dots that I can turn and reshape', 'morphing dot sphere: spherical point cloud, pointer rotation and interpolated heart target']
   });
 
   let lang = 'zh';
@@ -601,6 +647,14 @@
   function refreshStatic() {
     $$('[data-i18n]').forEach(function (el) { el.textContent = t(el.dataset.i18n); });
     applyLabels($$('[data-l10n]'));
+    $$('.cp-cp .cp-cap').forEach(function (el) {
+      const pct = el.closest('.cp-cp').dataset.wipe || '50';
+      el.textContent = (lang === 'en' ? 'Drag to compare · ' : '拖动比较 · ') + pct + '%';
+    });
+    $$('.cp-cp .cp-hd').forEach(function (el) {
+      const pct = el.getAttribute('aria-valuenow') || '50';
+      el.setAttribute('aria-valuetext', pct + '% ' + (lang === 'en' ? 'original' : '原图'));
+    });
     const q = $('#q'); if (q) q.placeholder = t('search');
     document.title = t('docTitle');
     document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
@@ -623,6 +677,7 @@
     const scope = root || document;
     const byId = {};
     window.TERMS.forEach(function (x) { byId[x.id] = x; });   /* 之前每个节点都全量 filter，229² 次比较 */
+    const coverage = window.DIALECTS && window.DIALECTS.coverage ? window.DIALECTS.coverage() : null;
     const nodes = $$('.term', scope);
     /* 详情页传进来的节点自己就是 .term，querySelectorAll 不含自身，不补这一句详情页永远不翻译 */
     if (scope.matches && scope.matches('.term')) nodes.unshift(scope);
@@ -649,8 +704,26 @@
       const rp = $('.replay', el); if (rp) rp.textContent = t('replay');
       const cp = $('.copy', el); if (cp && !cp.dataset.busy) cp.textContent = t('copy');
       const code = $('code', el);
-      if (code && window.DIALECTS) code.textContent = window.DIALECTS.codeFor(term);
-      const note = $('.code-note', el); if (note) note.textContent = t('codeStatic');
+      const format = $('.page-dialect', el);
+      if (format && window.DIALECTS) format.value = window.DIALECTS.current;
+      const formatLabel = $('.code-dialect span', el);
+      if (formatLabel) formatLabel.textContent = t('dialect');
+      const stage = $('.stage', el);
+      const overrides = stage && stage._prm ? stage._prm : {};
+      if (code && window.DIALECTS) code.textContent = window.DIALECTS.codeFor(term, overrides);
+      const note = $('.code-note', el);
+      if (note && window.DIALECTS) {
+        const status = window.DIALECTS.status(term, overrides);
+        note.textContent = t(status === 'manual' ? 'codeManual' : status === 'approximate' ? 'codeApprox' : 'codeTranslated');
+        const wrap = $('.codewrap', el);
+        if (wrap) wrap.classList.toggle('is-static', status === 'manual');
+      }
+      const coverageNote = $('.code-coverage', el);
+      if (coverageNote && coverage) {
+        coverageNote.textContent = lang === 'en'
+          ? coverage.translated + '/' + coverage.total + ' directly convertible · ' + coverage.approximate + ' approximate · ' + coverage.manual + ' manual / unavailable · counts are not compiler validation'
+          : coverage.translated + '/' + coverage.total + ' 条可直接转换 · ' + coverage.approximate + ' 条近似 · ' + coverage.manual + ' 条需手动 / 暂不支持 · 覆盖统计不代表编译验证';
+      }
     });
     if (root) return;   /* 局部刷新不涉及分类头 / 侧栏 */
     $$('.cat').forEach(function (sec) {
