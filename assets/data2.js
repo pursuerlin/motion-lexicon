@@ -437,7 +437,7 @@ window.TERMS.push(
     say: '多层 box-shadow 扩散 + 亮度饱和做泛光',
     def: '让亮部向外溢出。真实泛光需要“亮部超过 1 再向下压缩”，CSS 里用多层模糊阴影近似；颜色要偏亮而不是偏浓。',
     code: 'box-shadow: 0 0 12px var(--c), 0 0 40px color-mix(in srgb, var(--c) 60%, transparent);',
-    demo: { kind: 'frames', html: '<div class="obj dot"></div>', frames: [[0, 'box-shadow:0 0 0 0 rgba(214,255,63,0)'], [100, 'box-shadow:0 0 22px 8px rgba(214,255,63,.55)']], e: 'ease-in-out', d: '1400ms', loop: true, alt: true }
+    demo: { kind: 'frames', html: '<div class="obj demo-content demo-beacon" aria-hidden="true"><svg viewBox="0 0 40 40" fill="none"><path d="m20 6 3.6 10.4L34 20l-10.4 3.6L20 34l-3.6-10.4L6 20l10.4-3.6Z" fill="currentColor"/></svg></div>', frames: [[0, 'box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 0%,transparent)'], [100, 'box-shadow:0 0 16px 4px color-mix(in srgb,var(--accent) 30%,transparent),0 0 38px 8px color-mix(in srgb,var(--accent) 16%,transparent)']], e: 'ease-in-out', d: '1400ms', loop: true, alt: true }
   },
   {
     id: 'grain', en: 'Grain / Noise', zh: '颗粒噪点', cat: 'polish',

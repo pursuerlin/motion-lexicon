@@ -8,6 +8,7 @@
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const q1 = (s) => String(s).replace(/"/g, '&quot;');
   const EASE = window.EASE, LIST = window.EASE_LIST;
+  const lab = $('#lab');
 
   const state = { pts: [0.16, 1, 0.3, 1], fn: EASE.easeOutExpo, dur: 1200, dist: 640, prop: 'x', label: 'expo-out', css: 'cubic-bezier(0.16, 1, 0.3, 1)', key: 'easeOutExpo', draggable: true };
 
@@ -40,6 +41,7 @@
   const uy = Y => ((H - pad) - Y) / (H - pad * 2);
 
   function draw() {
+    if (!W || !H) return;
     themeCols();
     g.clearRect(0, 0, W, H);
     g.strokeStyle = colLine; g.lineWidth = 1;
@@ -127,6 +129,7 @@
 
   let parked = false, inView = true;
   function frame(now) {
+    if (!lab.open) { requestAnimationFrame(frame); return; }
     /* 顶栏「动效 关」对实验室同样有效：小球停在终点，只留静态曲线 */
     if (!window.ENGINE.motionOn()) {
       if (!parked) {
@@ -354,7 +357,14 @@
     }));
     io.observe($('#pv-live'));
     requestAnimationFrame(frame);
-    window.addEventListener('resize', function () { size(); draw(); fitTrack(false); });
+    // 收起时尺寸为零；展开后按实际列宽重建画布与行程。
+    function refreshLayout() {
+      if (!lab.open) return;
+      size(); fitTrack(false); draw(); t0 = performance.now();
+    }
+    lab.addEventListener('toggle', refreshLayout);
+    new ResizeObserver(refreshLayout).observe(pvBox);
+    window.addEventListener('resize', refreshLayout);
   }
   document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', boot) : boot();
 })();

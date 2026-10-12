@@ -251,7 +251,7 @@ window.TERMS = [
     def: '一组元素以固定时间差依次播放同一动画。让多个对象显得“有编排”而不是同时蹦出，是提升质感最划算的一招。间隔 30–60ms 为宜，超过 100ms 就变成等待。',
     code: '.item:nth-child(n) { animation-delay: calc(var(--i) * 40ms); }',
     demo: {
-      kind: 'frames', multi: 5, st: 40,
+      kind: 'frames', html: '<div class="obj demo-content demo-sequence" aria-hidden="true"><span class="demo-sequence-photo"></span><span class="demo-sequence-number"></span></div>', multi: 5, st: 40,
       frames: [[0, 'opacity:0; transform:translateY(16px) scale(.94)'], [100, 'opacity:1; transform:none']],
       e: 'cubic-bezier(0.16,1,0.3,1)', d: '460ms'
     }
@@ -356,7 +356,7 @@ window.TERMS = [
     say: '200ms 淡入（可叠加 8px 上移）',
     def: '透明度从 0 到 1。最保守的入场：不改变位置，因此不会推动其他内容，适合图片、遮罩、模态背景。',
     code: 'animation: fade-in 200ms ease-out both;',
-    demo: { kind: 'frames', frames: [[0, 'opacity:0'], [100, 'opacity:1']], e: 'ease-out', d: '420ms' }
+    demo: { kind: 'frames', html: '<div class="obj demo-content demo-notice"><span class="demo-notice-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 12 4 4 8-8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="demo-notice-copy"><b data-l10n="灵感已收好">灵感已收好</b><small data-l10n="留给下一次创作">留给下一次创作</small></span><span class="demo-notice-dot" aria-hidden="true"></span></div>', frames: [[0, 'opacity:0'], [100, 'opacity:1']], e: 'ease-out', d: '420ms' }
   },
   {
     id: 'slide-in', en: 'Slide in', zh: '滑入', cat: 'entrance',
@@ -365,7 +365,7 @@ window.TERMS = [
     say: '从右侧 translateX 滑入，ease-out 300ms',
     def: '从画面外沿某个方向平移进入，同时通常配合淡入。方向本身携带信息：从右进入常表示“下一页”，从左表示“返回”。',
     code: 'animation: slide-in 300ms cubic-bezier(0.16,1,0.3,1) both;',
-    demo: { kind: 'frames', frames: [[0, 'opacity:0; transform:translateX(46px)'], [100, 'opacity:1; transform:none']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '480ms' }
+    demo: { kind: 'frames', html: '<div class="obj demo-content demo-notice"><span class="demo-notice-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 12 4 4 8-8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="demo-notice-copy"><b data-l10n="灵感已收好">灵感已收好</b><small data-l10n="留给下一次创作">留给下一次创作</small></span><span class="demo-notice-dot" aria-hidden="true"></span></div>', frames: [[0, 'opacity:0; transform:translateX(46px)'], [100, 'opacity:1; transform:none']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '480ms' }
   },
   {
     id: 'scale-in', en: 'Scale in', zh: '缩放入场', cat: 'entrance',
@@ -374,7 +374,7 @@ window.TERMS = [
     say: '从 0.96 scale 放大到 1，配淡入',
     def: '尺寸由小变大进入。起点 scale 越接近 1（0.94–0.98）越像系统级精致；从 0 长出来则像弹窗广告。',
     code: 'transform: scale(.96); → transform: scale(1);',
-    demo: { kind: 'frames', frames: [[0, 'opacity:0; transform:scale(.96)'], [100, 'opacity:1; transform:scale(1)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '440ms' }
+    demo: { kind: 'frames', html: '<div class="obj demo-content demo-photo"><img src="assets/img/p10.jpg" alt="" loading="eager" decoding="async"><span class="demo-photo-caption"><b data-l10n="光影手记">光影手记</b><small aria-hidden="true">↗</small></span></div>', frames: [[0, 'opacity:0; transform:scale(.96)'], [100, 'opacity:1; transform:scale(1)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '440ms' }
   },
   {
     id: 'pop-in', en: 'Pop in', zh: '弹出（带过冲）', cat: 'entrance',
@@ -383,7 +383,7 @@ window.TERMS = [
     say: 'pop-in：scale 0.7→1 + ease-out-back，末端回弹',
     def: '快速放大并轻微冲过终点再落回，像气泡出现。适合徽章、通知、新增项、贴纸；一次屏幕上不要超过一个 pop。',
     code: 'animation: pop 320ms cubic-bezier(0.34,1.56,0.64,1) both;',
-    demo: { kind: 'frames', frames: [[0, 'opacity:0; transform:scale(.7)'], [100, 'opacity:1; transform:scale(1)']], e: 'cubic-bezier(0.34,1.56,0.64,1)', d: '520ms' }
+    demo: { kind: 'frames', html: '<div class="obj demo-content demo-badge"><span class="demo-badge-star"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="m20 5 4.6 9.4L35 16l-7.5 7.3 1.8 10.3L20 28.8l-9.3 4.8 1.8-10.3L5 16l10.4-1.6Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></span><b data-l10n="收藏成功">收藏成功</b><small aria-hidden="true">✦</small></div>', frames: [[0, 'opacity:0; transform:scale(.7)'], [100, 'opacity:1; transform:scale(1)']], e: 'cubic-bezier(0.34,1.56,0.64,1)', d: '520ms' }
   },
   {
     id: 'bounce-in', en: 'Bounce in', zh: '弹跳入场', cat: 'entrance',
@@ -393,7 +393,7 @@ window.TERMS = [
     def: '带着落地弹跳进入视野。能量感强、语气活泼，多用于插画、吉祥物、游戏化界面；金融或医疗场景应避免。',
     code: 'animation: bounce-in 720ms cubic-bezier(0.28,0.84,0.42,1) both;',
     demo: {
-      kind: 'frames',
+      kind: 'frames', html: '<div class="obj demo-content demo-notice"><span class="demo-notice-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 12 4 4 8-8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="demo-notice-copy"><b data-l10n="灵感已收好">灵感已收好</b><small data-l10n="留给下一次创作">留给下一次创作</small></span><span class="demo-notice-dot" aria-hidden="true"></span></div>',
       frames: [[0, 'opacity:0; transform:translateY(-40px) scale(.9)'], [55, 'opacity:1; transform:translateY(6px) scale(1.03)'], [78, 'transform:translateY(-4px)'], [100, 'transform:translateY(0) scale(1)']],
       e: 'cubic-bezier(0.33,1,0.68,1)', d: '900ms'
     }
@@ -405,7 +405,7 @@ window.TERMS = [
     say: '从上方 translateY(-12) 落下，ease-out',
     def: '受重力暗示的自上而下入场，常配 ease-in 起始加速与末端 ease-out 停稳。注意落点下方要有“承托”视觉，否则像掉进虚空。',
     code: 'animation: drop 360ms cubic-bezier(0.34,1.56,0.64,1) both;',
-    demo: { kind: 'frames', frames: [[0, 'opacity:0; transform:translateY(-34px)'], [100, 'opacity:1; transform:none']], e: 'cubic-bezier(0.34,1.56,0.64,1)', d: '520ms' }
+    demo: { kind: 'frames', html: '<div class="obj demo-content demo-notice"><span class="demo-notice-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 12 4 4 8-8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="demo-notice-copy"><b data-l10n="灵感已收好">灵感已收好</b><small data-l10n="留给下一次创作">留给下一次创作</small></span><span class="demo-notice-dot" aria-hidden="true"></span></div>', frames: [[0, 'opacity:0; transform:translateY(-34px)'], [100, 'opacity:1; transform:none']], e: 'cubic-bezier(0.34,1.56,0.64,1)', d: '520ms' }
   },
   {
     id: 'rise-in', en: 'Rise / Slide-up fade', zh: '上浮入场', cat: 'entrance',
@@ -414,7 +414,7 @@ window.TERMS = [
     say: 'translateY(14→0) + opacity 0→1，240ms ease-out',
     def: '轻微上移同时淡入，业界最通用的“万能入场”。位移只给 8–16px，用户感知到的是“浮现”，而不是“搬家”。',
     code: 'transform: translateY(14px); opacity: 0;  /* 初始态 */\n/* 目标态 */ transform: none; opacity: 1;',
-    demo: { kind: 'frames', multi: 3, st: 80, frames: [[0, 'opacity:0; transform:translateY(14px)'], [100, 'opacity:1; transform:none']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '240ms' }
+    demo: { kind: 'frames', html: '<div class="obj demo-content demo-sequence" aria-hidden="true"><span class="demo-sequence-photo"></span><span class="demo-sequence-number"></span></div>', multi: 3, st: 80, frames: [[0, 'opacity:0; transform:translateY(14px)'], [100, 'opacity:1; transform:none']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '240ms' }
   },
   {
     id: 'unfold', en: 'Unfold / Expand height', zh: '展开', cat: 'entrance',
@@ -433,7 +433,7 @@ window.TERMS = [
     def: '用 clip-path 或 mask 逐渐露出内容，元素本身不动而是“被看见的面积”在变。比淡入更有手工感，适合图片、色块、标题。',
     code: 'clip-path: inset(100% 0 0 0); → clip-path: inset(0);',
     demo: {
-      kind: 'frames', html: '<div class="obj img clip"></div>',
+      kind: 'frames', html: '<div class="obj demo-content demo-photo clip"><img src="assets/img/p04.jpg" alt="" loading="eager" decoding="async"><span class="demo-photo-caption"><b data-l10n="追光片刻">追光片刻</b><small aria-hidden="true">↗</small></span></div>',
       frames: [[0, 'clip-path:inset(100% 0 0 0)'], [100, 'clip-path:inset(0 0 0 0)']],
       e: 'cubic-bezier(0.76,0,0.24,1)', d: '700ms'
     }
@@ -458,7 +458,7 @@ window.TERMS = [
     say: 'blur(12px)→0 + scale 1.06→1 显影入场',
     def: '从模糊到清晰，模拟相机对焦或记忆浮现。GPU 成本较高，移动端建议只在首屏单次使用，不做循环。',
     code: 'filter: blur(12px) → none;  /* 与 scale 1.06→1 同步 */',
-    demo: { kind: 'frames', frames: [[0, 'opacity:0; filter:blur(10px); transform:scale(1.08)'], [100, 'opacity:1; filter:blur(0); transform:scale(1)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '760ms' }
+    demo: { kind: 'frames', html: '<div class="obj demo-content demo-photo"><img src="assets/img/p13.jpg" alt="" loading="eager" decoding="async"><span class="demo-photo-caption"><b data-l10n="午后光线">午后光线</b><small aria-hidden="true">↗</small></span></div>', frames: [[0, 'opacity:0; filter:blur(10px); transform:scale(1.08)'], [100, 'opacity:1; filter:blur(0); transform:scale(1)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '760ms' }
   },
   {
     id: 'flip-in', en: 'Flip in', zh: '翻转入场', cat: 'entrance',
@@ -467,7 +467,7 @@ window.TERMS = [
     say: 'rotateY(-90deg)→0，带 perspective',
     def: '围绕自身轴旋转 90° 进入，需要 perspective 才成立，否则退化成横向挤压。适合卡片、图片墙、封面。',
     code: 'perspective: 900px; transform: rotateY(-90deg) → rotateY(0);',
-    demo: { kind: 'frames', html: '<div class="obj card"></div>', frames: [[0, 'opacity:0; transform:perspective(700px) rotateY(-92deg)'], [100, 'opacity:1; transform:perspective(700px) rotateY(0)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '720ms' }
+    demo: { kind: 'frames', html: '<div class="obj demo-content demo-photo demo-photo-portrait"><img src="assets/img/p14.jpg" alt="" loading="eager" decoding="async"><span class="demo-photo-caption"><b data-l10n="光影手记">光影手记</b><small aria-hidden="true">↗</small></span></div>', frames: [[0, 'opacity:0; transform:perspective(700px) rotateY(-92deg)'], [100, 'opacity:1; transform:perspective(700px) rotateY(0)']], e: 'cubic-bezier(0.16,1,0.3,1)', d: '720ms' }
   },
   {
     id: 'stack-in', en: 'Stack in', zh: '层叠入场', cat: 'entrance',
@@ -489,7 +489,7 @@ window.TERMS = [
     say: '色块 wipe 扫过，扫过之后露出新内容',
     def: '一个实心形状扫过画面，在其背后替换内容。比淡入更有编辑感和节奏感，常用于图片切换和章节转场。',
     code: '/* 覆盖层 scaleX 0→1（transform-origin:left），再 100%→0（origin:right） */',
-    demo: { kind: 'frames', html: '<div class="wipepair"><i class="obj img wp wp-a">01</i><i class="obj img wp wp-b">02</i><i class="wipebar"></i></div>', frames: [[0, 'transform:scaleX(0); transform-origin:left'], [22, 'transform:scaleX(1); transform-origin:left'], [25, 'transform:scaleX(1); transform-origin:right'], [47, 'transform:scaleX(0); transform-origin:right'], [50, 'transform:scaleX(0); transform-origin:right'], [72, 'transform:scaleX(1); transform-origin:right'], [75, 'transform:scaleX(1); transform-origin:left'], [97, 'transform:scaleX(0); transform-origin:left'], [100, 'transform:scaleX(0); transform-origin:left']], e: 'cubic-bezier(0.76,0,0.24,1)', d: '1100ms', loop: true, wipe: true }
+    demo: { kind: 'frames', html: '<div class="wipepair demo-wipe"><div class="obj demo-content demo-photo wp wp-a"><img src="assets/img/p13.jpg" alt="" loading="eager" decoding="async"><span class="demo-photo-caption"><b data-l10n="午后光线">午后光线</b><small aria-hidden="true">↗</small></span></div><div class="obj demo-content demo-photo wp wp-b"><img src="assets/img/p04.jpg" alt="" loading="eager" decoding="async"><span class="demo-photo-caption"><b data-l10n="追光片刻">追光片刻</b><small aria-hidden="true">↗</small></span></div><i class="wipebar"></i></div>', frames: [[0, 'transform:scaleX(0); transform-origin:left'], [22, 'transform:scaleX(1); transform-origin:left'], [25, 'transform:scaleX(1); transform-origin:right'], [47, 'transform:scaleX(0); transform-origin:right'], [50, 'transform:scaleX(0); transform-origin:right'], [72, 'transform:scaleX(1); transform-origin:right'], [75, 'transform:scaleX(1); transform-origin:left'], [97, 'transform:scaleX(0); transform-origin:left'], [100, 'transform:scaleX(0); transform-origin:left']], e: 'cubic-bezier(0.76,0,0.24,1)', d: '1100ms', loop: true, wipe: true }
   },
   {
     id: 'glitch-in', en: 'Glitch in', zh: '故障式入场', cat: 'entrance',
@@ -592,7 +592,7 @@ window.TERMS = [
     say: 'rotate(360deg) 匀速循环',
     def: '围绕 transform-origin 转动。加载图标、箭头翻向、进度环都靠它；起始角度最好是 0/90/180 的整数关系，收尾才不歪。',
     code: 'animation: spin 1.4s linear infinite;',
-    demo: { kind: 'frames', html: '<div class="obj arrow"></div>', frames: [[0, 'transform:rotate(0deg)'], [100, 'transform:rotate(360deg)']], e: 'linear', d: '1600ms', loop: true }
+    demo: { kind: 'frames', html: '<div class="obj demo-content demo-compass" aria-hidden="true"><svg viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="45" stroke="currentColor" stroke-opacity=".25"/><circle cx="50" cy="50" r="34" stroke="currentColor" stroke-opacity=".3" stroke-dasharray="1 5"/><path d="M50 3v8m0 78v8M3 50h8m78 0h8" stroke="currentColor"/><path d="m50 18 10 32-10 32-10-32Z" stroke="currentColor" stroke-width="1.2"/><path d="m50 18 10 32H50Z" fill="currentColor"/><circle cx="50" cy="50" r="3" fill="currentColor"/></svg></div>', frames: [[0, 'transform:rotate(0deg)'], [100, 'transform:rotate(360deg)']], e: 'linear', d: '1600ms', loop: true }
   },
   {
     id: 'skew', en: 'Skew', zh: '斜切', cat: 'transform',

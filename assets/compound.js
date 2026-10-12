@@ -2237,6 +2237,7 @@
       if (window.ENGINE.isVisible(el)) fn(now);
     };
     window.ENGINE.tickers.add(u);
+    (el._watchers || (el._watchers = [])).push(u);
   }
 
   /* 键盘替代指针：方向键当作鼠标，Enter/空格当作点击。
