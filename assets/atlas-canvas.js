@@ -300,7 +300,6 @@ else if(id===29){
  heading(c,'Make room for something new.','29 / A SEED, THEN A GARDEN');
  for(let i=0;i<12;i++){const xx=24+hash(i+14)*552,yy=84+hash(i+40)*208+Math.sin(t*.7+i)*7;circle(c,xx,yy,1.2,'#a6b99a55')}
  const plants=s.garden||[];
- if(!plants.length)sourceGardenPlant(c,0);
  for(const plant of plants){
   const a=reduced()?10:Math.max(0,t-plant.time),scale=Math.min(.62+(plant.y-160)/200,(plant.y-85)/174);
   c.save();c.translate(plant.x,plant.y);c.scale(scale,scale);c.translate(-300,-267);

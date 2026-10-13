@@ -60,7 +60,7 @@
       homeItem1: '项目概览', homeItem2: '设计规范', homeItem3: '交付清单',
       homeExampleName: '错峰上浮入场', homeSpec: '上浮 16px · 时长 420ms · 间隔 90ms',
       labExpand: '展开实验室', labCollapse: '收起实验室',
-      brand1: '动效词汇表',
+      brand1: '动效词汇表', githubSource: 'GitHub 源码',
       brand2: 'MOTION LEXICON', search: '搜术语、中文说法或代码：easing / 错峰 / 视差 / will-change …',
       clear: '清空', dark: '亮色', light: '暗色', motionOn: '动效 开', motionOff: '动效 关', recipe: '配方',
       h1a: '你想要的动效，', h1b: '', h1c: '该怎么说？', h1d: '',
@@ -154,7 +154,7 @@
       homeItem1: 'Project overview', homeItem2: 'Design guidelines', homeItem3: 'Delivery checklist',
       homeExampleName: 'Staggered rise-in', homeSpec: 'Rise 16px · Duration 420ms · Interval 90ms',
       labExpand: 'Open the lab', labCollapse: 'Close the lab',
-      brand1: 'Motion Lexicon',
+      brand1: 'Motion Lexicon', githubSource: 'GitHub source',
       brand2: '动效词汇表', search: 'Search terms, phrasing or code: easing / stagger / parallax / will-change …',
       clear: 'Clear', dark: 'Dark', light: 'Light', motionOn: 'Motion on', motionOff: 'Motion off', recipe: 'Recipe',
       h1a: 'See it move.', h1b: '', h1c: 'Find its name.', h1d: '',
@@ -224,6 +224,7 @@
      会把两处数据都改一遍；改成「原文即 key」，中文侧零维护（切回 zh 就直接显示 key），
      要加第三种语言也只是再补一张表。缺词条时回落中文，不会出空标签。 */
   const LABEL = {
+    '在 GitHub 查看源码': 'View source on GitHub',
     '移动指针，探索画面': 'Move the pointer to explore',
     '悬停展开 · 轻点固定': 'Hover to unfold · tap to pin',
     '滚轮 / 拖动进度，探索变化': 'Scroll or drag the progress',

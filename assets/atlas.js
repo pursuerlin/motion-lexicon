@@ -95,7 +95,12 @@
     const listen = (el, event, fn, opts = {}) => el.addEventListener(event, fn, { ...opts, signal: abort.signal });
     const demo = new window.ATLAS_CANVAS.Demo(canvas, { id, mode: input });
     const title = root.querySelector('.atlas-heading');
-    demo.onHeading = text => { if(title) { title.textContent=text||''; title.hidden=!text; } };
+    demo.onHeading = text => {
+      if (!title) return;
+      const headingText = THREE.has(id) ? '' : text;
+      title.textContent = headingText || '';
+      title.hidden = !headingText;
+    };
     function theme() {
       if(typeof getComputedStyle !== 'function')return;
       const probe=document.createElement('i');stage.appendChild(probe);
@@ -162,7 +167,7 @@
       if (!THREE.has(id) || frame || failed || dead || !active) return;
       frame = document.createElement('iframe');
       frame.className = 'atlas-scene'; frame.title = canvas.getAttribute('aria-label');
-      frame.src = 'assets/atlas/scene.html?v=331&id=' + id;
+      frame.src = 'assets/atlas/scene.html?v=337&id=' + id;
       controller.frame = frame; view.appendChild(frame);
       const loadingFrame = frame;
       listen(frame, 'load', () => {

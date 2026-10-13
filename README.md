@@ -1,8 +1,28 @@
 # 动效词汇表 · Motion Lexicon
 
-把“那个感觉”说成专业术语。
+把“那个感觉”说成专业术语，也让团队更容易讨论、试验和实现动效。
 
-这是一个无需构建步骤的静态 Web 动效词典，收录 244 个动效术语、16 个分类和 23 种可交互演示。词条提供：
+动效词汇表是一个可直接在浏览器中使用的交互式参考库，收录 244 个动效术语、16 个分类和 23 种可交互演示。你可以从模糊的视觉感受出发，搜索并理解对应的运动方式，再通过点击、悬停、拖拽或滚动亲自体验效果，快速找到适合当前界面的表达。
+
+每个词条都围绕“怎么动、何时触发、适合用在哪里”展开，并提供演示、代码参考和可组合的动效配方，帮助设计评审与前端实现对齐预期。代码示例会标注适用平台；无法准确转换时会保留原始表达并明确说明。
+
+[在线体验](https://pursuerlin.github.io/motion-lexicon/) · [GitHub 源码](https://github.com/pursuerlin/motion-lexicon)
+
+## 页面预览
+
+### 首页与动效灵感
+
+![动效词汇表首页：术语搜索、动效灵感签与交互预览](docs/screenshots/readme-home.png)
+
+### 交互动效片段
+
+| 翻页卷曲转场 | 粒子球体变形 |
+| --- | --- |
+| ![翻页卷曲转场动效演示](docs/screenshots/motion-page-curl.gif) | ![粒子球体变形动效演示](docs/screenshots/motion-morphing-dot-sphere.gif) |
+| 共享元素转场 | 沉浸式漂浮生长 |
+| ![共享元素转场动效演示](docs/screenshots/motion-shared-element-transition.gif) | ![沉浸式漂浮生长动效演示](docs/screenshots/motion-immersive-floating-growth.gif) |
+
+## 功能
 
 - 可重播或可操作的真实演示
 - “含糊说法 → 专业说法”的需求表达

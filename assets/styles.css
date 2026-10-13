@@ -4310,5 +4310,7 @@ h1, h2 { font-weight: 560; }
 #sections .grid > .term[hidden] { display: none; }
 #sections .grid .term .term-main { flex: none; padding: 14px 8px 12px; }
 #sections .grid .term .en { white-space: normal; overflow: visible; line-height: 1.3; }
+#sections .grid .term .term-main .en { display: block; flex: none; margin: 0; line-height: 1.35; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+#sections .grid .term .term-main .zh { display: block; flex: none; min-height: 1.45em; margin: 4px 0 0; line-height: 1.45; }
 #sections .grid .term .brief { -webkit-line-clamp: 3; line-clamp: 3; }
 @media(max-width:600px) { #sections .grid { columns: 1; } }

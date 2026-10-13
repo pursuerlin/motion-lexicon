@@ -121,6 +121,11 @@ html[data-lang="en"] .lm-pin::before { content:"A STORY, LINE BY LINE"; }
 .topbar { padding-inline:max(clamp(16px,4.2vw,64px),calc((100vw - 1312px)/2));gap:16px; }
 .topbar .search { max-width:none;min-width:140px; }
 .topbar .brand { margin-right:5px; }
+.topbar .github-source { display:inline-flex;align-items:center;justify-content:center;flex:0 0 40px;width:40px;height:40px;min-height:40px;padding:0;border:1px solid var(--line-soft);border-radius:50%;color:var(--ink-2);text-decoration:none; }
+.topbar .top-tools > .github-source { padding:0; }
+.topbar .github-source svg { display:block;width:17px;height:17px; }
+.topbar .github-source:hover { color:var(--accent-strong);background:color-mix(in srgb,var(--accent) 9%,transparent);border-color:color-mix(in srgb,var(--accent) 26%,var(--line)); }
+.topbar .github-source:focus-visible { outline:2px solid var(--accent);outline-offset:3px; }
 @media(min-width:1101px) { .topbar .top-tools { gap:5px; }.topbar .menu-btn { padding-inline:12px; }.topbar .ghost { padding-inline:10px; } }
 @media(max-width:1100px) { .topbar { padding-inline:clamp(16px,4.2vw,64px);gap:8px 12px; } }
 @media(max-width:480px) { .topbar { gap:6px; }.fr-stamp { font-size:9px; }.term--detail .lm-pin { padding-inline:20px; } }
