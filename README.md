@@ -16,11 +16,28 @@
 
 ### 交互动效片段
 
-| 翻页卷曲转场 | 粒子球体变形 |
-| --- | --- |
-| ![翻页卷曲转场动效演示](docs/screenshots/motion-page-curl.gif) | ![粒子球体变形动效演示](docs/screenshots/motion-morphing-dot-sphere.gif) |
-| 共享元素转场 | 沉浸式漂浮生长 |
-| ![共享元素转场动效演示](docs/screenshots/motion-shared-element-transition.gif) | ![沉浸式漂浮生长动效演示](docs/screenshots/motion-immersive-floating-growth.gif) |
+<table width="100%">
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <p><strong>翻页卷曲转场</strong></p>
+      <img src="docs/screenshots/motion-page-curl.gif" alt="翻页卷曲转场动效演示" width="700">
+    </td>
+    <td width="50%" align="center" valign="top">
+      <p><strong>粒子球体变形</strong></p>
+      <img src="docs/screenshots/motion-morphing-dot-sphere.gif" alt="粒子球体变形动效演示" width="700">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <p><strong>共享元素转场</strong></p>
+      <img src="docs/screenshots/motion-shared-element-transition.gif" alt="共享元素转场动效演示" width="700">
+    </td>
+    <td width="50%" align="center" valign="top">
+      <p><strong>沉浸式漂浮生长</strong></p>
+      <img src="docs/screenshots/motion-immersive-floating-growth.gif" alt="沉浸式漂浮生长动效演示" width="700">
+    </td>
+  </tr>
+</table>
 
 ## 功能
 
