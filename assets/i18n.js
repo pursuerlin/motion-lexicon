@@ -42,7 +42,20 @@
       homeFlipBrief: '卡片以底边为轴，从 rotateX(-75deg) 翻转并淡入到 0deg；透视 800px，时长 600ms，使用 ease-out 曲线。',
       homeClipVague: '「从左到右一点点揭开」', homeClipName: '裁切揭示', homeClipSpec: '从左向右揭示 · 时长 650ms · ease-out',
       homeClipBrief: '用 clip-path 将卡片从左到右揭示，inset 从 0 100% 0 0 过渡到全零；时长 650ms，使用 ease-out 曲线。',
-      homePool: '18 种精选动效', homeKicker: '一部看得见的动效词典', homeRecipe: '组合我的动效配方',
+      homePool: '{count} 种精选动效', homeKicker: '一部看得见的动效词典', homeRecipe: '组合我的动效配方',
+      homeModesLabel: '选择灵感签玩法', homeModeAll: '全部', homeModeScroll: '滚动', homeModePointer: '指针', homeModeAuto: '自动演绎',
+      homeDriverScroll: '滚动驱动', homeDriverHover: '悬停响应', homeDriverPointer: '指针跟随', homeDriverDrag: '拖拽手势', homeDriverClick: '点击触发', homeDriverAuto: '自动演绎',
+      homeDrawn: '抽到：{name} · {driver}', homeBackExhibit: '回到展台',
+      exhibitTitle: '先看见，', exhibitAccent: '再说准。',
+      exhibitLead: '把脑海里的动效，变成能沟通、能实现的设计。',
+      exhibitIntro: '在真实交互里找灵感，把模糊的感觉说具体。',
+      exhibitWorkflowA: '查术语、调参数、取代码。', exhibitWorkflowB: '组合动效配方，交给 AI 或协作者。',
+      exhibitPhrases: '把感觉说具体', exhibitStaggerQuote: '「一张张出现」', exhibitStaggerName: '错峰入场',
+      exhibitScrubQuote: '「像拖视频进度条」', exhibitScrubName: '滚动抽帧',
+      exhibitDrag: '拖拽交互', exhibitCompare: '一拖，两种画面。', exhibitCompareHint: '拖动分割线，看看前后变化。',
+      exhibitCompareTerm: '拖拽擦除对比', exhibitCompareNote: '一条分割线，把变化说清楚。',
+      exhibitShape: '点击 · 形态变化', exhibitSphere: '一点，变个模样。', exhibitSphereHint: '七种形态，也可以拖动旋转。',
+      exhibitSphereTerm: '粒子球体变形', exhibitSphereNote: '同一组粒子，流动成不同形状。',
       homeExample: '动效灵感签', homeReplay: '重播', homeVague: '「让卡片一张张轻轻浮上来」',
       homeItem1: '项目概览', homeItem2: '设计规范', homeItem3: '交付清单',
       homeExampleName: '错峰上浮入场', homeSpec: '上浮 16px · 时长 420ms · 间隔 90ms',
@@ -78,11 +91,8 @@
       nTerms: '个术语', dialect: '代码写法', count: '个分类',
       backTo: '术语图鉴', copyMd: '复制为 Markdown', copiedMd: '已复制', maySay: '你可能会说',
       fav: '收藏', docTitle: '动效词汇表 · 把“那个感觉”说成专业术语',
-      dialectHd: '多平台代码示例',
-      codeStatic: '这段是手写实现，不参与方言编译（单条补间才能自动翻译）',
-      codeManual: '当前动效无法自动转换为所选写法。下方是原始示例，请勿直接当作该平台代码复制。',
-      codeApprox: '目标平台的缓动曲线是近似写法，可能与预览略有差异。',
-      codeTranslated: '已转换为所选平台写法；复制前请核对项目依赖与目标环境。',
+      dialectHd: '选择原生实现',
+      codeTranslated: '基础关键帧实现 · 保存为 HTML 后打开即可运行。',
       searchResults: '搜索结果', searchOne: '个匹配结果', searchNone: '没有匹配的术语。试试关键词、别名或简短描述。',
       searchClear: '清除搜索', resultOpen: '打开术语', searchName: '按术语、别名、说明或代码搜索',
       recentSearches: '最近搜索', clearSearchHistory: '清空记录', removeSearchHistory: '删除这条搜索记录', searchHistoryLocal: '记录仅保存在此设备',
@@ -126,7 +136,20 @@
       homeFlipBrief: 'Rotate cards around their bottom edge from rotateX(-75deg) to 0deg while fading in. Use 800px perspective, 600ms, and an ease-out curve.',
       homeClipVague: '“Uncover it gradually, from left to right”', homeClipName: 'Clip reveal', homeClipSpec: 'Reveal left to right · Duration 650ms · Ease-out',
       homeClipBrief: 'Reveal cards from left to right using clip-path. Animate inset from 0 100% 0 0 to all zeros over 650ms with an ease-out curve.',
-      homePool: '18 curated motions', homeKicker: 'A motion dictionary you can see', homeRecipe: 'Build my motion recipe',
+      homePool: '{count} curated motions', homeKicker: 'A motion dictionary you can see', homeRecipe: 'Build my motion recipe',
+      homeModesLabel: 'Choose an interaction', homeModeAll: 'All', homeModeScroll: 'Scroll', homeModePointer: 'Pointer', homeModeAuto: 'Auto',
+      homeDriverScroll: 'Scroll-driven', homeDriverHover: 'Hover', homeDriverPointer: 'Pointer', homeDriverDrag: 'Drag', homeDriverClick: 'Click', homeDriverAuto: 'Autoplay',
+      homeDrawn: 'Drawn: {name} · {driver}', homeBackExhibit: 'Back to exhibit',
+      exhibitTitle: 'See it move. ', exhibitAccent: 'Name it.',
+      exhibitLead: 'Turn the motion in your head into a design you can explain and build.',
+      exhibitIntro: 'Explore real interactions. Give the effect you have in mind a precise name.',
+      exhibitWorkflowA: 'Find terms, tune parameters and get code.', exhibitWorkflowB: 'Share a motion recipe with AI or your team.',
+      exhibitPhrases: 'Give the feeling a name', exhibitStaggerQuote: '“One by one”', exhibitStaggerName: 'Stagger',
+      exhibitScrubQuote: '“Like scrubbing a video”', exhibitScrubName: 'Frame scrubbing',
+      exhibitDrag: 'Drag interaction', exhibitCompare: 'One drag. Two views.', exhibitCompareHint: 'Drag the divider to compare the change.',
+      exhibitCompareTerm: 'Drag-to-compare wipe', exhibitCompareNote: 'A single divider makes the difference visible.',
+      exhibitShape: 'Tap · Shape change', exhibitSphere: 'Tap into a new shape.', exhibitSphereHint: 'Seven forms. Drag to turn them around.',
+      exhibitSphereTerm: 'Morphing dot sphere', exhibitSphereNote: 'The same particles flow into new forms.',
       homeExample: 'Motion inspiration', homeReplay: 'Replay', homeVague: '“Let the cards gently rise, one by one”',
       homeItem1: 'Project overview', homeItem2: 'Design guidelines', homeItem3: 'Delivery checklist',
       homeExampleName: 'Staggered rise-in', homeSpec: 'Rise 16px · Duration 420ms · Interval 90ms',
@@ -162,11 +185,8 @@
       nTerms: 'terms', dialect: 'Dialect', count: 'groups',
       backTo: 'Glossary', copyMd: 'Copy as Markdown', copiedMd: 'Copied', maySay: 'You might say',
       fav: 'Saved', docTitle: 'Motion Lexicon · say the feeling in proper terms',
-      dialectHd: 'Platform code examples',
-      codeStatic: 'Hand-written implementation — not machine-translated across dialects (only single tweens are)',
-      codeManual: 'This motion cannot be translated to the selected format. The source example below is not converted code.',
-      codeApprox: 'This platform uses an approximate easing curve; it may differ slightly from the preview.',
-      codeTranslated: 'Converted to the selected syntax. Check project dependencies and target support before copying.',
+      dialectHd: 'Choose a native implementation',
+      codeTranslated: 'Core keyframe implementation · Save as HTML and open to run.',
       searchResults: 'Search results', searchOne: 'matches',
       searchNone: 'No matching terms. Try a keyword, alias, or short description.',
       searchClear: 'Clear search', resultOpen: 'Open term', searchName: 'Search by term, alias, description, or code',
@@ -204,6 +224,30 @@
      会把两处数据都改一遍；改成「原文即 key」，中文侧零维护（切回 zh 就直接显示 key），
      要加第三种语言也只是再补一张表。缺词条时回落中文，不会出空标签。 */
   const LABEL = {
+    '移动指针，探索画面': 'Move the pointer to explore',
+    '悬停展开 · 轻点固定': 'Hover to unfold · tap to pin',
+    '滚轮 / 拖动进度，探索变化': 'Scroll or drag the progress',
+    '滚轮或拖动进度条': 'Scroll or drag the progress',
+    '点哪里，哪里生长': 'Tap anywhere to grow a garden',
+    '轻点画面，触发变化': 'Tap the scene to interact',
+    '按住拖动，探索画面': 'Drag to explore',
+    '山野之间': 'Into the mountains',
+    '大图留在眼前，故事逐步展开': 'The image stays as the story unfolds',
+    '光影': 'Light',
+    '起点': 'Beginning',
+    '远方': 'Beyond',
+    '余韵': 'Afterglow',
+    '拖动旋转点阵；轻点切换七种形状': 'Drag to rotate; tap to cycle through seven shapes',
+    '选择粒子形状': 'Choose a particle shape',
+    '切换到下一种形状': 'Switch to the next shape',
+    '球体': 'Sphere',
+    '心形': 'Heart',
+    '圆环': 'Torus',
+    '立方体': 'Cube',
+    '螺旋': 'Helix',
+    '星形': 'Star',
+    '星系': 'Galaxy',
+
     '灵感已收好': 'Inspiration saved', '留给下一次创作': 'For your next creation',
     '收藏成功': 'Saved to collection', '光影手记': 'Light studies',
     '追光片刻': 'Chasing light', '午后光线': 'Afternoon light',
@@ -409,6 +453,7 @@
     '在卡片里移动鼠标': 'Move the cursor inside the card',
     '在按钮上点击任意位置': 'Click anywhere on the button',
     '在框里滚动': 'Scroll inside the frame',
+    '拖拽或点击左右翻页 · 滚轮连续翻书': 'Drag or click either side to turn · Scroll to flip through',
     '增长开始显现': 'Growth starts to show',
     '已保存到云端': 'Saved to the cloud',
     '已发布': 'Published',
@@ -451,8 +496,8 @@
     '搜索动效术语': 'Search motion terms', '最近搜索': 'Recent searches', '按场景浏览': 'Browse by situation', '链接最近核验：2026-09-21': 'Links last checked: 2026-09-21', '缓动曲线预览': 'Easing curve preview',
     '没有匹配的术语。换个说法试试，比如「弹」「糊」「跟手」「掉帧」。':
       'No matches. Try another word — bounce, blur, follow, jank.',
-    '同一条动效，切换成 CSS / WAAPI / GSAP / Framer / Swift / Compose / Tailwind 的写法':
-      'The same effect written in CSS / WAAPI / GSAP / Framer / Swift / Compose / Tailwind',
+    '切换 CSS / WAAPI 原生实现':
+      'Choose a native CSS / WAAPI implementation',
     '切换配色：五套调色板，默认跟随系统的深浅色偏好':
       'Switch palette: five palettes, defaulting to your system light/dark setting',
     '约 80 词、按用途分 12 类': '~80 terms in 12 purpose groups',
@@ -677,23 +722,23 @@
 
   /* 第 16 类「组合范式」由 compound.js 注入，英文释义在这里补齐 */
   Object.assign(window.EN, {
-    'gaze-tracking': ['The pointer position drives where a character is looking: take the vector from centre to pointer, clamp it to the eye’s travel radius, then smooth it. Add an idle wander and blinks, or the “life” switches off the moment nobody moves the mouse.', 'make the character look at my cursor', 'cursor-driven gaze tracking: clamped pupil offset with 0.16 lerp smoothing and idle wander'],
+    'gaze-tracking': ['The pointer position drives where a character is looking: take the vector from centre to pointer, clamp it to the eye’s travel radius, then smooth it. Add an idle wander and blinks, or the “life” switches off the moment nobody moves the mouse.', 'make the character look at my cursor', 'cursor-driven gaze tracking: spring-smoothed eye and head rotation, clamped input, idle blinks'],
     'pinned-hero': ['Pin the hero in the viewport and use one scroll progress to drive both its shrink and the content re-laying out beside it. Sharing a single progress value is the whole trick — two independent timelines make the screen look like it came apart.', 'keep the big image while the cards slide in below', 'scroll-driven pinned hero recomposition: hero sticky + scale 0.74, cards fan out on the same progress'],
     'section-stack': ['Successive sections behave like a deck of cards: the next one covers the previous, which scales down slightly and dims behind it. Keep the stack to three or four layers — beyond that it reads as “stuck”, not as depth.', 'the next screen covers the last one', 'scroll-driven section reveal with sticky stacking, 14px offset per layer, scale 0.94 when covered'],
-    'scene-parallax': ['Split one image into three to five layers and assign displacement by depth — the nearer the layer, the further it travels. Add a few degrees of rotateY on the container and a flat picture becomes a box you can look through.', 'the layers shift when I move the mouse', 'cursor-driven miniature scene parallax: depth-weighted offsets plus rotateY on the diorama'],
-    'scroll-orbit': ['Map scroll progress straight onto the camera’s azimuth. Two rules: pin the subject, otherwise it scrolls out of frame halfway; and hold the pitch constant while only the azimuth moves, otherwise viewers get disoriented.', 'scrolling spins the model around', 'scroll-driven character orbit: progress → rotateY 0-360°, pitch locked at -14°'],
-    'door-bloom': ['Break one surface into panels that swing open around their own hinge edge on hover, staggered, with a glow rising from the centre. It is the most “expensive” tier of hover feedback — reserve it for hero surfaces.', 'the doors fan open when I hover', 'hover-triggered door bloom: six panels rotateY -64° around their own edge, 45ms stagger'],
+    'scene-parallax': ['A real miniature coast contains a lighthouse, pine trees, a cottage and a pier. The pointer shifts a camera that keeps looking at the scene centre; actual depth makes nearby objects move more than distant ones.', 'the layers shift when I move the mouse', 'cursor-driven miniature scene parallax: normalized pointer input controls a spring-smoothed 3D camera offset'],
+    'scroll-orbit': ['Map scroll progress straight onto the camera’s azimuth. Two rules: pin the subject, otherwise it scrolls out of frame halfway; and hold the pitch constant while only the azimuth moves, otherwise viewers get disoriented.', 'scrolling spins the model around', 'scroll-driven character orbit: shared scroll progress drives a full camera orbit around the subject'],
+    'door-bloom': ['Four doors rotate around independent hinges, revealing a metallic body, glass cabin and interior. Hover to unfold, leave to close, or tap to pin. Reversing midway preserves the current angles and spring velocities.', 'the doors fan open when I hover', 'hover-triggered door bloom: four independent door hinges, staggered springs, hover or tap to pin'],
     'vortex-transit': ['Concentric layers scale from far to near on one shared progress, and modulo arithmetic sends each layer back to the start, producing a tunnel with no end. It must stop dead the instant scrolling stops, or it induces motion sickness.', 'scrolling feels like flying through a tunnel', 'scroll-driven vortex transit: N rings scale 0.1→3.4 on a modulo-wrapped progress'],
-    'immersive-float': ['A causal chain: the object falls, contacts the surface, and only then does growth begin — each stage’s endpoint is the next one’s start. The value here is in the sequencing, not in any individual curve.', 'tap it, it drops and then plants something', 'click-triggered sequence: gravity drop + squash, then stroke-dashoffset growth, then staggered leaf scale-in'],
-    'helix-flow': ['Add a vertical offset proportional to index on top of circular rotation and the ring becomes a helix. Deriving scale and opacity from cos(theta) conveys depth without any real 3D.', 'drag it and the items spiral past', 'drag-driven helix flow: x = sin θ · R, y ∝ index, scale and opacity from cos θ'],
-    'luminous-flow': ['Write the pointer position into one CSS custom property and let the light pool, the floor highlight and the fog all read from that single source. Mapping pointer speed to fog density effectively gives the scene a throttle.', 'the light follows the cursor and fog rolls in', 'cursor-driven luminous flow: --lx/--ly drive the light, smoothed speed drives fog and a 1.06 push-in'],
+    'immersive-float': ['A causal chain: the object falls, contacts the surface, and only then does growth begin — each stage’s endpoint is the next one’s start. The value here is in the sequencing, not in any individual curve.', 'tap it, it drops and then plants something', 'tap-position planting: independent seed fall, contact ripple, stem drawing, leaves and three staggered blossoms; keep the latest seven plants'],
+    'helix-flow': ['Eight photographs unfold along a spiral track. Drag to turn the collection; release to carry momentum into the nearest card position. Previous and next buttons or arrow keys browse one photograph at a time.', 'drag and the photographs spiral past', 'pointer displacement sets phase, release velocity sets inertia distance, then the gallery settles on the nearest card'],
+    'luminous-flow': ['Light travels over three interlocking ceramic rings. Moving the pointer changes the key light and camera angle; highlights, shading and the floor shadow respond continuously. Leaving returns the light to centre.', 'the light and highlights follow the cursor', 'normalized pointer position drives 3D light direction and a small camera rotation; surface normals determine diffuse and specular lighting'],
     'spotlight-reveal': ['Hide information under a mask the same colour as the background and punch a radial hole at the pointer. Good for exploratory content — but never put anything essential behind it, because keyboard and touch users will never shine the light there.', 'a torch that reveals what is under the cursor', 'cursor spotlight reveal: one radial-gradient mask driven by --lx/--ly'],
     'cursor-trail': ['A chain of particles where each one chases the previous, so the tail tapers naturally. Chain the interpolation rather than replaying recorded coordinates — replaying throws leftover ghosts at you the moment the pointer stops.', 'a little comet tail behind the cursor', 'cursor trail: chained 0.28 lerp with size and opacity falling off by index'],
-    'hover-fan': ['Collapse a stack of items on hover and spread them into a fan. Only the transform changes, never the layout, so nothing around it shifts — that is what makes it safe inside a dense grid.', 'a deck of cards that spreads out when I hover', 'hover fan-out: rotate and translateX distributed by index, 40ms stagger'],
+    'hover-fan': ['Unfold a stack of items on hover and spread them into a fan. Only the transform changes, never the layout, so nothing around it shifts — that is what makes it safe inside a dense grid.', 'a deck of cards that spreads out when I hover', 'hover fan-out: rotate and translateX distributed by index, 40ms stagger'],
     'card-peel': ['Lift one corner like a sheet of paper, showing the reverse face and the shadow it drops. Purely decorative, and at its best as an affordance on entry cards: “there is more under here”.', 'the corner of the card lifts up on hover', 'hover card peel: corner triangle grows 0→36px with a gradient back face and shadow'],
     'horizontal-scroll': ['Vertical scroll drives a horizontal track. Common for portfolios and timelines and expensive: people lose their sense of progress and trackpad gestures fight each other, so give it a clear end and a way out.', 'scrolling down but the content moves right', 'scroll-to-horizontal: map vertical progress onto the track translateX inside a pinned container'],
     'scrub-frames': ['Quantise scroll progress into discrete frames to get the “dragging a video timeline” feel (24 frames is the usual). Quantise, do not interpolate — interpolating just gives smear and you lose the mechanical frame-by-frame read.', 'scrolling feels like dragging through a video', 'scrubbed frame sequence: frame = round(p * (N-1)), no interpolation, with a frame counter readout'],
-    'sticky-two-col': ['The most robust scrollytelling structure: the visual is pinned, the text flows past it, and the visual swaps per paragraph. Put the “entered” threshold at the viewport middle or the swap will flicker.', 'the picture stays put while the steps scroll by', 'sticky two-column: left visual pinned, right steps cross-fade it at the viewport midline'],
+    'sticky-two-col': ['The most robust scrollytelling structure: the visual is pinned, the text flows past it, and the visual swaps per paragraph. Switch only when each step reaches the top of the scroll viewport; use the same threshold when scrolling back.', 'the picture stays put while the steps scroll by', 'sticky two-column: left visual pinned, right steps cross-fade it when they reach the viewport top'],
     'theme-morph': ['Interpolate between colour stops on scroll to signal “new chapter”. Interpolate the foreground too — animate only the background and you will pass through combinations nobody can read.', 'the whole page slowly changes colour as I scroll', 'scroll-linked theme morph: RGB interpolation across stops, foreground interpolated in parallel'],
     'progress-ring': ['Draw progress as a circle. Three details: start at 12 o’clock (rotate -90°), use the measured circumference for dasharray, and centre the number separately or it reads badly.', 'a ring that fills up as you scroll', 'scroll progress ring: dashoffset = circumference * (1 - p)'],
     'fab-to-sheet': ['The button and the panel it opens are the same container, only size and radius differ — that is the container transform applied to a mobile FAB. Let the content arrive a beat late or you will see the text stretch.', 'the round button grows into a panel', 'FAB to sheet container transform: same element animates width/height/radius, children fade in +130ms'],
@@ -703,7 +748,7 @@
     'velocity-skew': ['An always-on marquee that reacts to scrolling: more speed means more travel and more shear on the letterforms. Drive the skew from smoothed velocity, not the instantaneous delta, or it buzzes like a sawtooth.', 'the row leans and dashes when I scroll fast', 'scroll-velocity marquee: smoothed scroll delta feeds both the displacement increment and skewX, both decaying to 0'],
     'proximity-glow': ['Treat the pointer as a light with a radius and let each tile respond by distance. Use squared falloff rather than linear — a linear ramp smears the edge and you cannot see the “nearness” at all.', 'tiles light up as the cursor gets close', 'cursor proximity grid: per-tile (1 − d/R)² falloff mapped to brightness, scale and Z offset'],
     'liquid-follow': ['One point chases the pointer on a spring while being stretched along its own velocity vector and squashed across it, then rotated to match — that is what reads as surface tension. Displacement alone is just a follower.', 'a jelly dot that stretches as it chases the cursor', 'liquid cursor follow: spring position + velocity-aligned rotate with scaleX/scaleY complementary stretch'],
-    'chart-build': ['The figure assembles itself as you scroll. The rule: the readout and the geometry must come from the same progress value — compute them separately and you get “bars full, number still climbing”.', 'the chart grows as I scroll through it', 'scroll-driven chart build: line via stroke-dashoffset, bars staggered by index, readout bound to the same progress'],
+    'chart-build': ['The figure assembles itself as you scroll. The rule: the readout and the geometry must come from the same progress value — compute them separately and you get “bars full, number still climbing”.', 'the chart grows as I scroll through it', 'scroll-driven chart build: shared progress drives Canvas bar heights, line extent and numeric readouts, with staggered bars and reversible scrolling'],
     'preview-follow': ['A preview card floats beside a list and follows the pointer. It must stay mounted and only swap its contents — creating DOM on every hover makes the swap flicker and throws away the motion inertia.', 'a picture floats next to the list while I hover rows', 'hover-linked floating preview: spring-followed card, content swap plus one scale pop, never remounted'],
     'throw-dismiss': ['Rotation follows displacement while the flight follows release velocity — you need both. Displacement alone looks like dragging paper; velocity alone looks like a spring. Gate the dismiss on both, or slow drags get thrown by accident.', 'grab the card and fling it away', 'velocity throw & dismiss: rot ∝ dx, flight path from release velocity, dismiss needs either past threshold'],
     'scramble-decode': ['Characters converge from random glyphs to the target one by one, forming a decoding band. Only replace the not-yet-locked characters each frame — re-randomising everything reads as noise, not as decoding.', 'the text decodes itself hacker-style', 'scramble decode reveal: per-character lock times left to right, only unlocked slots re-randomise'],
@@ -715,10 +760,10 @@
     'confetti-burst': ['Treat each piece as a rigid-body particle: random lateral velocity, launched upward then pulled by gravity each frame, spinning around its own axis, removed the moment it leaves the container. Colors come from the theme palette (never a raw rainbow) and 20–30 pieces is the sweet spot — more reads cheap.', 'click and it throws a handful of confetti', 'confetti burst: vy += g per frame, translate + rotate, recycle on exit'],
     'smooth-tabs': ['Move the selected state off the individual tabs and onto one shared indicator: it measures the target item’s offsetLeft/offsetWidth and slides over. Re-measure on mount and on resize — skip the remeasure and the indicator parks at a stale position. This is layout animation in its smallest, most useful form.', 'the underline slides to the tab I click', 'smooth tabs: indicator slides to offsetLeft/offsetWidth, content cross-fades'],
     'coverflow-carousel': ['The whole carousel is a pure function of the index offset: off = i − focus drives lateral offset, Z recession and Y rotation in one transform, so switching focus changes a single number. Opacity and stacking order decay with |off| so far cards fade naturally. Album walls and image galleries all come from this pattern.', 'the middle one is biggest and straight, the sides tilt away', 'coverflow: translateX(44%·off) translateZ(−120·|off|) rotateY(−34°·off)'],
-    'page-curl': ['A page rotates around a fixed book spine, revealing its reverse and the next sheet underneath. Drag distance drives the turn; on release, a short easing finishes the page or returns it. Useful for albums, stories and editorial transitions.', 'turn the next page like a book', 'page curl: drag progress rotates around the spine; release completes past threshold or springs back'],
+    'page-curl': ['A subdivided paper mesh bends and twists as each sheet turns, with separate front and back images, page thickness and continuous shadows. The grab position controls the fold; release velocity and a spring finish or return the page. Supports continuous turns for albums, stories and magazines.', 'turn the next page like a book', 'Drag controls page progress and curl; release velocity finishes the turn or springs back. Click, scroll or use arrow keys to turn multiple pages.'],
     'dynamic-island': ['A persistent capsule grows into a live activity in place. Keep the alert, artwork, progress and controls inside one shape so the transition feels continuous instead of opening a separate panel.', 'tap the little capsule to expand the live activity', 'dynamic island: one persistent capsule morphs between compact alert and expanded live activity'],
-    'scratch-reveal': ['Cover a picture or answer with an erasable surface. Pointer or touch movement clears the cover in strokes; once enough has been scratched away, fade the remainder to reveal the result.', 'rub the surface and reveal what is underneath', 'scratch to reveal: destination-out canvas strokes with threshold-based auto reveal'],
-    'morphing-dot-sphere': ['Project a sampled point cloud from a sphere onto a 2D canvas. Drag to rotate it, then interpolate the same points into a heart and back. Keep the particle count and frame rate bounded for smooth rendering on mobile.', 'a sphere made of dots that I can turn and reshape', 'morphing dot sphere: spherical point cloud, pointer rotation and interpolated heart target']
+    'scratch-reveal': ['Cover a picture or answer with an erasable surface. Pointer or touch movement clears the cover in strokes, preserving the revealed areas. Reset restores the full cover for another pass.', 'rub the surface and reveal what is underneath', 'scratch to reveal: destination-out canvas strokes preserve revealed areas; reset rebuilds the cover'],
+    'morphing-dot-sphere': ['Project a sampled point cloud from a sphere onto a 2D canvas. Drag to rotate it, then interpolate the same points into a heart, torus, cube, helix, star or galaxy. Tap to cycle, or choose a shape directly; interrupted morphs continue from their current coordinates. Keep the particle count and frame rate bounded for smooth rendering on mobile.', 'a sphere made of dots that I can turn and reshape', 'morphing dot sphere: seven point-cloud shapes, pointer rotation and continuous interpolation from current positions']
   });
 
   let lang = 'zh';
@@ -759,7 +804,6 @@
     const scope = root || document;
     const byId = {};
     window.TERMS.forEach(function (x) { byId[x.id] = x; });   /* 之前每个节点都全量 filter，229² 次比较 */
-    const coverage = window.DIALECTS && window.DIALECTS.coverage ? window.DIALECTS.coverage() : null;
     const nodes = $$('.term', scope);
     /* 详情页传进来的节点自己就是 .term，querySelectorAll 不含自身，不补这一句详情页永远不翻译 */
     if (scope.matches && scope.matches('.term')) nodes.unshift(scope);
@@ -785,27 +829,8 @@
       if (addb) addb.textContent = addb.classList.contains('on') ? t('added') : t('add');
       const rp = $('.replay', el); if (rp) rp.textContent = t('replay');
       const cp = $('.copy', el); if (cp && !cp.dataset.busy) cp.textContent = t('copy');
-      const code = $('code', el);
-      const format = $('.page-dialect', el);
-      if (format && window.DIALECTS) format.value = window.DIALECTS.current;
-      const formatLabel = $('.code-dialect span', el);
-      if (formatLabel) formatLabel.textContent = t('dialect');
       const stage = $('.stage', el);
-      const overrides = stage && stage._prm ? stage._prm : {};
-      if (code && window.DIALECTS) code.textContent = window.DIALECTS.codeFor(term, overrides);
-      const note = $('.code-note', el);
-      if (note && window.DIALECTS) {
-        const status = window.DIALECTS.status(term, overrides);
-        note.textContent = t(status === 'manual' ? 'codeManual' : status === 'approximate' ? 'codeApprox' : 'codeTranslated');
-        const wrap = $('.codewrap', el);
-        if (wrap) wrap.classList.toggle('is-static', status === 'manual');
-      }
-      const coverageNote = $('.code-coverage', el);
-      if (coverageNote && coverage) {
-        coverageNote.textContent = lang === 'en'
-          ? coverage.translated + '/' + coverage.total + ' directly convertible · ' + coverage.approximate + ' approximate · ' + coverage.manual + ' manual / unavailable · counts are not compiler validation'
-          : coverage.translated + '/' + coverage.total + ' 条可直接转换 · ' + coverage.approximate + ' 条近似 · ' + coverage.manual + ' 条需手动 / 暂不支持 · 覆盖统计不代表编译验证';
-      }
+      if (window.DIALECTS) window.DIALECTS.refreshPanel(el, term, Object.assign({}, stage && stage._prm, stage ? {loop:stage._loop} : {}));
     });
     if (root) return;   /* 局部刷新不涉及分类头 / 侧栏 */
     $$('.cat').forEach(function (sec) {

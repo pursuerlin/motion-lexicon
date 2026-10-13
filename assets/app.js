@@ -169,7 +169,8 @@
     const run = function () {
       Object.keys(stage._prm).forEach(function (k) {
         const c = s.ctl.filter(function (x) { return x.p === k; })[0];
-        stage.style.setProperty('--' + k, stage._prm[k] + (c && c.u ? c.u : ''));
+        // A comparison keeps both source durations; applyTiming scales them together.
+        if (!(s.kind === 'two' && k === 'dur')) stage.style.setProperty('--' + k, stage._prm[k] + (c && c.u ? c.u : ''));
       });
       /* 错峰间隔、时长：都交给 applyTiming 统一施加，重播也不会被冲掉 */
       if (stage._staggerEls || stage._prm.dur != null) { applyTiming(stage); wakeIfIdle(stage); }
@@ -252,7 +253,7 @@
          原来这里烘死 24 格，滑块一拨到 6，读数写 06/6 而接触表还亮着第 24 格。
          每格的取样位移同样交给运行时，别在这里按 24 复算一遍第二真源。 */
       for (let i = 0; i < 48; i++) {
-        contactFrames += '<s data-frame="' + (i + 1) + '" aria-label="第 ' + (i + 1) + ' 帧"><img src="assets/img/p16.jpg" alt="第 ' + (i + 1) + ' 帧" draggable="false"><b>' + String(i + 1).padStart(2, '0') + '</b></s>';
+        contactFrames += '<button type="button" data-frame="' + (i + 1) + '" aria-label="跳到第 ' + (i + 1) + ' 帧"><img src="assets/img/p16.jpg" alt="" decoding="async"><b>' + String(i + 1).padStart(2, '0') + '</b></button>';
       }
     }
     const compoundReadout = withTools && s.kind === 'compound' && s.mode === 'frames'
@@ -262,7 +263,7 @@
         '<div class="fr-readout-track"><i data-fr-out="track"></i></div>' +
         '<div class="fr-contact-head"><span>FRAME CONTACT SHEET</span><b data-fr-out="sheet">24</b></div><div class="fr-contact" aria-label="接触表里每一格就是一个真实采样帧" data-l10n="接触表里每一格就是一个真实采样帧" data-l10n-attr="aria-label">' + contactFrames + '</div>' +
         '<p data-l10n="左侧是实际预览，右侧接触表标出当前采样帧。">左侧是实际预览，右侧接触表标出当前采样帧。</p></aside>'
-      : withTools && s.kind === 'compound' && s.mode === 'gaze'
+      : withTools && s.kind === 'compound' && s.mode === 'gaze' && !s.atlas
       ? '<aside class="gz-readout" aria-label="视线跟随实时读数" data-l10n="视线跟随实时读数" data-l10n-attr="aria-label"><div class="gz-readout-head"><b><i></i> LIVE READOUT</b><span data-gz-out="mode">AUTONOMOUS</span></div>' +
         '<div class="gz-readout-state" aria-live="polite"><i></i><strong data-gz-out="state">IDLE LOOP</strong><small>gaze target</small></div>' +
         '<div class="gz-readout-focus"><div><small>GAZE OFFSET</small><strong><span data-gz-out="x">+0.0</span><em> × </em><span data-gz-out="y">+0.0</span><u>px</u></strong><small>→ target <span data-gz-out="tx">+0.0</span> × <span data-gz-out="ty">+0.0</span>px</small></div><div class="gz-readout-lag"><small>LAG</small><b data-gz-out="lag">0.0px</b></div></div>' +
@@ -273,7 +274,7 @@
     /* 卡片：舞台下面直接跟参数条。弹窗：参数条排在慢放/循环之下，别挤在演示和工具条中间 */
     const modeAttr = s.kind === 'compound' && s.mode ? ' data-mode="' + esc(s.mode) + '"' : '';
     /* 徽标只给卡片：详情页的 .stage-tools 里已经有同一件事的完整说法，两处并存就是重复提示 */
-    const lazyAttr = withTools ? '' : ' is-lazy data-lazy-stage="1"';
+    const lazyAttr = withTools ? '' : ' is-lazy';
     return '<div class="stage kind-' + (s.kind || 'frames') + lazyAttr + '"' + stageAttrs(s) + modeAttr + kb + '>' +
       (withTools ? '' : drvBadge(s)) + (withTools ? stageMarkup(t) : '') + '</div>' +
       compoundReadout +
@@ -286,21 +287,17 @@
     return 'term' + (s.ctl ? ' has-ctl' : '') + (s.ctl && s.ctl.length > 2 ? ' ctl-n3' : '');
   }
   function cardHTML(t) {
+    const s = t.demo || {};
+    const layout = ['island','tilt','ring3d'].includes(s.mode) || s.obj === 'demo-photo-portrait'
+      ? 'portrait' : ['two','spring','curve'].includes(s.kind) ? 'study' : 'landscape';
     return '<article class="' + cardCls(t) + ' t-' + t.id + ' cat-' + t.cat + '" data-id="' + t.id + '" data-cat="' + t.cat +
-      '" data-play="' + playOf(t) + '" tabindex="0" role="button" aria-label="' + esc(t.en) + ' ' + esc(t.zh) + '">' +
+      '" data-card-layout="' + layout + '"' + (s.atlas ? ' style="--atlas-card-ratio:' + s.atlasAspect + ';--atlas-preview-height:' + (100 / s.atlasAspect) + 'cqw"' : '') + ' data-play="' + playOf(t) + '" tabindex="0" role="button" aria-label="' + esc(t.en) + ' ' + esc(t.zh) + '">' +
       stageBlock(t, false) +
       '<div class="term-main"><h3 class="en">' + esc(t.en) + '</h3><p class="zh">' + esc(t.zh) + '</p>' +
       '<p class="brief">' + esc(briefOf(t.def)) + '</p></div>' +
       '<span class="open-mark" aria-hidden="true">↗</span></article>';
   }
   function detailHTML(t) {
-    const code = window.DIALECTS ? window.DIALECTS.codeFor(t) : t.code;
-    const codeStatus = window.DIALECTS ? window.DIALECTS.status(t) : 'translated';
-    const codeCoverage = window.DIALECTS ? window.DIALECTS.coverage() : { total: window.TERMS.length, translated: 0, approximate: 0, manual: window.TERMS.length };
-    const live = codeStatus !== 'manual';
-    const dialectOptions = window.DIALECTS ? window.DIALECTS.list.map(function (d) {
-      return '<option value="' + d.key + '"' + (d.key === window.DIALECTS.current ? ' selected' : '') + '>' + esc(d.label) + '</option>';
-    }).join('') : '';
     const cat = window.CATS.filter(c => c.id === t.cat)[0] || {};
     return '<article class="' + cardCls(t) + ' term--detail t-' + t.id + ' cat-' + t.cat + '" data-id="' + t.id + '" data-cat="' + t.cat +
       '" data-play="' + playOf(t) + '">' +
@@ -313,11 +310,7 @@
       '<p class="pg-def">' + esc(t.def) + '</p>' +
       (t.cat === 'compound' ? '<p class="editorial-note"><b>' + esc(L('sitePattern')) + '</b> ' + esc(L('sitePatternNote')) + '</p>' : '') +
       '<div class="pg-say"><b class="sw sharp">' + esc(L('sayIt')) + '</b><span>' + esc(t.say) + '</span></div>' +
-      (code ? '<div class="codewrap' + (live ? '' : ' is-static') + '">' +
-        '<label class="code-dialect"><span>' + esc(L('dialect')) + '</span><select class="page-dialect">' + dialectOptions + '</select></label>' +
-        '<span class="code-note">' + esc(L(codeStatus === 'manual' ? 'codeManual' : codeStatus === 'approximate' ? 'codeApprox' : 'codeTranslated')) + '</span>' +
-        '<p class="code-coverage" aria-live="polite">' + esc(codeCoverage.translated + '/' + codeCoverage.total + (window.I18N.lang === 'en' ? ' directly convertible' : ' 条可直接转换') + ' · ' + codeCoverage.approximate + (window.I18N.lang === 'en' ? ' approximate' : ' 条近似') + ' · ' + codeCoverage.manual + (window.I18N.lang === 'en' ? ' manual / unavailable' : ' 条需手动 / 暂不支持') + (window.I18N.lang === 'en' ? ' · counts are not compiler validation' : ' · 覆盖统计不代表编译验证')) + '</p>' +
-        '<button class="copy" type="button">复制</button><pre><code>' + esc(code) + '</code></pre></div>' : '') +
+      (window.DIALECTS ? window.DIALECTS.panelHTML(t) : '') +
       (window.REFS ? window.REFS.panelHTML(t.id) : '') +
       '<div class="foot"><div class="alias">' +
       (t.alias || []).map(a => '<span>' + esc(a) + '</span>').join('') +
@@ -335,6 +328,7 @@
     const stage = $('.stage', node);
     if (stage) {
       io.unobserve(stage);
+      if (stage._dispose) stage._dispose();
       if (stage._iv) { clearInterval(stage._iv); stage._iv = null; }
       if (stage._ro) { stage._ro.disconnect(); stage._ro = null; }
       if (stage._update) tickers.delete(stage._update);
@@ -361,8 +355,8 @@
       c.__demo = term.demo || {};
       host.appendChild(c);
       try { mountStage(c); } catch (err) { console.warn('详情挂载失败：' + id, err); }
-      if (window.I18N) window.I18N.refreshTerms(c);   /* 只刷这一条，全站刷一遍是 2000+ 次 DOM 查询 */
     }
+    if (window.I18N) window.I18N.refreshTerms(c);   /* Cached details must also follow language and code-format changes. */
     detailCache.set(id, c);
     while (detailCache.size > DETAIL_MAX) {
       const oldest = detailCache.keys().next().value;
@@ -721,6 +715,7 @@
       nodes.forEach(el => { el.style.animation = ''; });
     }
     applyTiming(stage);
+    if (stage._replay) stage._replay();
   }
   /* 一次性动效播完就停在终态：这时候拖「时长」改的只是一个看不见的数字
      （往短了拖连终态都不动）。没有动画在跑就重播一次，让新参数立刻看得见。 */
@@ -733,11 +728,13 @@
     if (!stage) return;
     stage._speed = speed;
     applyTiming(stage);
+    if (stage._onTiming) stage._onTiming();
   }
   function setLoop(stage, on) {
     if (!stage) return;
     stage._loop = on;
     applyTiming(stage);
+    if (stage._onTiming) stage._onTiming();
   }
 
   const visible = new WeakMap();
@@ -746,11 +743,13 @@
     if (!el) return;
     visible.set(el, on);
     el.classList.toggle('in-view', on);
+    if (el._setActive) el._setActive();
   }
   const io = new IntersectionObserver(es => {
     es.forEach(e => {
       visible.set(e.target, e.isIntersecting);
       e.target.classList.toggle('in-view', e.isIntersecting);
+      if (e.target._setActive) e.target._setActive();
     });
   }, { rootMargin: '120px 0px', threshold: 0.01 });
   const stageMountIO = new IntersectionObserver(es => {
@@ -1085,7 +1084,13 @@
     }, { rootMargin: '60px 0px', threshold: 0.02 });
     cardEls.forEach(el => cardIO.observe(el));
     /* 兜底：任何原因导致 IO 没触发，也不能让卡片一直不可见 */
-    setTimeout(function () { cardEls.forEach(el => el.classList.add('shown')); }, 1600);
+    setTimeout(function () {
+      // Only rescue currently visible cards; offscreen cards still reveal when the reader reaches them.
+      cardEls.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (!el.hidden && rect.bottom > 0 && rect.top < window.innerHeight) el.classList.add('shown');
+      });
+    }, 1600);
   }
 
   /* ---------------- 搜索与筛选 ---------------- */
@@ -1158,6 +1163,7 @@
     }
     empty.hidden = shown > 0 || (!q && !cat && !favOnly);
     if (q && !empty.hidden) empty.textContent = L('searchNone');
+    document.dispatchEvent(new CustomEvent('motion:filter', { detail: { query: q, category: cat, count: shown } }));
   }
 
   /* 详情页导出成一段可以直接贴进需求或提示词的 Markdown */
@@ -1167,15 +1173,12 @@
     const stage = detail && detail.querySelector('.stage');
     const overrides = stage && stage._prm ? stage._prm : {};
     const copy = en && window.EN[t.id] ? window.EN[t.id] : [t.def, t.vague, t.say];
-    const code = window.DIALECTS ? window.DIALECTS.codeFor(t, overrides) : t.code;
-    const codeStatus = window.DIALECTS ? window.DIALECTS.status(t, overrides) : 'translated';
-    const codeNote = codeStatus === 'manual' ? (en ? 'Selected syntax is unavailable for this motion. The code block is the original source example, not converted code.' : '当前写法无法自动转换；代码块保留的是原始示例，并非目标平台代码。') :
-      codeStatus === 'approximate' ? (en ? 'The selected platform uses an approximate easing curve.' : '所选平台的缓动曲线为近似值。') : '';
+    const code = window.DIALECTS ? window.DIALECTS.codeFor(t, Object.assign({}, overrides, stage ? {loop: stage._loop} : {})) : '';
     return '## ' + (en ? t.en + ' / ' + t.zh : t.zh + ' / ' + t.en) + '\n\n' +
       '> **' + (en ? 'You might say' : '你可能会说') + ':** ' + copy[1] + '\n\n' +
       copy[0] + '\n\n' +
       '**' + (en ? 'Say it as' : '说出来') + ':** ' + copy[2] + '\n' +
-      (code ? (codeNote ? '\n> ' + codeNote + '\n' : '') + '\n```\n' + code + '\n```\n' : '') +
+      (code ? '\n```html\n' + code + '\n```\n' : '') +
       (t.alias && t.alias.length ? '\n**也叫：** ' + t.alias.join('、') + '\n' : '');
   }
   /* 剪贴板统一入口：异步 API 被拒（权限 / 失焦）时降级 execCommand，
@@ -1314,6 +1317,7 @@
     $('#motion').setAttribute('aria-pressed', String(on));
     $('#motion').textContent = on ? L('motionOn') : L('motionOff');
     /* SMIL、CSS 关键帧之外的“自带时钟”演示不吃 tickers 门控，得单独通知 */
+    document.querySelectorAll('.stage').forEach(stage => { if (stage._onMotion) stage._onMotion(on); });
     motionHooks.forEach(f => { try { f(on); } catch (e) {} });
   }
 
@@ -1387,7 +1391,7 @@
       const paint = function () {
         list.innerHTML = '<p class="menu-hd" role="presentation">' + esc(L('dialectHd')) + '</p>' + D.list.map(d =>
           '<button type="button" role="option" class="menu-item' + (d.key === D.current ? ' on' : '') +
-          '" data-k="' + d.key + '" aria-selected="' + (d.key === D.current) + '"><span>' + d.label + '</span>' +
+          '" data-k="' + d.key + '" aria-selected="' + (d.key === D.current) + '"><span class="dialect-choice"><b>' + d.label + '</b><small>' + esc(window.I18N.lang === 'en' ? d.en : d.zh) + '</small></span>' +
           '<svg class="menu-tick" width="15" height="15" viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 10.6 8.2 14 15.5 6.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></button>').join('');
         $('#dialect-cur').textContent = (D.list.filter(x => x.key === D.current)[0] || D.list[0]).label;
       };
@@ -1674,7 +1678,8 @@
       if (rm) { toggleRecipe(rm.dataset.rm); return; }
       const cp = e.target.closest('.copy');
       if (cp) {
-        const code = cp.parentElement.querySelector('code');
+        const code = cp.closest('.codewrap').querySelector('code');
+        if (!code) return;
         copyText(code.textContent, function () {
           cp.dataset.busy = '1'; cp.textContent = L('copied');
           setTimeout(() => { delete cp.dataset.busy; cp.textContent = L('copy'); }, 1200);
@@ -1745,17 +1750,38 @@
       setSpeed(stage, parseFloat(b.dataset.sp));
       replay(stage);
     });
-    $('#page-body').addEventListener('change', function (e) {
-      const select = e.target.closest('.page-dialect'); if (!select || !window.DIALECTS) return;
-      window.DIALECTS.set(select.value);
+    $('#page-body').addEventListener('click', function (e) {
+      const button = e.target.closest('[data-code-format]'); if (!button || !window.DIALECTS) return;
+      const menu = button.closest('details');
+      window.DIALECTS.set(button.dataset.codeFormat);
+      menu.open = false;
       if (paintDialect) paintDialect();
       if (window.I18N) window.I18N.refreshTerms();
+      menu.querySelector('summary').focus();
+    });
+    document.addEventListener('click', function (e) {
+      $$('.code-format[open]').forEach(menu => { if (!menu.contains(e.target)) menu.open = false; });
+    });
+    $('#page-body').addEventListener('keydown', function (e) {
+      const menu = e.target.closest('.code-format'); if (!menu) return;
+      if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); menu.open = false; menu.querySelector('summary').focus(); }
+      const items = $$('.code-options button',menu), index = items.indexOf(e.target);
+      if (['ArrowDown','ArrowUp','Home','End'].includes(e.key)) {
+        e.preventDefault(); menu.open = true;
+        const next = e.key === 'Home' ? 0 : e.key === 'End' ? items.length-1 : (index+(e.key==='ArrowDown'?1:items.length-1)+items.length)%items.length;
+        items[next].focus();
+      }
+    });
+    $('#page-body').addEventListener('focusout', function (e) {
+      const menu = e.target.closest('.code-format');
+      if (menu && !menu.contains(e.relatedTarget)) menu.open = false;
     });
     $('#page-body').addEventListener('change', function (e) {
       const c = e.target.closest('[data-loop]'); if (!c) return;
       const node = c.closest('.term--detail'), stage = node.querySelector('.stage');
       setLoop(stage, c.checked);
       replay(stage);
+      if (window.DIALECTS) window.DIALECTS.refreshPanel(node, TERMS_BY_ID[node.dataset.id], Object.assign({}, stage._prm, {loop: stage._loop}));
       /* 勾选/取消循环会改这条曲线的形状（一次性斜坡 ⇄ 三角波），面板必须跟着重建 */
       if (window.HUD) window.HUD.rebuild(node, node.dataset.id);
     });
@@ -1766,7 +1792,7 @@
       const term = TERMS_BY_ID[node.dataset.id], stage = $('.stage', node);
       const code = $('code', node);
       if (term && stage && code && window.DIALECTS) {
-        code.textContent = window.DIALECTS.codeFor(term, stage._prm || {});
+        window.DIALECTS.refreshPanel(node, term, Object.assign({}, stage._prm, {loop: stage._loop}));
       }
     });
     window.addEventListener('resize', redrawCurves);

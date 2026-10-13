@@ -19,7 +19,7 @@
   };
   /* 默认值优先读词条里那份 d/st：词条改一次数字，滑块不用再改第二遍。
      两处写死必然漂移——这次审计就抓到 6 条滑块默认值和 demo 定义不一致。 */
-  const dataD = function (id, fb) { const d = (byId[id] || {}).demo || {}; return d.d ? parseFloat(d.d) : fb; };
+  const dataD = function (id, fb) { const d = (byId[id] || {}).demo || {}; const value = d.kind === 'two' && d.a ? d.a.d : d.d; return value ? parseFloat(value) * (/ms$/.test(value) ? 1 : 1000) : fb; };
   const dataSt = function (id, fb) { const d = (byId[id] || {}).demo || {}; return d.st == null ? fb : +d.st; };
   const num = function (p, l, min, max, v, step, u) {
     return { p: p, l: l, min: min, max: max, step: step == null ? 1 : step, v: v, u: u || '' };

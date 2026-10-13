@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "project": "动效词汇表 · 首屏构图对比",
+  "brief": "减少中间无意义空白；保留真实可交互动效、术语入口、图鉴浏览与配方入口。三种结构可直接比较。",
+  "round": "01",
+  "candidates": [
+    {
+      "id": "baseline",
+      "name": "当前首屏",
+      "concept": "现有纸感双栏：大标题在左，固定灵感签在右。",
+      "typography": "Noto Serif SC / Fraunces 标题；Roboto / 系统中文正文",
+      "palette": [
+        "#FAF7F1",
+        "#211C15",
+        "#C8420E"
+      ],
+      "traits": [
+        "最大1560px画布",
+        "标题与右侧卡片距离较大",
+        "25种精选动效"
+      ],
+      "kind": "url",
+      "url": "http://127.0.0.1:4173/home-study.html?direction=baseline",
+      "baseline": true
+    },
+    {
+      "id": "a",
+      "name": "紧凑编辑版",
+      "concept": "像打开一页精心编排的动效手册，标题与实演紧密相邻。",
+      "typography": "Noto Serif SC 560，大字96px；正文15px；小型等宽索引",
+      "palette": [
+        "#FAF7F1",
+        "#211C15",
+        "#C8420E"
+      ],
+      "traits": [
+        "首屏画布收至1160px，双栏间距40px",
+        "口语到术语的真实入口补足左侧",
+        "保留518px灵感签和纸感基调"
+      ],
+      "kind": "url",
+      "url": "http://127.0.0.1:4173/home-study.html?direction=a"
+    },
+    {
+      "id": "b",
+      "name": "动效翻译台",
+      "concept": "把描述、演示、术语连成一条阅读路径，页面就是一台动效翻译器。",
+      "typography": "Roboto / 系统中文无衬线700，66px通栏标题；内容区衬线引用27px",
+      "palette": [
+        "#F7F6F0",
+        "#1D211E",
+        "#0E7C6B"
+      ],
+      "traits": [
+        "通栏标题，上下组织",
+        "横向三段展示：描述 → 实演 → 术语",
+        "青瓷主题与细描边，手机回归纵向"
+      ],
+      "kind": "url",
+      "url": "http://127.0.0.1:4173/home-study.html?direction=b"
+    },
+    {
+      "id": "c",
+      "name": "图鉴展台",
+      "concept": "先让动效本身吸引人，像逛一个小型交互作品展。",
+      "typography": "Noto Serif SC 560，50px短标题；Roboto正文，等宽作品编号",
+      "palette": [
+        "#0B0D10",
+        "#E8EDF3",
+        "#3BC9DB"
+      ],
+      "traits": [
+        "内容优先，缩短引言",
+        "一张主灵感签，两张可交互术语作品",
+        "石墨底色，将色彩交给真实演示素材"
+      ],
+      "kind": "url",
+      "url": "http://127.0.0.1:4173/home-study.html?direction=c"
+    }
+  ]
+}

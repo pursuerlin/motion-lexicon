@@ -11,9 +11,10 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="color-scheme" content="dark light">
-<link rel="stylesheet" href="assets/fonts/fonts.css?v=291">
-<link rel="stylesheet" href="assets/styles.css?v=291">
-<link rel="stylesheet" href="assets/hud.css?v=291">
+<link rel="stylesheet" href="assets/fonts/fonts.css?v=331">
+<link rel="stylesheet" href="assets/styles.css?v=331">
+<link rel="stylesheet" href="assets/hud.css?v=331">
+<link rel="stylesheet" href="assets/home-exhibit.css?v=331">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>〜</text></svg>">
 <!-- 首帧就定主题：等 app.js 启动才纠正的话，浅色用户每次都闪一下暗色 -->
 <script>
@@ -27,6 +28,8 @@
   document.documentElement.dataset.theme = t;
 } catch (e) {} })();
 </script>
+<link rel="stylesheet" href="assets/atlas.css?v=331">
+<link rel="stylesheet" href="assets/atelier.css?v=331">
 </head>
 <body>
 <a class="skip-link" href="#content">跳到主要内容</a>
@@ -50,8 +53,8 @@
     <span id="hitcount" class="hit" aria-live="polite"></span>
     <div class="menu" id="dialect-menu">
       <button id="dialect-btn" class="menu-btn" type="button" aria-haspopup="listbox" aria-expanded="false"
-        title="同一条动效，切换成 CSS / WAAPI / GSAP / Framer / Swift / Compose / Tailwind 的写法"
-        data-l10n="同一条动效，切换成 CSS / WAAPI / GSAP / Framer / Swift / Compose / Tailwind 的写法" data-l10n-attr="title">
+        title="切换 CSS / WAAPI 原生实现"
+        data-l10n="切换 CSS / WAAPI 原生实现" data-l10n-attr="title">
         <span class="menu-cap" data-i18n="dialect">代码写法</span><b id="dialect-cur">CSS</b>
         <svg class="menu-caret" width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
@@ -74,37 +77,62 @@
   <div class="scroll-progress" id="scroll-progress" aria-hidden="true"><i></i></div>
 </header>
 
-<main id="top" tabindex="-1">
-  <section class="lede" aria-labelledby="home-title">
+<main id="top" class="exhibit-page" tabindex="-1">
+  <section class="lede home-exhibit" aria-labelledby="home-title">
     <div class="lede-txt">
-      <h1 id="home-title"><span class="home-title-lead" data-i18n="h1a">你想要的动效，</span><span class="home-title-question"><span data-i18n="h1b"></span><em data-i18n="h1c">该怎么说？</em><span data-i18n="h1d"></span></span></h1>
-      <p class="home-intro" data-i18n="homeLead">看真实演示，找准确术语。</p>
-      <p class="home-body" data-i18n="homeBody">把「自然一点」「依次出现」写成 AI 和协作者能理解的动效需求。再从缓动、错峰、入场、转场到滚动叙事，找到可以直接写进方案的说法。</p>
+      <p class="exhibit-kicker"><span aria-hidden="true">MOTION /</span><span data-i18n="homeKicker">一部看得见的动效词典</span></p>
+      <h1 id="home-title"><span data-i18n="exhibitTitle">先看见，</span><em data-i18n="exhibitAccent">再说准。</em></h1>
+      <div class="home-intro">
+        <p class="exhibit-lead" data-i18n="exhibitLead">把脑海里的动效，变成能沟通、能实现的设计。</p>
+        <p class="exhibit-body"><span data-i18n="exhibitIntro">在真实交互里找灵感，把模糊的感觉说具体。</span><span class="exhibit-workflow"><span data-i18n="exhibitWorkflowA">查术语、调参数、取代码。</span> <span data-i18n="exhibitWorkflowB">组合动效配方，交给 AI 或协作者。</span></span></p>
+      </div>
+      <div class="exhibit-phrases">
+        <span class="exhibit-phrases-label" data-i18n="exhibitPhrases">把感觉说具体</span>
+        <a href="#term/stagger"><span data-i18n="exhibitStaggerQuote">「一张张出现」</span><span class="phrase-arrow" aria-hidden="true">→</span><b data-i18n="exhibitStaggerName">错峰入场</b></a>
+        <a href="#term/scrub-frames"><span data-i18n="exhibitScrubQuote">「像拖视频进度条」</span><span class="phrase-arrow" aria-hidden="true">→</span><b data-i18n="exhibitScrubName">滚动抽帧</b></a>
+      </div>
       <div class="home-actions">
         <a class="browse-link" href="#content"><span data-i18n="browseTerms">浏览动效图鉴</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14m-5-5 5 5 5-5"/></svg></a>
         <button class="home-recipe recipe-open" type="button"><span data-i18n="homeRecipe">组合我的动效配方</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button>
       </div>
     </div>
-    <figure class="motion-example" aria-labelledby="example-title">
+    <article class="exhibit-piece exhibit-compare" data-preview-id="drag-compare" tabindex="-1" aria-labelledby="compare-title">
+      <div class="exhibit-piece-heading"><p class="exhibit-index"><span>01 /</span><span data-i18n="exhibitDrag">拖拽交互</span></p><h2 id="compare-title" data-i18n="exhibitCompare">一拖，两种画面。</h2><p data-i18n="exhibitCompareHint">拖动分割线，看看前后变化。</p></div>
+      <div class="exhibit-preview" id="compare-preview"></div>
+      <div class="exhibit-piece-footer"><a href="#term/drag-compare"><span data-i18n="exhibitCompareTerm">拖拽擦除对比</span><span aria-hidden="true">↗</span></a></div>
+    </article>
+    <figure class="motion-example" tabindex="-1" aria-labelledby="example-title">
       <div class="example-hd">
-        <div class="example-heading"><span class="example-eyebrow" data-i18n="homeExample">动效灵感签</span><span class="example-pool" data-i18n="homePool">18 种精选动效</span></div>
+        <div class="example-heading"><span class="example-eyebrow" data-i18n="homeExample">动效灵感签</span><span class="example-pool">23 种精选动效</span></div>
         <div class="example-controls">
           <button id="home-replay" class="example-control" type="button"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 1 0 .1 4M16 3v5h-5"/></svg><span data-i18n="homeReplay">重播</span></button>
           <button id="home-random" class="example-control example-random" type="button"><svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h2c4 0 6 10 10 10h2M14 12l3 3-3 3M3 15h2c1.5 0 2.7-1.4 3.8-3.2M11.2 8.2C12.3 6.4 13.5 5 15 5h2M14 2l3 3-3 3"/></svg><span data-i18n="homeRandom">随机抽取</span></button>
         </div>
       </div>
-      <p class="example-vague" id="example-vague" data-i18n="homeVague">「让卡片一张张轻轻浮上来」</p>
+      <div class="inspiration-modes" role="group" aria-label="选择灵感签玩法">
+        <i class="mode-indicator" aria-hidden="true"></i>
+        <button type="button" data-home-mode="all" aria-pressed="true" data-i18n="homeModeAll">全部</button>
+        <button type="button" data-home-mode="scroll" aria-pressed="false" data-i18n="homeModeScroll">滚动</button>
+        <button type="button" data-home-mode="pointer" aria-pressed="false" data-i18n="homeModePointer">指针</button>
+        <button type="button" data-home-mode="auto" aria-pressed="false" data-i18n="homeModeAuto">自动演绎</button>
+      </div>
+      <div class="example-summary"><div class="example-term"><b id="example-title" data-i18n="homeExampleName">滚动抽帧播放</b><span id="example-en" hidden></span><span id="example-driver" class="example-driver">滚动驱动</span></div><p class="example-vague" id="example-vague">「滚一下就像在拖视频进度条」</p></div>
       <div class="example-stage" id="example-stage"></div>
       <figcaption class="example-caption">
         <div class="example-description" aria-live="polite" aria-atomic="true">
-          <div class="example-term"><b id="example-title" data-i18n="homeExampleName">错峰上浮入场</b><span id="example-en">Stagger + Rise</span></div>
           <p class="example-spec" id="example-spec" data-i18n="homeSpec">上浮 16px · 时长 420ms · 间隔 90ms</p>
           <p class="example-note" id="example-note" data-i18n="homeStaggerUse">逐项出现，让视线自然跟着列表的顺序移动。</p>
         </div>
         <div class="example-footer"><button id="home-copy" type="button"><span data-i18n="homeCopy">复制动效描述</span></button><a id="example-link" href="#term/stagger"><span data-i18n="homeViewTerm">查看术语</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></div>
         <span id="home-copy-status" class="sr-only" role="status"></span>
+        <span id="home-draw-status" class="sr-only" role="status" aria-live="polite"></span>
       </figcaption>
     </figure>
+    <article class="exhibit-piece exhibit-sphere" data-preview-id="morphing-dot-sphere" tabindex="-1" aria-labelledby="sphere-title">
+      <div class="exhibit-piece-heading"><p class="exhibit-index"><span>03 /</span><span data-i18n="exhibitShape">点击 · 形态变化</span></p><h2 id="sphere-title" data-i18n="exhibitSphere">一点，变个模样。</h2><p data-i18n="exhibitSphereHint">七种形态，也可以拖动旋转。</p></div>
+      <div class="exhibit-preview" id="sphere-preview"></div>
+      <div class="exhibit-piece-footer"><a href="#term/morphing-dot-sphere"><span data-i18n="exhibitSphereTerm">粒子球体变形</span><span aria-hidden="true">↗</span></a></div>
+    </article>
     <div class="home-discovery">
       <div id="scene-shortcuts" class="scene-shortcuts" aria-label="按场景浏览" data-l10n="按场景浏览" data-l10n-attr="aria-label">
         <span data-i18n="scenarioLabel">按场景找</span>
@@ -121,6 +149,7 @@
       </div>
     </div>
   </section>
+  <a class="exhibit-return" href="#top" hidden><span aria-hidden="true">↑</span><span data-i18n="homeBackExhibit">回到展台</span></a>
 
   <!-- ============ 缓动实验室 ============ -->
   <details class="lab" id="lab">
@@ -271,19 +300,24 @@
 </div>
 
 <!-- 全部 defer：下载更早并行、不阻塞解析，defer 保证按文档顺序执行，全局变量依赖不受影响 -->
-<script defer src="assets/ease.js?v=291"></script>
-<script defer src="assets/data1.js?v=291"></script>
-<script defer src="assets/data2.js?v=291"></script>
-<script defer src="assets/app.js?v=291"></script>
-<script defer src="assets/motion.js?v=291"></script>
-<script defer src="assets/runtime.js?v=291"></script>
-<script defer src="assets/compound.js?v=291"></script>
-<script defer src="assets/refs.js?v=291"></script>
-<script defer src="assets/hud.js?v=291"></script>
-<script defer src="assets/params.js?v=291"></script>
-<script defer src="assets/dialects.js?v=291"></script>
-<script defer src="assets/i18n.js?v=291"></script>
-<script defer src="assets/lab.js?v=291"></script>
-<script defer src="assets/home.js?v=291"></script>
+<script defer src="assets/ease.js?v=331"></script>
+<script defer src="assets/data1.js?v=331"></script>
+<script defer src="assets/data2.js?v=331"></script>
+<script defer src="assets/app.js?v=331"></script>
+<script defer src="assets/motion.js?v=331"></script>
+<script defer src="assets/runtime.js?v=331"></script>
+<script defer src="assets/page-book.js?v=331"></script>
+<script defer src="assets/compound.js?v=331"></script>
+<script defer src="assets/refs.js?v=331"></script>
+<script defer src="assets/hud.js?v=331"></script>
+<script defer src="assets/params.js?v=331"></script>
+<script defer src="assets/atlas-canvas.js?v=331"></script>
+<script defer src="assets/atlas.js?v=331"></script>
+<script defer src="assets/atelier-studies.js?v=331"></script>
+<script defer src="assets/dialects.js?v=331"></script>
+<script defer src="assets/i18n.js?v=331"></script>
+<script defer src="assets/lab.js?v=331"></script>
+<script defer src="assets/home.js?v=331"></script>
+<script defer src="assets/home-exhibit.js?v=331"></script>
 </body>
 </html>

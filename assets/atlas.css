@@ -1,0 +1,54 @@
+/* Keep source materials inside an intentional, consistently proportioned stage. */
+.stage.kind-compound:has(.atlas-root) { padding: 0; display: block; background: #ede8dd; isolation: isolate; }
+.term:not(.term--detail) .stage:has(.atlas-root) { height: 216px; }
+.term--detail .pg-visual .stage:has(.atlas-root) { height: clamp(340px, 38vw, 520px); min-height: 0; }
+#example-stage .stage:has(.atlas-root) { height: 100%; min-height: 0; padding: 0; }
+.atlas-root { width: 100%; height: 100%; display: flex; flex-direction: column; color: #42594a; background: #ede8dd; }
+.atlas-viewport { position: relative; flex: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; }
+.atlas-canvas { display: block; max-width: 100%; max-height: 100%; touch-action: pan-y; outline: none; }
+.atlas-root[data-input="drag"] .atlas-canvas, .atlas-root[data-input="scroll"] .atlas-canvas { touch-action: none; cursor: grab; }
+.atlas-canvas:active { cursor: grabbing; }
+.atlas-canvas:focus-visible, .atlas-scene:focus-visible { outline: 2px solid #648a72; outline-offset: -3px; }
+.atlas-scene { position: absolute; inset: 0; border: 0; width: 100%; height: 100%; background: #ede8dd; }
+.atlas-controls { flex: 0 0 36px; min-width: 0; display: flex; align-items: center; gap: 9px; padding: 0 12px; border-top: 1px solid #738a7020; background: #f2eee4; font-size: 10px; }
+.atlas-cue { flex: 1; min-width: 0; color: #70816d; white-space: nowrap; }
+.atlas-progress { min-width: 44px; width: 90px; flex: 1; accent-color: #5c8268; cursor: ew-resize; height: 20px; margin: 0; }
+.atlas-controls output { font: 10px ui-monospace,monospace; min-width: 28px; text-align: right; }
+.atlas-reset { flex: 0 0 auto; display: flex; align-items: center; gap: 4px; padding: 4px 5px; border: 0; border-radius: 4px; background: transparent; color: #526e57; font: inherit; cursor: pointer; }
+.atlas-reset:hover { background: #597c6510; }
+.atlas-reset:focus-visible,.atlas-variants button:focus-visible { outline: 2px solid #648a72; outline-offset: 2px; }
+.atlas-root[data-input="scroll"] .atlas-cue { flex: 0 1 auto; }
+.atlas-variants { display: flex; justify-content: center; gap: 4px; padding: 6px; background: #f2eee4; border-bottom: 1px solid #738a7020; }
+.atlas-variants button { padding: 4px 10px; border: 1px solid transparent; border-radius: 6px; font: inherit; font-size: 11px; background: transparent; color: #75816e; cursor: pointer; }
+.atlas-variants button[aria-pressed="true"] { border-color: #56735a25; background: #faf8ef; color: #3e624c; box-shadow: 0 1px 3px #1f3b2010; }
+.atlas-legacy { position: absolute; inset: 0; padding: 18px; background: var(--panel-2); outline: none; }
+.atlas-legacy[hidden],.atlas-canvas[hidden] { display: none; }
+.atlas-legacy .cp-chip { display: none; }
+.atlas-legacy .cp-fan { height: 100%; }
+.atlas-legacy:hover .fn-c, .atlas-legacy:focus-visible .fn-c { transform: translateX(calc(var(--i) * var(--spread,23px))) rotate(calc(var(--i) * var(--rot,12deg))); }
+.atlas-root[data-atlas-id="25"],.atlas-root[data-atlas-id="28"],.atlas-root[data-atlas-id="46"] { background: #192e2f; }
+@media(max-width: 600px) {
+ .term--detail .pg-visual .stage:has(.atlas-root) { height: 310px; }
+ .atlas-controls { gap: 7px; padding: 0 9px; }
+ .atlas-cue { font-size: 11px; }
+ .atlas-root[data-input="scroll"] .atlas-cue { max-width: 115px; overflow: hidden; text-overflow: ellipsis; }
+}
+
+/* Match the paper surround; a soft edge joins the fixed-ratio painting to wide stages. */
+.atlas-viewport { background: linear-gradient(135deg,#f3eee5,#e1dfd2); }
+.atlas-canvas { mask-image: linear-gradient(to right,transparent,#000 12px,#000 calc(100% - 12px),transparent); }
+.atlas-root[data-atlas-id="25"] .atlas-viewport,.atlas-root[data-atlas-id="28"] .atlas-viewport,.atlas-root[data-atlas-id="46"] .atlas-viewport { background: linear-gradient(#101e22,#263c3c); }
+.stage:has(.atlas-root) + .stage-tools { display: none; }
+.atlas-progress { appearance: auto !important; background: transparent !important; }
+/* The embedded stage already owns its input cue. */
+#example-stage:has(.atlas-root) .example-hint { display: none; }
+.atlas-legacy .cp-cap { display: none; }
+
+/* Gallery stages use their natural width; no fixed-height letterboxing. */
+.grid .term:not(.term--detail) .stage:has(.atlas-root),
+.term--detail .pg-visual .stage:has(.atlas-root) { height: auto; }
+.grid .atlas-root, .term--detail .atlas-root { height: auto; }
+.grid .atlas-viewport, .term--detail .atlas-viewport { flex: none; width: 100%; aspect-ratio: 5 / 3; }
+.grid .atlas-viewport { aspect-ratio: var(--atlas-card-ratio, 1.666667); }
+.atlas-canvas { mask-image: none; }
+.atlas-root[data-atlas-id="17"] .atlas-viewport { background: #141c21; }
