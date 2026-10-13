@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>动效词汇表</title>
+  <rect x="2" y="2" width="60" height="60" rx="18" fill="#F3EDE2" stroke="#D9CFC0" stroke-width="2"/>
+  <path d="M18 45V34" fill="none" stroke="#C8420E" stroke-linecap="round" stroke-width="8"/>
+  <path d="M32 45V20" fill="none" stroke="#0B7285" stroke-linecap="round" stroke-width="8"/>
+  <path d="M46 45V27" fill="none" stroke="#C2255C" stroke-linecap="round" stroke-width="8"/>
+</svg>
